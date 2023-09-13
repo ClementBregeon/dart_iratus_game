@@ -187,6 +187,7 @@ abstract class Move {
   }
 
   // used for '+' (check) and '#' (checkmate) symbols
+  // TODO : change
   void addNotationHint(String hint) {
     _notation += hint;
   }

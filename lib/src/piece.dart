@@ -332,14 +332,14 @@ abstract class PieceMovingTwice extends PieceIdentity {
         for (List<int> move2 in moves) {
           Position pos2;
           try {
-            pos2 = Position.fromRowCol(p.board, row: p.row + move2[0], col: p.col + move2[1]);
+            pos2 = Position.fromRowCol(p.board, row: pos.row + move2[0], col: pos.col + move2[1]);
           } catch (e) {
             continue; // out of board
           }
           if (pos2 == pos) continue; // without this line, a piece moving twice sets its own pos in antiking
           if (p.antiking.contains(pos2)) continue;
 
-          p.antiking.add(pos);
+          p.antiking.add(pos2);
         }
       }
     }

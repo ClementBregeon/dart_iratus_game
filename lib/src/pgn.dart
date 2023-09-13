@@ -70,9 +70,24 @@ class PGN {
     if (game.board.movesHistory.isNotEmpty) {
       int turnNumber = game.board.startFEN.turnNumber;
       List<String> mtList = ['$turnNumber.'];
+      String lastColor = '';
       // Move? lastMove = game.board.movesHistory.isNotEmpty ? game.board.movesHistory.last : null;
       for (Move move in game.board.movesHistory) {
-        mtList.add(move.notation);
+        if (move.turn == lastColor) {
+          if ('0123456789'.contains(mtList.last[0])) {
+            mtList[mtList.length - 2] = '${mtList[mtList.length - 2]}-${move.notation}';
+            if (move == game.board.lastMove) {
+              // The first black move added turn number to mtList, but the second black move
+              // is the last move of the game. So we delete it.
+              mtList.removeLast();
+            }
+          } else {
+            mtList.last = '${mtList.last}-${move.notation}';
+          }
+        } else {
+          mtList.add(move.notation);
+        }
+        lastColor = move.turn;
         if (move.turnNumber > turnNumber && move != game.board.lastMove) {
           turnNumber = move.turnNumber;
           mtList.add('$turnNumber.');

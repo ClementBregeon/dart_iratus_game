@@ -47,4 +47,9 @@ void main() {
   // fen_test.dart
   // pgn_test.dart
   // TODO : can a pawn capture en passant a promoted pawn ?
+
+  // TODO : PUZZLES
+
+  // Tonado pawns
+  // 8/8/2k5/P7/8/2K5/8/8/8/8 w - - - 1- 1 60 => a7 (to prevent the king from touching the a9 square)
 }

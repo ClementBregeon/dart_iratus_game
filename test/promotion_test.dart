@@ -83,12 +83,12 @@ void main() {
     expect(game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'q', true);
   });
 
-  // In this starting fen, there is two kings, a white rook and a white pawn.
-  // White to move, promote and make a discovered check.
-  fen = '8/8/1R1P2k1/8/8/2K5/8/8/8/8 w - - - 1- 0 1';
-  game = IratusGame.fromFEN(fen);
-
   test('A promotion with discovered check is correctly noted.', () {
+    // In this starting fen, there is two kings, a white rook and a white pawn.
+    // White to move, promote and make a discovered check.
+    fen = '8/8/1R1P2k1/8/8/2K5/8/8/8/8 w - - - 1- 0 1';
+    game = IratusGame.fromFEN(fen);
+
     game.move('d9');
     game.move('=N');
 

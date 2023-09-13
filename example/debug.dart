@@ -2,21 +2,13 @@ import 'package:iratus_game/iratus_game.dart';
 import 'package:iratus_game/src/game.dart';
 
 void main() {
-  String fen = '8/8/3P4/8/8/2K2k2/8/8/8/8 w - - - 1- 0 1';
+  String fen = '8/8/3C_4/8/5c2/2K2k2/8/8/P7/8 w - - d7 0- 1 1';
 
   IratusGame game = IratusGame.fromFEN(fen);
 
-  ConsoleView.printAllValidMoves(game.board);
-  ConsoleView.printBoard(game.board.calculator as CalculatorIratusBoard);
-  game.move('d9');
-  ConsoleView.printAllValidMoves(game.board);
-  ConsoleView.printBoard(game.board.calculator as CalculatorIratusBoard);
-  game.undo();
-  ConsoleView.printAllValidMoves(game.board);
-  ConsoleView.printBoard(game.board.calculator as CalculatorIratusBoard);
-  // game.move('d9');
-  // ConsoleView.printAllValidMoves(game.board);
-  // ConsoleView.printBoard(game.board.calculator as CalculatorIratusBoard);
+  game.move('Cd6');
+  game.move('Ce5');
+  game.move('Ce4');
 
-  print(game.board.getFEN());
+  print(game.getPGN().moveText);
 }

@@ -217,9 +217,18 @@ abstract class Game {
     if (_result > 0) throw ArgumentError('The game has already ended');
 
     board._move(notation);
-    if (!board.waitingForInput) {
-      _checkForEnd();
+
+    if (board.waitingForInput) {
+      // wait for promotion input
+      return;
     }
+
+    if (board.lastMove!.nextTurn == board.lastMove!.turn) {
+      // wait for second move
+      return;
+    }
+
+    _checkForEnd();
   }
 
   /// Redo the last undone move.

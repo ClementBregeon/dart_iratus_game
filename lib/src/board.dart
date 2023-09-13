@@ -4,6 +4,13 @@ abstract class Board {
   /// All the undone moves.
   final List<MainMove> _backMovesHistory = [];
 
+  /// Used by calculators. True when calculating the valid moves.
+  /// False when duplicating the original's moves.
+  ///
+  /// This field prevents changes to _backMovesHistory during calculs.
+  /// Without it, _backMovesHistory would be mest up by the calculs.
+  bool _duringCalcul = false;
+
   /// All the board's position sinc the game started.
   ///
   /// This field is used for checking 3 times repetition.
@@ -120,7 +127,6 @@ abstract class Board {
   /// Move a piece from start to end
   /// if the movement is the result of another move, main is false
   void _moveFromTo(Position start, Position end) {
-
     MainMove move = MainMove(this, start, end);
 
     lastMove = move;
@@ -132,7 +138,9 @@ abstract class Board {
     if (this is CalculatorInterface || !waitingForInput) {
       _turn = move.nextTurn;
       _fenHistory.add(getFEN());
-      _backMovesHistory.clear();
+      if (!_duringCalcul) {
+        _backMovesHistory.clear();
+      }
       updateAllValidMoves();
     }
   }
@@ -197,7 +205,9 @@ abstract class Board {
     }
 
     MainMove undoneMove = movesHistory.removeLast();
-    _backMovesHistory.add(undoneMove);
+    if (!_duringCalcul) {
+      _backMovesHistory.add(undoneMove);
+    }
     _fenHistory.removeLast();
     _turn = undoneMove.turn;
     lastMove = movesHistory.isEmpty ? null : movesHistory.last;
@@ -262,6 +272,7 @@ class IratusBoard extends Board {
 
     CalculatorInterface calc = calculator!;
     Board calc2 = calc as Board;
+    calc2._duringCalcul = true; // prevent changes to _backMovesHistory
 
     allValidMoves.clear();
 
@@ -352,6 +363,8 @@ class IratusBoard extends Board {
         piece.validMoves = validMoves;
       }
     }
+
+    calc2._duringCalcul = false;
   }
 }
 
