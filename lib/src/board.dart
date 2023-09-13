@@ -299,12 +299,6 @@ class IratusBoard extends Board {
         if (lastMovedPiece.validMoves.isEmpty) {
           throw Exception('A piece moving twice started moving, but can\'t make its second move');
         }
-        for (Piece otherPiece in piecesColored[lastMovedPiece.color]!) {
-          if (otherPiece == lastMovedPiece) {
-            continue;
-          }
-          otherPiece.validMoves.clear(); // TODO : remove ? since now, we only look at board.allValidMoves...
-        }
       }
     }
     if (secondMove == false) {
