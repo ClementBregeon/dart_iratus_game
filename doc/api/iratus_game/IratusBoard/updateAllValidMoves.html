@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the updateAllValidMoves method from the IratusBoard class, for the Dart programming language.">
+  <title>updateAllValidMoves method - IratusBoard class - iratus_game library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/iratus_game-library.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/IratusBoard-class.html">IratusBoard</a></li>
+    <li class="self-crumb">updateAllValidMoves method</li>
+  </ol>
+  <div class="self-name">updateAllValidMoves</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="iratus_game&#47;IratusBoard-class-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-method">updateAllValidMoves</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+  <div>
+    <ol class="annotation-list">
+        <li>@<a href="https://api.dart.dev/stable/3.1.0/dart-core/override-constant.html">override</a></li>
+    </ol>
+  </div>
+
+<span class="returntype">void</span>
+<span class="name ">updateAllValidMoves</span>(<wbr>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">@override
+void updateAllValidMoves() {
+  &#47;&#47; TODO : Improve !
+  if (this is CalculatorInterface) throw Exception(&#39;A calculator can\&#39;t call the updateAllValidMoves() method&#39;);
+
+  for (Piece piece in pieces) {
+    piece.antiking.clear();
+  }
+  for (Piece piece in pieces) {
+    piece.identity.updateValidMoves();
+  }
+  for (Piece? king in king.values) {
+    if (king == null) return;
+    king.identity.updateValidMoves();
+  }
+
+  CalculatorInterface calc = calculator!;
+  calc.clone();
+
+  allValidMoves.clear();
+
+  bool secondMove = false;
+  if (lastMove != null || startFEN.pieceMovingAgain != null) {
+    Piece lastMovedPiece = lastMove == null ? startFEN.pieceMovingAgain! : lastMove!.piece;
+    if (lastMovedPiece.identity is PieceMovingTwice &amp;&amp; (lastMovedPiece.identity as PieceMovingTwice).stillHasToMove) {
+      secondMove = true;
+      Piece clonedPiece = calc.getSimulatedPiece(lastMovedPiece);
+      Board calc2 = calc as Board;
+      List&lt;Position&gt; validMoves = [];
+      for (Position validMove in lastMovedPiece.validMoves) {
+        Move moveObject = calc2.move(clonedPiece.pos, validMove, main: true);
+        for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
+          enemyClonedPiece.identity.updateValidMoves();
+        }
+        if (!inCheck(calc2.king[lastMovedPiece.color]!, dontCareAboutPhantoms: false)) {
+          validMoves.add(validMove);
+          allValidMoves[moveObject.notation] = moveObject;
+        }
+        calc2.undo(moveObject);
+      }
+      lastMovedPiece.validMoves = validMoves;
+      if (lastMovedPiece.validMoves.isEmpty) {
+        throw Exception(&#39;A piece moving twice started moving, but can\&#39;t make its second move&#39;);
+      }
+      for (Piece otherPiece in piecesColored[lastMovedPiece.color]!) {
+        if (otherPiece == lastMovedPiece) {
+          continue;
+        }
+        otherPiece.validMoves.clear();
+      }
+    }
+  }
+  if (secondMove == false) {
+    for (Piece piece in piecesColored[_game.turn]!) {
+      Piece clonedPiece = calc.getSimulatedPiece(piece);
+      List&lt;Position&gt; validMoves = [];
+      Board calc2 = calc as Board;
+      if (piece.identity is PieceMovingTwice &amp;&amp; !(piece.identity as PieceMovingTwice).stillHasToMove) {
+        for (Position validMove in piece.validMoves) {
+          Move moveObject = calc2.move(clonedPiece.pos, validMove, main: true);
+          for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
+            enemyClonedPiece.identity.updateValidMoves();
+          }
+          bool valid;
+          if (moveObject.nextTurn == piece.color) {
+            valid = false;
+            clonedPiece.identity.updateValidMoves();
+            for (Position validMove2 in clonedPiece.validMoves) {
+              Move moveObject2 = calc2.move(clonedPiece.pos, validMove2, main: true);
+              for (Piece enemyClonedPiece2 in calc2.piecesColored[clonedPiece.enemyColor]!) {
+                enemyClonedPiece2.identity.updateValidMoves();
+              }
+
+              if (!inCheck(calc2.king[piece.color]!, dontCareAboutPhantoms: false)) {
+                valid = true;
+              }
+              calc2.undo(moveObject2);
+              if (valid) {
+                break;
+              }
+            }
+          } else {
+            valid = !inCheck(calc2.king[piece.color]!, dontCareAboutPhantoms: false);
+          }
+          calc2.undo(moveObject);
+          if (valid) {
+            validMoves.add(validMove);
+            allValidMoves[moveObject.notation] = moveObject;
+          }
+        }
+      } else {
+        for (Position validMove in piece.validMoves) {
+          Move moveObject = calc2.move(clonedPiece.pos, validMove, main: true);
+          for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
+            enemyClonedPiece.identity.updateValidMoves();
+          }
+          if (!inCheck(calc2.king[piece.color]!, dontCareAboutPhantoms: false)) {
+            validMoves.add(validMove);
+            allValidMoves[moveObject.notation] = moveObject;
+          }
+          calc2.undo(moveObject);
+        }
+      }
+      piece.validMoves = validMoves;
+    }
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/iratus_game-library.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/IratusBoard-class.html">IratusBoard</a></li>
+    <li class="self-crumb">updateAllValidMoves method</li>
+</ol>
+
+
+    <h5>IratusBoard class</h5>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    iratus_game
+      1.0.0
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

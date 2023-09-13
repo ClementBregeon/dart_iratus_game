@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the IratusFEN.fromString constructor from Class IratusFEN from the iratus_game library, for the Dart programming language.">
+  <title>IratusFEN.fromString constructor - IratusFEN - iratus_game library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/iratus_game-library.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/IratusFEN-class.html">IratusFEN</a></li>
+    <li class="self-crumb">IratusFEN.fromString constructor</li>
+  </ol>
+  <div class="self-name">IratusFEN.fromString</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="iratus_game&#47;IratusFEN-class-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-constructor">IratusFEN.fromString</span> constructor 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+      <span class="name ">IratusFEN.fromString</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="fromString-param-fen"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span> <span class="parameter-name">fen</span>, </span></li>
+<li><span class="parameter" id="fromString-param-board"><span class="type-annotation">Board</span> <span class="parameter-name">board</span></span></li>
+</ol>)
+    </section>
+
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">IratusFEN.fromString(this.fen, Board board) {
+  if (!isValidFEN(fen)) throw ArgumentError.value(fen, &#39;Invalid FEN&#39;);
+
+  List&lt;String&gt; parts = fen.split(&quot; &quot;);
+
+  if (parts.length != 8) {
+    throw ArgumentError.value(
+      fen,
+      &#39;Invalid FEN : An Iratus FEN should have 8 values (pieces, turn, casle rights, en passant, piece moving again, dynamitables has moved, counter for 50 moves rules, half turn number)&#39;,
+    );
+  }
+
+  pieces = parts[0];
+  turn = parts[1];
+  castleRights = parts[2];
+  enPassant = parts[3] == &#39;-&#39; ? null : Position.fromCoords(board, parts[3]);
+  fenEqualizer = &#39;$pieces $turn $castleRights ${parts[3]} ${parts[4]}&#39;;
+  counter50rule = int.parse(parts[6]);
+  turnNumber = int.parse(parts[7]);
+
+  &#47;&#47; DYNAMITABLES HAS MOVED
+  List&lt;String&gt; splittedDynamitablesHasMoved = parts[5].split(&#39;-&#39;);
+  dynamitablesHasMoved = {
+    &#39;w&#39;: splittedDynamitablesHasMoved[0],
+    &#39;b&#39;: splittedDynamitablesHasMoved[1],
+  };
+
+  &#47;&#47; PIECES
+  _PieceInformations pieceInfos = _PieceInformations();
+  String firstChar = fen[0].toLowerCase();
+  if (!pieceIDs.contains(firstChar)) {
+    if (!&quot;12345678&quot;.contains(firstChar)) {
+      throw ArgumentError.value(firstChar, &#39;Invalid FEN :\nA FEN must start with either a piece id or a number.&#39;);
+    }
+  }
+  String linkID = &#39;&#39;;
+  var waitingForLink = {};
+  var irow = 0;
+  &#47;&#47; This var is the bridge between the dynamitablesHasMoved notation
+  &#47;&#47; and the dynamitables pieces on the board
+  var dhmIndexes = {&#39;w&#39;: 0, &#39;b&#39;: 0};
+
+  void createPiece(_PieceInformations pieceInfos) {
+    if (!ids.contains(pieceInfos.id)) {
+      throw ArgumentError.value(pieceInfos.id, &#39;Invalid FEN : Unknown piece id&#39;);
+    }
+
+    Piece piece;
+    Position pos = Position.fromRowCol(board, row: pieceInfos.row, col: pieceInfos.col);
+    if (pieceInfos.phantomized) {
+      piece = Piece(board, pieceInfos.color, pos, &#39;f&#39;);
+      piece.transform(pieceInfos.id);
+    } else {
+      piece = Piece(board, pieceInfos.color, pos, pieceInfos.id);
+    }
+    if (pieceInfos.dynamited) {
+      piece.setDynamite(true);
+    }
+    if (pieceInfos.linkID != null) {
+      final waitingPiece = waitingForLink[pieceInfos.linkID];
+      if (waitingPiece != null) {
+        waitingPiece.linkedPiece = piece;
+        piece.linkedPiece = waitingPiece;
+      } else {
+        waitingForLink[pieceInfos.linkID] = piece;
+      }
+    }
+    if (dynamitables.contains(pieceInfos.id)) {
+      if (dynamitablesHasMoved[pieceInfos.color]![dhmIndexes[pieceInfos.color]!] == &#39;1&#39;) {
+        piece.setUnknownFirstMove();
+      }
+      dhmIndexes[pieceInfos.color] = dhmIndexes[pieceInfos.color]! + 1;
+    }
+  }
+
+  for (final String row in parts[0].split(&#39;&#47;&#39;)) {
+    bool inParenthesis = false;
+    int icol = 0;
+    for (final int charCode in row.runes) {
+      String char = String.fromCharCode(charCode);
+      bool charIsNumber = &#39;0123456789&#39;.contains(char);
+      &#47;&#47; Link ID
+      if (inParenthesis) {
+        if (char == &#39;)&#39;) {
+          inParenthesis = false;
+          pieceInfos.linkID = int.parse(linkID);
+          continue;
+        }
+        if (!charIsNumber) {
+          throw ArgumentError.value(row, &#39;Invalid FEN :\nParentheses only accept numbers.&#39;);
+        }
+        linkID += char;
+        continue;
+      }
+      if (char == &quot;(&quot;) {
+        inParenthesis = true;
+        linkID = &quot;&quot;;
+        continue;
+      }
+
+      &#47;&#47; Phantom
+      if (char == &quot;~&quot;) {
+        pieceInfos.phantomized = true;
+        continue;
+      }
+
+      &#47;&#47; Dynamite
+      if (char == &quot;_&quot;) {
+        pieceInfos.dynamited = true;
+        continue;
+      }
+
+      &#47;&#47; Empty spaces
+      if (charIsNumber) {
+        icol += int.parse(char);
+        continue;
+      }
+
+      &#47;&#47; Piece creation
+      if (pieceInfos.id != &#39;&#39;) {
+        createPiece(pieceInfos);
+      }
+
+      &#47;&#47; Piece pre-creation
+      pieceInfos.reset();
+      final charLowerCase = char.toLowerCase(); &#47;&#47; white ids are uppercase
+      pieceInfos.id = charLowerCase;
+      pieceInfos.color = char == charLowerCase ? &quot;b&quot; : &quot;w&quot;;
+      pieceInfos.row = irow;
+      pieceInfos.col = icol;
+      icol++;
+    }
+    irow++;
+  }
+  createPiece(pieceInfos);
+
+  &#47;&#47; CASTLE RIGHTS
+  for (final String castle in &#39;qkQK&#39;.split(&#39;&#39;)) {
+    if (castleRights.contains(castle)) continue;
+
+    Piece? k = board.king[castle == castle.toUpperCase() ? &#39;w&#39; : &#39;b&#39;];
+    if (k == null) continue; &#47;&#47; an army without king
+    if (k.col != 4 || (k.color == &#39;w&#39; &amp;&amp; k.row != 8) || (k.color == &#39;b&#39; &amp;&amp; k.row != 1)) {
+      k.setUnknownFirstMove();
+      continue;
+    }
+    Piece? rook = getRookAt(castle.toUpperCase() == &#39;K&#39; ? &#39;right&#39; : &#39;left&#39;, k);
+    if (rook != null) {
+      rook.setUnknownFirstMove();
+    }
+  }
+
+  &#47;&#47; PIECE MOVING AGAIN
+  String parts4 = parts[4];
+  if (parts4 != &quot;-&quot;) {
+    pieceMovingAgain = board.get(Position.fromCoords(board, parts4));
+    if (pieceMovingAgain == null) {
+      throw ArgumentError.value(parts4, &#39;Invalid FEN :\nNo piece at&#39;);
+    }
+    (pieceMovingAgain!.identity as PieceMovingTwice).stillHasToMove = true;
+  } else {
+    pieceMovingAgain = null;
+  }
+}</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/iratus_game-library.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/IratusFEN-class.html">IratusFEN</a></li>
+    <li class="self-crumb">IratusFEN.fromString constructor</li>
+</ol>
+
+
+    <h5>IratusFEN class</h5>
+  </div><!--/.sidebar-offcanvas-left-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    iratus_game
+      1.0.0
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1, user-scalable=no">
+  <meta name="description" content="API docs for the start method from the ConsoleView class, for the Dart programming language.">
+  <title>start method - ConsoleView class - iratus_game library - Dart API</title>
+
+
+  
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" rel="stylesheet">
+  
+  <link rel="stylesheet" href="../../static-assets/github.css?v1">
+  <link rel="stylesheet" href="../../static-assets/styles.css?v1">
+  <link rel="icon" href="../../static-assets/favicon.png?v1">
+
+  
+</head>
+
+
+<body data-base-href="../../" data-using-base-href="false" class="light-theme">
+
+<div id="overlay-under-drawer"></div>
+
+<header id="title">
+  <span id="sidenav-left-toggle" class="material-symbols-outlined" role="button" tabindex="0">menu</span>
+  <ol class="breadcrumbs gt-separated dark hidden-xs">
+    <li><a href="../../index.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/iratus_game-library.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/ConsoleView-class.html">ConsoleView</a></li>
+    <li class="self-crumb">start method</li>
+  </ol>
+  <div class="self-name">start</div>
+  <form class="search navbar-right" role="search">
+    <input type="text" id="search-box" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+  <div class="toggle" id="theme-button">
+    <label for="theme">
+      <input type="checkbox" id="theme" value="light-theme">
+      <span id="dark-theme-button" class="material-symbols-outlined">
+        brightness_4
+      </span>
+      <span id="light-theme-button" class="material-symbols-outlined">
+        brightness_5
+      </span>
+    </label>
+  </div>
+</header>
+<main>
+
+  <div
+      id="dartdoc-main-content"
+      class="main-content"
+      data-above-sidebar="iratus_game&#47;ConsoleView-class-sidebar.html"
+      data-below-sidebar="">
+      <div>
+<h1><span class="kind-method">start</span> method 
+</h1></div>
+
+    <section class="multi-line-signature">
+      
+
+<span class="returntype">void</span>
+<span class="name ">start</span>(<wbr>)
+
+      
+
+    </section>
+    
+
+
+    
+<section class="summary source-code" id="source">
+  <h2><span>Implementation</span></h2>
+  <pre class="language-dart"><code class="language-dart">void start() {
+  print(&#39;Enter a starting FEN or enter RETURN for a game  :&#39;);
+  while (_game.result == 0) {
+    _printBoard();
+
+    String? input;
+    bool played = false;
+
+    while (played == false) {
+      print(&#39;Enter your move or command :&#39;);
+      input = stdin.readLineSync();
+
+      switch (input) {
+        case null:
+          print(&#39;No input detected&#39;);
+          break;
+        case &#39;exit&#39;:
+          played = true;
+          _game.interrupt();
+          break;
+        case &#39;help&#39;:
+          print(&#39;Availible commands :&#39;);
+          for (String command in _commandsDoc.keys) {
+            print(&#39;  $command: ${_commandsDoc[command]}&#39;);
+          }
+          break;
+        case &#39;ls&#39;:
+          print(&#39;Availible moves :&#39;);
+          _printPossibleMoves();
+          break;
+        case &#39;redo&#39;:
+          _game.redo();
+          _printBoard();
+          break;
+        case &#39;redoAll&#39;:
+          _game.redoAll();
+          _printBoard();
+          break;
+        case &#39;undo&#39;:
+          _game.undo();
+          _printBoard();
+          break;
+        case &#39;undoAll&#39;:
+          _game.undoAll();
+          _printBoard();
+          break;
+
+        default:
+          for (String validMoveNotation in _board.allValidMoves.keys) {
+            if (validMoveNotation == input) {
+              _game.move(input);
+              played = true;
+              break;
+            }
+          }
+          if (!played) {
+            print(&#39;Wrong notation (type \&#39;ls\&#39; to see all valid moves)&#39;);
+          }
+      }
+    }
+  }
+  _printBoard();
+  print(&#39;Result : ${_game.resultDoc[_game.result</code></pre>
+</section>
+
+
+  </div> <!-- /.main-content -->
+
+  <div id="dartdoc-sidebar-left" class="sidebar sidebar-offcanvas-left">
+    <!-- The search input and breadcrumbs below are only responsively visible at low resolutions. -->
+<header id="header-search-sidebar" class="hidden-l">
+  <form class="search-sidebar" role="search">
+    <input type="text" id="search-sidebar" autocomplete="off" disabled class="form-control typeahead" placeholder="Loading search...">
+  </form>
+</header>
+
+<ol class="breadcrumbs gt-separated dark hidden-l" id="sidebar-nav">
+    <li><a href="../../index.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/iratus_game-library.html">iratus_game</a></li>
+    <li><a href="../../iratus_game/ConsoleView-class.html">ConsoleView</a></li>
+    <li class="self-crumb">start method</li>
+</ol>
+
+
+    <h5>ConsoleView class</h5>
+  </div><!--/.sidebar-offcanvas-->
+
+  <div id="dartdoc-sidebar-right" class="sidebar sidebar-offcanvas-right">
+  </div><!--/.sidebar-offcanvas-->
+
+</main>
+
+<footer>
+  <span class="no-break">
+    iratus_game
+      1.0.0
+  </span>
+
+  
+</footer>
+
+
+
+<script src="../../static-assets/highlight.pack.js?v1"></script>
+<script src="../../static-assets/docs.dart.js"></script>
+
+
+
+</body>
+
+</html>
+
