@@ -64,6 +64,8 @@ abstract class Board {
   /// Can be 'w' or 'b'.
   String get turn => _turn;
 
+  Iterable<String> get validNotations => waitingForInput ? promotionValidNotations : allValidMoves.keys;
+
   /// Return true if the last move played needs an input.
   ///
   /// Exemple : when a pawn reaches the end of the board,
@@ -75,7 +77,7 @@ abstract class Board {
         piecesByPos = List.filled(nbcols * nbrows, null) {
     createPieces(fen);
     _fenHistory.add(startFEN);
-    _turn = startFEN.turn; // TODO : move to Board
+    _turn = startFEN.turn;
 
     // piece.isWidgeted needs to be set after all the pieces creation, because
     // when a piece is phantomized, if it is widgeted, it will try to phantomize
@@ -118,14 +120,6 @@ abstract class Board {
   /// Move a piece from start to end
   /// if the movement is the result of another move, main is false
   void _moveFromTo(Position start, Position end) {
-    // TODO : If the move is provided by a player, we first need to check its validity
-    // if (this is! CalculatorInterface) {
-    //   // If the move is provided by a player, we first need to check its validity
-    //   Move? calcMove = allValidMoves[notation];
-    //   if (calcMove == null) {
-    //     throw ArgumentError.value(notation, 'Unknown move');
-    //   }
-    // }
 
     MainMove move = MainMove(this, start, end);
 
@@ -153,7 +147,7 @@ abstract class Board {
             notation, 'A promotion notation must be in the format \'=\' + promotionId (upper case)');
       }
       lastMove!.executeCommand(Transform(pawnToPromote!, 'p', notation[1].toLowerCase()));
-      lastMove!.executeCommand(NotationHint(notation.toUpperCase()));
+      lastMove!._notation += notation.toUpperCase();
 
       pawnToPromote = null;
       _fenHistory.add(getFEN());
@@ -183,10 +177,17 @@ abstract class Board {
 
     lastMove = lastUndoneMove;
     movesHistory.add(lastUndoneMove);
-    _turn = lastUndoneMove.nextTurn;
+
+    if (!waitingForInput) {
+      _turn = lastUndoneMove.nextTurn;
+      _fenHistory.add(getFEN());
+    }
+
+    if (this is! CalculatorInterface) {
+      (calculator! as Board).redo();
+    }
 
     updateAllValidMoves();
-    _fenHistory.add(getFEN());
   }
 
   /// Undo the last move played
@@ -200,8 +201,13 @@ abstract class Board {
     _fenHistory.removeLast();
     _turn = undoneMove.turn;
     lastMove = movesHistory.isEmpty ? null : movesHistory.last;
+    pawnToPromote = null; // If was waiting for promotion input
 
     undoneMove.undoCommands();
+
+    if (this is! CalculatorInterface) {
+      (calculator! as Board).undo();
+    }
 
     updateAllValidMoves();
   }

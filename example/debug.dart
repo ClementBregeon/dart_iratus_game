@@ -11,12 +11,12 @@ void main() {
   game.move('d9');
   ConsoleView.printAllValidMoves(game.board);
   ConsoleView.printBoard(game.board.calculator as CalculatorIratusBoard);
-  game.move('=Q');
+  game.undo();
   ConsoleView.printAllValidMoves(game.board);
   ConsoleView.printBoard(game.board.calculator as CalculatorIratusBoard);
-  game.move('Kg3');
-  ConsoleView.printAllValidMoves(game.board);
-  ConsoleView.printBoard(game.board.calculator as CalculatorIratusBoard);
+  // game.move('d9');
+  // ConsoleView.printAllValidMoves(game.board);
+  // ConsoleView.printBoard(game.board.calculator as CalculatorIratusBoard);
 
   print(game.board.getFEN());
 }

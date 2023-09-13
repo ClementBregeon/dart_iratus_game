@@ -80,8 +80,7 @@ class ConsoleView {
 
   /// Print the notations of all the possible moves in the position
   static void printAllValidMoves(Board board) {
-    Iterable<String> validNotations = board.pawnToPromote == null ? board.allValidMoves.keys : promotionValidNotations;
-    print(validNotations.join(', '));
+    print(board.validNotations.join(', '));
   }
 
   /// Starts the console dialogue with the players.

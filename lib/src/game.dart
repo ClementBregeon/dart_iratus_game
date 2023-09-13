@@ -108,7 +108,7 @@ abstract class Game {
     if (_result == 1) {
       board.lastMove!.addNotationHint('#');
     } else if (inCheck(board.king[board.turn]!, dontCareAboutPhantoms: false)) {
-      board.lastMove!.addNotationHint('+'); // TODO : move to move.dart
+      board.lastMove!.addNotationHint('+');
     }
   }
 
@@ -210,6 +210,9 @@ abstract class Game {
   ///   - no mate symbol.
   ///   - no promotion notation.
   ///   - if it moves a piece moving twice, only 1 move at a time.
+  ///
+  /// We don't require check and mate symbol, in order to let the player evaluate the move by himself.
+  /// The promotion and the second move of a piece moving twice are inputs given after a first move.
   void move(String notation) {
     if (_result > 0) throw ArgumentError('The game has already ended');
 

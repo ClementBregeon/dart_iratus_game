@@ -770,9 +770,12 @@ class _Pawn extends PieceIdentity {
 
   @override
   void redo(pos) {
-    // skip call to Pawn.redo, avoiding the promotion choice
-    // TODO : test if working
-    super.goTo(pos);
+    if (p.board.currentMove.notation.contains('=')) {
+      // If the redone move has a promotion, skip call to Pawn.redo(), avoiding the promotion choice
+      super.goTo(pos);
+    } else {
+      super.redo(pos);
+    }
   }
 
   @override
