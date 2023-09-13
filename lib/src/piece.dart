@@ -84,6 +84,11 @@ class Piece {
     _hasMovedInAnotherLife = true;
   }
 
+  @override
+  String toString() {
+    return '${id.toUpperCase()}$coord';
+  }
+
   /// Transform a piece into another
   void transform(String pieceId) {
     if (id == pieceId) return;

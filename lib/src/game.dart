@@ -213,24 +213,15 @@ abstract class Game {
   void move(String notation) {
     if (_result > 0) throw ArgumentError('The game has already ended');
 
-    if (board._move(notation)) {
+    board._move(notation);
+    if (!board.waitingForInput) {
       _checkForEnd();
     }
   }
 
   /// Redo the last undone move.
   void redo() {
-    if (board._backMovesHistory.isEmpty) {
-      return;
-    }
-
-    Move lastUndoneMove = board._backMovesHistory.removeLast();
-
-    board.redo(lastUndoneMove);
-    board.movesHistory.add(lastUndoneMove);
-    board._turn = lastUndoneMove.nextTurn; // TODO : move turn to Board
-    board.updateAllValidMoves();
-    board._fenHistory.add(board.getFEN());
+    board.redo();
   }
 
   /// Redo all the undone moves.
@@ -242,18 +233,7 @@ abstract class Game {
 
   /// Undo the last move played.
   void undo() {
-    if (_result > 0) throw ArgumentError('Can\'t undo a move because the game has ended');
-
-    if (board.movesHistory.isEmpty) {
-      return;
-    }
-
-    Move lastMove = board.movesHistory.removeLast();
-    board._backMovesHistory.add(lastMove);
-    board._fenHistory.removeLast();
-    board.undo(lastMove);
-    board._turn = lastMove.turn;
-    board.updateAllValidMoves();
+    board.undo();
   }
 
   /// Undo all the moves played.

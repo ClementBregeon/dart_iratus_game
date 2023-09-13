@@ -2,7 +2,7 @@ part of iratus_game;
 
 abstract class Board {
   /// All the undone moves.
-  final List<Move> _backMovesHistory = [];
+  final List<MainMove> _backMovesHistory = [];
 
   /// All the board's position sinc the game started.
   ///
@@ -30,13 +30,13 @@ abstract class Board {
   Map<String, Piece?> king = {'w': null, 'b': null};
 
   /// The last MainMove played
-  Move? lastMove;
+  MainMove? lastMove;
 
   /// The currentMove or the move who created the currentMove
-  late Move mainCurrentMove;
+  late MainMove mainCurrentMove;
 
   /// All the moves played during the game.
-  final List<Move> movesHistory = [];
+  final List<MainMove> movesHistory = [];
 
   /// The number of rows in this board
   final int nbrows;
@@ -63,6 +63,12 @@ abstract class Board {
   ///
   /// Can be 'w' or 'b'.
   String get turn => _turn;
+
+  /// Return true if the last move played needs an input.
+  ///
+  /// Exemple : when a pawn reaches the end of the board,
+  /// the pawn is waiting for a promotion id.
+  bool get waitingForInput => pawnToPromote != null;
 
   Board(String fen, Game game, this.nbrows, this.nbcols)
       : _game = game,
@@ -111,7 +117,7 @@ abstract class Board {
 
   /// Move a piece from start to end
   /// if the movement is the result of another move, main is false
-  Move _moveFromTo(Position start, Position end, {bool main = true}) {
+  void _moveFromTo(Position start, Position end) {
     // TODO : If the move is provided by a player, we first need to check its validity
     // if (this is! CalculatorInterface) {
     //   // If the move is provided by a player, we first need to check its validity
@@ -121,33 +127,27 @@ abstract class Board {
     //   }
     // }
 
-    Move moveToReturn;
-    if (main) {
-      moveToReturn = MainMove(this, start, end);
-    } else {
-      moveToReturn = ExtraMove(this, start, end);
+    MainMove move = MainMove(this, start, end);
+
+    lastMove = move;
+    movesHistory.add(move);
+
+    if (this is! CalculatorInterface) {
+      (calculator! as Board)._moveFromTo(start, end);
     }
-
-    // currentMove = moveToReturn;
-
-    // if (main) {
-    //   mainCurrentMove = moveToReturn;
-    // }
-
-    // moveToReturn.executeCommand(Main()); // This may change the value of this.currentMove
-
-    // if (main) {
-    //   lastMove = moveToReturn;
-    // }
-
-    return moveToReturn;
+    if (this is CalculatorInterface || !waitingForInput) {
+      _turn = move.nextTurn;
+      _fenHistory.add(getFEN());
+      _backMovesHistory.clear();
+      updateAllValidMoves();
+    }
   }
 
-  /// Return true if the move is complete, false if an input is needed (like a promotion input)
-  bool _move(String notation) {
+  /// Move a piece or complete an input request (like promotion)
+  void _move(String notation) {
     if (this is CalculatorInterface) throw Exception('A calculator can\'t call the _move() method');
 
-    if (pawnToPromote != null) {
+    if (waitingForInput) {
       if (!promotionValidNotations.contains(notation)) {
         throw ArgumentError.value(
             notation, 'A promotion notation must be in the format \'=\' + promotionId (upper case)');
@@ -160,8 +160,7 @@ abstract class Board {
       _backMovesHistory.clear();
       _turn = lastMove!.nextTurn;
       updateAllValidMoves();
-
-      return true;
+      return;
     }
 
     Move? calcMove = allValidMoves[notation];
@@ -169,36 +168,42 @@ abstract class Board {
       throw ArgumentError.value(notation, 'Unknown move');
     }
 
-    Move currentMove = MainMove(this, calcMove.start, calcMove.end);
-    movesHistory.add(currentMove);
-    if (pawnToPromote == null) {
-      _turn = currentMove.nextTurn;
-      _fenHistory.add(getFEN());
-      _backMovesHistory.clear();
-      updateAllValidMoves();
-
-      return true;
-    } else {
-      return false;
-    }
+    _moveFromTo(calcMove.start, calcMove.end);
   }
 
-  void redo(Move move, {main = true}) {
-    currentMove = move;
-    if (main) {
-      mainCurrentMove = currentMove;
+  /// Redo the last move undone
+  void redo() {
+    if (_backMovesHistory.isEmpty) {
+      return;
     }
-    move.redoCommands();
 
-    lastMove = move;
+    MainMove lastUndoneMove = _backMovesHistory.removeLast();
+
+    lastUndoneMove.redoCommands();
+
+    lastMove = lastUndoneMove;
+    movesHistory.add(lastUndoneMove);
+    _turn = lastUndoneMove.nextTurn;
+
+    updateAllValidMoves();
+    _fenHistory.add(getFEN());
   }
 
-  void undo(Move move) {
+  /// Undo the last move played
+  void undo() {
+    if (movesHistory.isEmpty) {
+      return;
+    }
+
+    MainMove undoneMove = movesHistory.removeLast();
+    _backMovesHistory.add(undoneMove);
+    _fenHistory.removeLast();
+    _turn = undoneMove.turn;
     lastMove = movesHistory.isEmpty ? null : movesHistory.last;
 
-    for (final Command command in move.commands.reversed) {
-      move.undoCommand(command);
-    }
+    undoneMove.undoCommands();
+
+    updateAllValidMoves();
   }
 
   void updateAllValidMoves();
@@ -234,7 +239,9 @@ class IratusBoard extends Board {
   @override
   void updateAllValidMoves() {
     // TODO : Improve !
-    if (this is CalculatorInterface) throw Exception('A calculator can\'t call the updateAllValidMoves() method');
+
+    // A calculator can't call the updateAllValidMoves() method
+    if (this is CalculatorInterface) return;
 
     for (Piece piece in pieces) {
       piece.antiking.clear();
@@ -248,7 +255,7 @@ class IratusBoard extends Board {
     }
 
     CalculatorInterface calc = calculator!;
-    calc.clone();
+    Board calc2 = calc as Board;
 
     allValidMoves.clear();
 
@@ -258,10 +265,10 @@ class IratusBoard extends Board {
       if (lastMovedPiece.identity is PieceMovingTwice && (lastMovedPiece.identity as PieceMovingTwice).stillHasToMove) {
         secondMove = true;
         Piece clonedPiece = calc.getSimulatedPiece(lastMovedPiece);
-        Board calc2 = calc as Board;
         List<Position> validMoves = [];
         for (Position validMove in lastMovedPiece.validMoves) {
-          Move moveObject = MainMove(calc2, clonedPiece.pos, validMove);
+          calc2._moveFromTo(clonedPiece.pos, validMove);
+          Move moveObject = calc2.lastMove!;
           for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
             enemyClonedPiece.identity.updateValidMoves();
           }
@@ -269,7 +276,7 @@ class IratusBoard extends Board {
             validMoves.add(validMove);
             allValidMoves[moveObject.notation] = moveObject;
           }
-          calc2.undo(moveObject);
+          calc2.undo();
         }
         lastMovedPiece.validMoves = validMoves;
         if (lastMovedPiece.validMoves.isEmpty) {
@@ -288,10 +295,10 @@ class IratusBoard extends Board {
         if (piece.isCaptured) continue;
         Piece clonedPiece = calc.getSimulatedPiece(piece);
         List<Position> validMoves = [];
-        Board calc2 = calc as Board;
         if (piece.identity is PieceMovingTwice && !(piece.identity as PieceMovingTwice).stillHasToMove) {
           for (Position validMove in piece.validMoves) {
-            Move moveObject = MainMove(calc2, clonedPiece.pos, validMove);
+            calc2._moveFromTo(clonedPiece.pos, validMove);
+            Move moveObject = calc2.lastMove!;
             for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
               enemyClonedPiece.identity.updateValidMoves();
             }
@@ -300,7 +307,7 @@ class IratusBoard extends Board {
               valid = false;
               clonedPiece.identity.updateValidMoves();
               for (Position validMove2 in clonedPiece.validMoves) {
-                Move moveObject2 = MainMove(calc2, clonedPiece.pos, validMove2);
+                calc2._moveFromTo(clonedPiece.pos, validMove2);
                 for (Piece enemyClonedPiece2 in calc2.piecesColored[clonedPiece.enemyColor]!) {
                   enemyClonedPiece2.identity.updateValidMoves();
                 }
@@ -308,7 +315,7 @@ class IratusBoard extends Board {
                 if (!inCheck(calc2.king[piece.color]!, dontCareAboutPhantoms: false)) {
                   valid = true;
                 }
-                calc2.undo(moveObject2);
+                calc2.undo();
                 if (valid) {
                   break;
                 }
@@ -316,7 +323,7 @@ class IratusBoard extends Board {
             } else {
               valid = !inCheck(calc2.king[piece.color]!, dontCareAboutPhantoms: false);
             }
-            calc2.undo(moveObject);
+            calc2.undo();
             if (valid) {
               validMoves.add(validMove);
               allValidMoves[moveObject.notation] = moveObject;
@@ -324,7 +331,8 @@ class IratusBoard extends Board {
           }
         } else {
           for (Position validMove in piece.validMoves) {
-            Move moveObject = MainMove(calc2, clonedPiece.pos, validMove);
+            calc2._moveFromTo(clonedPiece.pos, validMove);
+            MainMove moveObject = calc2.lastMove!;
             for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
               enemyClonedPiece.identity.updateValidMoves();
             }
@@ -332,7 +340,7 @@ class IratusBoard extends Board {
               validMoves.add(validMove);
               allValidMoves[moveObject.notation] = moveObject;
             }
-            calc2.undo(moveObject);
+            calc2.undo();
           }
         }
         piece.validMoves = validMoves;

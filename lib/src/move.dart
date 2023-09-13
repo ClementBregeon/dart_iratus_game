@@ -238,10 +238,11 @@ abstract class Move {
   }
 
   void redoCommands() {
+    board.currentMove = this;
     for (final command in _commands) {
       switch (command.name) {
         case "extra":
-          board.redo(command.args[0], main: false);
+          command.args[0].redoCommands();
           break;
         case "capture":
           command.args[0].capture(command.args[1]);
@@ -259,24 +260,31 @@ abstract class Move {
     }
   }
 
-  void undoCommand(Command command) {
-    switch (command.name) {
-      case "extra":
-        board.undo(command.args[0]);
-        break;
-      case "capture":
-        command.args[0].uncapture();
-        break;
-      case "main":
-        piece.identity.undo(this);
-        break;
-      case "setDynamite":
-        command.args[0].setDynamite(false);
-        break;
-      case "transform":
-        command.args[0].transform(command.args[1]);
-        break;
+  void undoCommands() {
+    for (final Command command in _commands.reversed) {
+      switch (command.name) {
+        case "extra":
+          command.args[0].undoCommands();
+          break;
+        case "capture":
+          command.args[0].uncapture();
+          break;
+        case "main":
+          piece.identity.undo(this);
+          break;
+        case "setDynamite":
+          command.args[0].setDynamite(false);
+          break;
+        case "transform":
+          command.args[0].transform(command.args[1]);
+          break;
+      }
     }
+  }
+
+  @override
+  String toString() {
+    return notation;
   }
 }
 
@@ -284,7 +292,12 @@ class MainMove extends Move {
   MainMove(super.board, super.start, super.end) {
     board.mainCurrentMove = this;
     executeCommand(Main());
-    board.lastMove = this;
+  }
+
+  @override
+  void redoCommands() {
+    board.mainCurrentMove = this;
+    super.redoCommands();
   }
 }
 
