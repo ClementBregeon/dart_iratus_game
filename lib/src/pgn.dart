@@ -1,6 +1,5 @@
-import 'package:iratus_game/src/fen.dart';
-import 'package:iratus_game/src/game.dart';
-import 'package:iratus_game/src/move.dart';
+import 'fen.dart';
+import 'game.dart';
 
 /// An object representating an Iratus game.
 ///
@@ -68,13 +67,13 @@ class PGN {
     }
 
     // moveText
-    if (game.movesHistory.isNotEmpty) {
+    if (game.board.movesHistory.isNotEmpty) {
       int turnNumber = game.board.startFEN.turnNumber;
       List<String> mtList = ['$turnNumber.'];
-      Move? lastMove = game.movesHistory.isNotEmpty ? game.movesHistory.last : null;
-      for (Move move in game.movesHistory) {
+      // Move? lastMove = game.board.movesHistory.isNotEmpty ? game.board.movesHistory.last : null;
+      for (Move move in game.board.movesHistory) {
         mtList.add(move.notation);
-        if (move.turnNumber > turnNumber && move != lastMove) {
+        if (move.turnNumber > turnNumber && move != game.board.lastMove) {
           turnNumber = move.turnNumber;
           mtList.add('$turnNumber.');
         }

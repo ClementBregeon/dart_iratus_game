@@ -1,7 +1,4 @@
-import 'board.dart';
-import 'piece.dart';
-import 'position.dart';
-import 'utils.dart';
+part of iratus_game;
 
 class Move {
   // Private fields
@@ -202,7 +199,7 @@ class Move {
         _executeCommands(args[0].identity.capture(args[1]));
         break;
       case "extraMove":
-        final extraMove = board.move(args[0], args[1], main: false);
+        final extraMove = board._move(args[0], args[1], main: false);
         extraMove.turnNumber = turnNumber;
         command.args = [extraMove];
         _commands.add(command);

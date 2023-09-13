@@ -1,4 +1,4 @@
-import 'board.dart';
+import 'game.dart';
 import 'utils.dart';
 
 class Position {

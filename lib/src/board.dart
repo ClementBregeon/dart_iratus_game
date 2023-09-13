@@ -1,15 +1,37 @@
-import 'fen.dart';
-import 'game.dart';
-import 'move.dart';
-import 'piece.dart';
-import 'position.dart';
+part of iratus_game;
 
 abstract class Board {
-  /// All the possible moves in the position
-  Map<String, Move> allValidMoves = {};
+  /// All the undone moves.
+  final List<Move> _backMovesHistory = [];
+
+  /// All the board's position sinc the game started.
+  ///
+  /// This field is used for checking 3 times repetition.
+  final List<FEN> _fenHistory = [];
 
   /// The game managing the board
   final Game _game;
+
+  /// All the possible moves in the position
+  Map<String, Move> allValidMoves = {};
+
+  /// The board used to simulate moves, to check if the king is in check
+  late CalculatorInterface? calculator;
+
+  /// The move currently being calculated
+  late Move currentMove;
+
+  /// The kings, sorted by color
+  Map<String, Piece?> king = {'w': null, 'b': null};
+
+  /// The last mainMove played
+  Move? lastMove;
+
+  /// The currentMove or the move who created the currentMove
+  late Move mainCurrentMove;
+
+  /// All the moves played during the game.
+  final List<Move> movesHistory = [];
 
   /// The number of rows in this board
   final int nbrows;
@@ -17,8 +39,8 @@ abstract class Board {
   /// The number of columns in this board
   final int nbcols;
 
-  /// The FEN of the starting position
-  late IratusFEN startFEN;
+  /// The pawn to promote, waiting for an input
+  Piece? pawnToPromote;
 
   /// All the pieces, sorted by time of creation
   List<Piece> pieces = [];
@@ -29,23 +51,8 @@ abstract class Board {
   /// All the pieces, sorted by color
   Map<String, List<Piece>> piecesColored = {'w': [], 'b': []};
 
-  /// The kings, sorted by color
-  Map<String, Piece?> king = {'w': null, 'b': null};
-
-  /// The pawn to promote, waiting for an input
-  Piece? pawnToPromote;
-
-  /// The move currently being calculated
-  late Move currentMove;
-
-  /// The currentMove or the move who created the currentMove
-  late Move mainCurrentMove;
-
-  /// The last mainMove played
-  Move? lastMove;
-
-  /// The board used to simulate moves, to check if the king is in check
-  late CalculatorInterface? calculator;
+  /// The FEN of the starting position
+  late IratusFEN startFEN;
 
   Board(String fen, Game game, this.nbrows, this.nbcols)
       : _game = game,
@@ -89,7 +96,7 @@ abstract class Board {
 
   /// Move a piece from start to end
   /// if the movement is the result of another move, main is false
-  Move move(Position start, Position end, {bool main = true}) {
+  Move _move(Position start, Position end, {bool main = true}) {
     // if (this is CalculatorInterface) {
     //   print('Calculator');
     // } else {
@@ -106,6 +113,10 @@ abstract class Board {
 
     moveToReturn.executeCommand(MainMove()); // This may change the value of this.currentMove
 
+    if (main) {
+      lastMove = moveToReturn;
+    }
+
     return moveToReturn;
   }
 
@@ -115,9 +126,13 @@ abstract class Board {
       mainCurrentMove = currentMove;
     }
     move.redoCommands();
+
+    lastMove = move;
   }
 
   void undo(Move move) {
+    lastMove = movesHistory.isEmpty ? null : movesHistory.last;
+
     for (final Command command in move.commands.reversed) {
       move.undoCommand(command);
     }
@@ -190,7 +205,7 @@ class IratusBoard extends Board {
         Board calc2 = calc as Board;
         List<Position> validMoves = [];
         for (Position validMove in lastMovedPiece.validMoves) {
-          Move moveObject = calc2.move(clonedPiece.pos, validMove, main: true);
+          Move moveObject = calc2._move(clonedPiece.pos, validMove, main: true);
           for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
             enemyClonedPiece.identity.updateValidMoves();
           }
@@ -220,7 +235,7 @@ class IratusBoard extends Board {
         Board calc2 = calc as Board;
         if (piece.identity is PieceMovingTwice && !(piece.identity as PieceMovingTwice).stillHasToMove) {
           for (Position validMove in piece.validMoves) {
-            Move moveObject = calc2.move(clonedPiece.pos, validMove, main: true);
+            Move moveObject = calc2._move(clonedPiece.pos, validMove, main: true);
             for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
               enemyClonedPiece.identity.updateValidMoves();
             }
@@ -229,7 +244,7 @@ class IratusBoard extends Board {
               valid = false;
               clonedPiece.identity.updateValidMoves();
               for (Position validMove2 in clonedPiece.validMoves) {
-                Move moveObject2 = calc2.move(clonedPiece.pos, validMove2, main: true);
+                Move moveObject2 = calc2._move(clonedPiece.pos, validMove2, main: true);
                 for (Piece enemyClonedPiece2 in calc2.piecesColored[clonedPiece.enemyColor]!) {
                   enemyClonedPiece2.identity.updateValidMoves();
                 }
@@ -253,7 +268,7 @@ class IratusBoard extends Board {
           }
         } else {
           for (Position validMove in piece.validMoves) {
-            Move moveObject = calc2.move(clonedPiece.pos, validMove, main: true);
+            Move moveObject = calc2._move(clonedPiece.pos, validMove, main: true);
             for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
               enemyClonedPiece.identity.updateValidMoves();
             }

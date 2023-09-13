@@ -1,5 +1,4 @@
-import 'board.dart';
-import 'move.dart';
+import 'game.dart';
 import 'position.dart';
 import 'utils.dart';
 

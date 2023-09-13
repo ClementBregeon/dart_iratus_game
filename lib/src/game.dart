@@ -1,10 +1,14 @@
-import 'package:iratus_game/src/pgn.dart';
-import 'package:iratus_game/src/utils.dart';
+library iratus_game;
 
-import 'board.dart';
+// import 'board.dart';
 import 'fen.dart';
-import 'move.dart';
+import 'pgn.dart';
 import 'piece.dart';
+import 'position.dart';
+import 'utils.dart';
+
+part 'board.dart';
+part 'move.dart';
 
 /// A chess player, regardless of the variant.
 class Player {
@@ -20,14 +24,6 @@ class Player {
 }
 
 abstract class Game {
-  /// All the undone moves.
-  final List<Move> _backMovesHistory = [];
-
-  /// All the board's position sinc the game started.
-  ///
-  /// This field is used for checking 3 times repetition.
-  final List<FEN> _fenHistory = [];
-
   // Protected fields, with getters
   int _result = 0;
   late String _turn;
@@ -38,9 +34,6 @@ abstract class Game {
 
   /// The starting date for the game.
   final DateTime date = DateTime.now();
-
-  /// All the moves played during the game.
-  final List<Move> movesHistory = [];
 
   /// The players engaged in this game.
   ///
@@ -113,15 +106,15 @@ abstract class Game {
   /// Update result & winner.
   // TODO : merge with _updateResult()
   void _checkForEnd() {
-    if (movesHistory.isEmpty) return;
+    if (board.movesHistory.isEmpty) return;
     if (_result > 0) throw ArgumentError('The game has already ended');
 
     _updateResult();
 
     if (_result == 1) {
-      movesHistory.last.addNotationHint('#');
+      board.movesHistory.last.addNotationHint('#');
     } else if (inCheck(board.king[turn]!, dontCareAboutPhantoms: false)) {
-      movesHistory.last.addNotationHint('+'); // TODO : move to move.dart
+      board.movesHistory.last.addNotationHint('+'); // TODO : move to move.dart
     }
   }
 
@@ -163,11 +156,11 @@ abstract class Game {
       return;
     }
 
-    if (_fenHistory.length > 5) {
-      FEN currentFEN = _fenHistory.last;
+    if (board._fenHistory.length > 5) {
+      FEN currentFEN = board._fenHistory.last;
       int count = 1;
 
-      for (FEN fen in _fenHistory) {
+      for (FEN fen in board._fenHistory) {
         if (currentFEN == fen) {
           continue;
         }
@@ -185,7 +178,7 @@ abstract class Game {
 
     for (Piece piece in board.piecesColored[turn]!) {
       if (!piece.isCaptured && piece.validMoves.isNotEmpty) {
-        if (movesHistory.isNotEmpty && movesHistory.last.counter50rule > 100) {
+        if (board.movesHistory.isNotEmpty && board.movesHistory.last.counter50rule > 100) {
           _result = 8; // draw by 50-moves rule
           _winner = 1; // draw
           return;
@@ -208,7 +201,7 @@ abstract class Game {
   /// Board initialization, after the creation of the board.
   void _init() {
     _turn = board.startFEN.turn;
-    _fenHistory.add(board.startFEN);
+    board._fenHistory.add(board.startFEN); // TODO : move to Board
     board.updateAllValidMoves();
   }
 
@@ -242,8 +235,8 @@ abstract class Game {
       board.lastMove!.executeCommand(NotationHint(notation.toUpperCase()));
 
       board.pawnToPromote = null;
-      _fenHistory.add(board.getFEN());
-      _backMovesHistory.clear();
+      board._fenHistory.add(board.getFEN()); // TODO : move to Board
+      board._backMovesHistory.clear(); // same
       _turn = board.lastMove!.nextTurn;
       board.updateAllValidMoves();
       _checkForEnd();
@@ -256,13 +249,12 @@ abstract class Game {
       throw ArgumentError.value(notation, 'Unknown move');
     }
 
-    Move currentMove = board.move(calcMove.start, calcMove.end, main: true);
-    movesHistory.add(currentMove);
-    board.lastMove = currentMove;
+    Move currentMove = board._move(calcMove.start, calcMove.end, main: true);
+    board.movesHistory.add(currentMove); // TODO : move to Board
     if (board.pawnToPromote == null) {
       _turn = currentMove.nextTurn;
-      _fenHistory.add(board.getFEN());
-      _backMovesHistory.clear();
+      board._fenHistory.add(board.getFEN()); // TODO : move to Board
+      board._backMovesHistory.clear(); // same
       board.updateAllValidMoves();
       _checkForEnd();
     }
@@ -270,23 +262,22 @@ abstract class Game {
 
   /// Redo the last undone move.
   void redo() {
-    if (_backMovesHistory.isEmpty) {
+    if (board._backMovesHistory.isEmpty) {
       return;
     }
 
-    Move lastUndoneMove = _backMovesHistory.removeLast();
+    Move lastUndoneMove = board._backMovesHistory.removeLast();
 
     board.redo(lastUndoneMove);
-    movesHistory.add(lastUndoneMove);
-    board.lastMove = lastUndoneMove;
-    _turn = lastUndoneMove.nextTurn;
+    board.movesHistory.add(lastUndoneMove);
+    _turn = lastUndoneMove.nextTurn; // TODO : move turn to Board
     board.updateAllValidMoves();
-    _fenHistory.add(board.getFEN());
+    board._fenHistory.add(board.getFEN());
   }
 
   /// Redo all the undone moves.
   void redoAll() {
-    while (_backMovesHistory.isNotEmpty) {
+    while (board._backMovesHistory.isNotEmpty) {
       redo();
     }
   }
@@ -295,14 +286,13 @@ abstract class Game {
   void undo() {
     if (_result > 0) throw ArgumentError('Can\'t undo a move because the game has ended');
 
-    if (movesHistory.isEmpty) {
+    if (board.movesHistory.isEmpty) {
       return;
     }
 
-    Move lastMove = movesHistory.removeLast();
-    _backMovesHistory.add(lastMove);
-    board.lastMove = movesHistory.isEmpty ? null : movesHistory.last;
-    _fenHistory.removeLast();
+    Move lastMove = board.movesHistory.removeLast();
+    board._backMovesHistory.add(lastMove);
+    board._fenHistory.removeLast();
     board.undo(lastMove);
     _turn = lastMove.turn;
     board.updateAllValidMoves();
@@ -310,7 +300,7 @@ abstract class Game {
 
   /// Undo all the moves played.
   void undoAll() {
-    while (movesHistory.isNotEmpty) {
+    while (board.movesHistory.isNotEmpty) {
       undo();
     }
   }

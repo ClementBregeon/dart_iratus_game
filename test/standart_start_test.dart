@@ -1,5 +1,4 @@
-import 'package:iratus_game/iratus_game.dart';
-import 'package:iratus_game/src/board.dart';
+import 'package:iratus_game/src/game.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -7,7 +6,7 @@ void main() {
   var board = game.board;
 
   test('Game is properly initialized', () {
-    expect(game.movesHistory.isEmpty, true);
+    expect(game.board.movesHistory.isEmpty, true);
     expect(game.turn == 'w', true);
     expect(game.result == 0, true);
     expect(game.winner == 0, true);

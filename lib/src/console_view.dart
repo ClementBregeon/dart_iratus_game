@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:iratus_game/src/utils.dart';
 
-import 'board.dart';
 import 'game.dart';
 import 'piece.dart';
 import 'position.dart';
