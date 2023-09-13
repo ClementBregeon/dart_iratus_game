@@ -259,7 +259,7 @@ class IratusFEN extends FEN {
     }
   }
 
-  IratusFEN.fromBoard(Board board, {required String turn}) {
+  IratusFEN.fromBoard(Board board) {
     pieceMovingAgain = null;
 
     String fenIP = ''; // fen in progress
@@ -329,6 +329,7 @@ class IratusFEN extends FEN {
     }
 
     // Turn
+    turn = board.turn;
     fenIP += ' $turn ';
 
     // Castle Rights

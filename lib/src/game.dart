@@ -26,7 +26,6 @@ class Player {
 abstract class Game {
   // Protected fields, with getters
   int _result = 0;
-  late String _turn;
   int _winner = 0;
 
   /// The board of the game.
@@ -41,11 +40,6 @@ abstract class Game {
   /// Player white = game.player['w'];
   /// ```
   final Map<String, Player> player = {'w': Player('w', 'Winston'), 'b': Player('b', 'Bellucci')};
-
-  /// The color of the player who has to make the next move.
-  ///
-  /// Can be 'w' or 'b'.
-  String get turn => _turn;
 
   /// The result of the game.
   ///
@@ -112,9 +106,9 @@ abstract class Game {
     _updateResult();
 
     if (_result == 1) {
-      board.movesHistory.last.addNotationHint('#');
-    } else if (inCheck(board.king[turn]!, dontCareAboutPhantoms: false)) {
-      board.movesHistory.last.addNotationHint('+'); // TODO : move to move.dart
+      board.lastMove!.addNotationHint('#');
+    } else if (inCheck(board.king[board.turn]!, dontCareAboutPhantoms: false)) {
+      board.lastMove!.addNotationHint('+'); // TODO : move to move.dart
     }
   }
 
@@ -176,7 +170,7 @@ abstract class Game {
       }
     }
 
-    for (Piece piece in board.piecesColored[turn]!) {
+    for (Piece piece in board.piecesColored[board.turn]!) {
       if (!piece.isCaptured && piece.validMoves.isNotEmpty) {
         if (board.movesHistory.isNotEmpty && board.movesHistory.last.counter50rule > 100) {
           _result = 8; // draw by 50-moves rule
@@ -188,21 +182,14 @@ abstract class Game {
     }
 
     // if this code is executed, it means the current player has to legal move
-    Piece currentKing = board.king[turn]!;
+    Piece currentKing = board.king[board.turn]!;
     if (inCheck(currentKing, dontCareAboutPhantoms: false)) {
       _result = 1; // checkmate
-      _winner = turn == 'b' ? 2 : 3; // ... won
+      _winner = board.turn == 'b' ? 2 : 3; // ... won
     } else {
       _result = 4; // stalemate
       _winner = 1; // draw
     }
-  }
-
-  /// Board initialization, after the creation of the board.
-  void _init() {
-    _turn = board.startFEN.turn;
-    board._fenHistory.add(board.startFEN); // TODO : move to Board
-    board.updateAllValidMoves();
   }
 
   /// Return a PGN object, representating the game.
@@ -226,36 +213,7 @@ abstract class Game {
   void move(String notation) {
     if (_result > 0) throw ArgumentError('The game has already ended');
 
-    if (board.pawnToPromote != null) {
-      if (!promotionValidNotations.contains(notation)) {
-        throw ArgumentError.value(
-            notation, 'A promotion notation must be in the format \'=\' + promotionId (upper case)');
-      }
-      board.lastMove!.executeCommand(Transform(board.pawnToPromote!, 'p', notation[1].toLowerCase()));
-      board.lastMove!.executeCommand(NotationHint(notation.toUpperCase()));
-
-      board.pawnToPromote = null;
-      board._fenHistory.add(board.getFEN()); // TODO : move to Board
-      board._backMovesHistory.clear(); // same
-      _turn = board.lastMove!.nextTurn;
-      board.updateAllValidMoves();
-      _checkForEnd();
-
-      return;
-    }
-
-    Move? calcMove = board.allValidMoves[notation];
-    if (calcMove == null) {
-      throw ArgumentError.value(notation, 'Unknown move');
-    }
-
-    Move currentMove = board._move(calcMove.start, calcMove.end, main: true);
-    board.movesHistory.add(currentMove); // TODO : move to Board
-    if (board.pawnToPromote == null) {
-      _turn = currentMove.nextTurn;
-      board._fenHistory.add(board.getFEN()); // TODO : move to Board
-      board._backMovesHistory.clear(); // same
-      board.updateAllValidMoves();
+    if (board._move(notation)) {
       _checkForEnd();
     }
   }
@@ -270,7 +228,7 @@ abstract class Game {
 
     board.redo(lastUndoneMove);
     board.movesHistory.add(lastUndoneMove);
-    _turn = lastUndoneMove.nextTurn; // TODO : move turn to Board
+    board._turn = lastUndoneMove.nextTurn; // TODO : move turn to Board
     board.updateAllValidMoves();
     board._fenHistory.add(board.getFEN());
   }
@@ -294,7 +252,7 @@ abstract class Game {
     board._backMovesHistory.add(lastMove);
     board._fenHistory.removeLast();
     board.undo(lastMove);
-    _turn = lastMove.turn;
+    board._turn = lastMove.turn;
     board.updateAllValidMoves();
   }
 
@@ -314,7 +272,6 @@ class IratusGame extends Game {
   /// Initialize a standart Iratus game.
   IratusGame() {
     board = IratusBoard(IratusFEN.start, this);
-    _init();
   }
 
   /// Initialize an Iratus game from a fen string.
@@ -322,6 +279,5 @@ class IratusGame extends Game {
   /// For more details about the fen notation for Iratus, see [IratusFEN].
   IratusGame.fromFEN(String fen) {
     board = IratusBoard(fen, this);
-    _init();
   }
 }

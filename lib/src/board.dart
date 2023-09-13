@@ -12,6 +12,11 @@ abstract class Board {
   /// The game managing the board
   final Game _game;
 
+  /// The color of the player who has to make the next move.
+  ///
+  /// Can be 'w' or 'b'.
+  late String _turn;
+
   /// All the possible moves in the position
   Map<String, Move> allValidMoves = {};
 
@@ -24,7 +29,7 @@ abstract class Board {
   /// The kings, sorted by color
   Map<String, Piece?> king = {'w': null, 'b': null};
 
-  /// The last mainMove played
+  /// The last MainMove played
   Move? lastMove;
 
   /// The currentMove or the move who created the currentMove
@@ -54,10 +59,17 @@ abstract class Board {
   /// The FEN of the starting position
   late IratusFEN startFEN;
 
+  /// The color of the player who has to make the next move.
+  ///
+  /// Can be 'w' or 'b'.
+  String get turn => _turn;
+
   Board(String fen, Game game, this.nbrows, this.nbcols)
       : _game = game,
         piecesByPos = List.filled(nbcols * nbrows, null) {
     createPieces(fen);
+    _fenHistory.add(startFEN);
+    _turn = startFEN.turn; // TODO : move to Board
 
     // piece.isWidgeted needs to be set after all the pieces creation, because
     // when a piece is phantomized, if it is widgeted, it will try to phantomize
@@ -67,6 +79,7 @@ abstract class Board {
       for (Piece piece in pieces) {
         piece.forCalcul = false;
       }
+      updateAllValidMoves();
     }
   }
 
@@ -84,6 +97,8 @@ abstract class Board {
   }
 
   /// Called once, at board creation
+  ///
+  /// In the implementation, initialize the pieces and calculator fields
   void createPieces(String fen);
 
   /// Get a piece from a position
@@ -96,28 +111,76 @@ abstract class Board {
 
   /// Move a piece from start to end
   /// if the movement is the result of another move, main is false
-  Move _move(Position start, Position end, {bool main = true}) {
-    // if (this is CalculatorInterface) {
-    //   print('Calculator');
-    // } else {
-    //   print('Original');
+  Move _moveFromTo(Position start, Position end, {bool main = true}) {
+    // TODO : If the move is provided by a player, we first need to check its validity
+    // if (this is! CalculatorInterface) {
+    //   // If the move is provided by a player, we first need to check its validity
+    //   Move? calcMove = allValidMoves[notation];
+    //   if (calcMove == null) {
+    //     throw ArgumentError.value(notation, 'Unknown move');
+    //   }
     // }
-    // print('start:${start.coord}  end:${end.coord}');
 
-    Move moveToReturn = Move(this, start, end);
-    currentMove = moveToReturn;
-
+    Move moveToReturn;
     if (main) {
-      mainCurrentMove = moveToReturn;
+      moveToReturn = MainMove(this, start, end);
+    } else {
+      moveToReturn = ExtraMove(this, start, end);
     }
 
-    moveToReturn.executeCommand(MainMove()); // This may change the value of this.currentMove
+    // currentMove = moveToReturn;
 
-    if (main) {
-      lastMove = moveToReturn;
-    }
+    // if (main) {
+    //   mainCurrentMove = moveToReturn;
+    // }
+
+    // moveToReturn.executeCommand(Main()); // This may change the value of this.currentMove
+
+    // if (main) {
+    //   lastMove = moveToReturn;
+    // }
 
     return moveToReturn;
+  }
+
+  /// Return true if the move is complete, false if an input is needed (like a promotion input)
+  bool _move(String notation) {
+    if (this is CalculatorInterface) throw Exception('A calculator can\'t call the _move() method');
+
+    if (pawnToPromote != null) {
+      if (!promotionValidNotations.contains(notation)) {
+        throw ArgumentError.value(
+            notation, 'A promotion notation must be in the format \'=\' + promotionId (upper case)');
+      }
+      lastMove!.executeCommand(Transform(pawnToPromote!, 'p', notation[1].toLowerCase()));
+      lastMove!.executeCommand(NotationHint(notation.toUpperCase()));
+
+      pawnToPromote = null;
+      _fenHistory.add(getFEN());
+      _backMovesHistory.clear();
+      _turn = lastMove!.nextTurn;
+      updateAllValidMoves();
+
+      return true;
+    }
+
+    Move? calcMove = allValidMoves[notation];
+    if (calcMove == null) {
+      throw ArgumentError.value(notation, 'Unknown move');
+    }
+
+    Move currentMove = MainMove(this, calcMove.start, calcMove.end);
+    movesHistory.add(currentMove);
+    if (pawnToPromote == null) {
+      _turn = currentMove.nextTurn;
+      _fenHistory.add(getFEN());
+      _backMovesHistory.clear();
+      updateAllValidMoves();
+
+      return true;
+    } else {
+      return false;
+    }
   }
 
   void redo(Move move, {main = true}) {
@@ -141,21 +204,10 @@ abstract class Board {
   void updateAllValidMoves();
 }
 
-abstract class CalculatorInterface {
-  abstract IratusBoard original;
-  // abstract List<Piece> piecesCorrespondence;
-
-  void clone();
-
-  Piece getSimulatedPiece(Piece originalPiece);
-}
-
 class IratusBoard extends Board {
   Map<String, List<Piece>> phantoms = {'w': [], 'b': []};
 
-  IratusBoard(String fen, Game game) : super(fen, game, 10, 8) {
-    if (this is! CalculatorInterface) calculator = CalculatorIratusBoard(original: this);
-  }
+  IratusBoard(String fen, Game game) : super(fen, game, 10, 8);
 
   @override
   void addPiece(Piece piece) {
@@ -168,11 +220,15 @@ class IratusBoard extends Board {
   @override
   void createPieces(String fen) {
     startFEN = IratusFEN.fromString(fen, this);
+
+    if (this is! CalculatorInterface) {
+      calculator = CalculatorIratusBoard(original: this);
+    }
   }
 
   @override
   FEN getFEN() {
-    return IratusFEN.fromBoard(this, turn: _game.turn);
+    return IratusFEN.fromBoard(this);
   }
 
   @override
@@ -205,7 +261,7 @@ class IratusBoard extends Board {
         Board calc2 = calc as Board;
         List<Position> validMoves = [];
         for (Position validMove in lastMovedPiece.validMoves) {
-          Move moveObject = calc2._move(clonedPiece.pos, validMove, main: true);
+          Move moveObject = MainMove(calc2, clonedPiece.pos, validMove);
           for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
             enemyClonedPiece.identity.updateValidMoves();
           }
@@ -228,14 +284,14 @@ class IratusBoard extends Board {
       }
     }
     if (secondMove == false) {
-      for (Piece piece in piecesColored[_game.turn]!) {
+      for (Piece piece in piecesColored[_turn]!) {
         if (piece.isCaptured) continue;
         Piece clonedPiece = calc.getSimulatedPiece(piece);
         List<Position> validMoves = [];
         Board calc2 = calc as Board;
         if (piece.identity is PieceMovingTwice && !(piece.identity as PieceMovingTwice).stillHasToMove) {
           for (Position validMove in piece.validMoves) {
-            Move moveObject = calc2._move(clonedPiece.pos, validMove, main: true);
+            Move moveObject = MainMove(calc2, clonedPiece.pos, validMove);
             for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
               enemyClonedPiece.identity.updateValidMoves();
             }
@@ -244,7 +300,7 @@ class IratusBoard extends Board {
               valid = false;
               clonedPiece.identity.updateValidMoves();
               for (Position validMove2 in clonedPiece.validMoves) {
-                Move moveObject2 = calc2._move(clonedPiece.pos, validMove2, main: true);
+                Move moveObject2 = MainMove(calc2, clonedPiece.pos, validMove2);
                 for (Piece enemyClonedPiece2 in calc2.piecesColored[clonedPiece.enemyColor]!) {
                   enemyClonedPiece2.identity.updateValidMoves();
                 }
@@ -268,7 +324,7 @@ class IratusBoard extends Board {
           }
         } else {
           for (Position validMove in piece.validMoves) {
-            Move moveObject = calc2._move(clonedPiece.pos, validMove, main: true);
+            Move moveObject = MainMove(calc2, clonedPiece.pos, validMove);
             for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
               enemyClonedPiece.identity.updateValidMoves();
             }
@@ -283,6 +339,15 @@ class IratusBoard extends Board {
       }
     }
   }
+}
+
+abstract class CalculatorInterface {
+  abstract IratusBoard original;
+  // abstract List<Piece> piecesCorrespondence;
+
+  void clone();
+
+  Piece getSimulatedPiece(Piece originalPiece);
 }
 
 class CalculatorIratusBoard extends IratusBoard implements CalculatorInterface {

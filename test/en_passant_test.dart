@@ -18,10 +18,10 @@ void main() {
     expect(game.board.lastMove!.enPassant != null, true);
     expect(game.board.lastMove!.enPassant!.coord == 'd7', true);
 
-    ConsoleView.printBoard(game.board);
-    ConsoleView.printAllValidMoves(game.board);
+    // ConsoleView.printBoard(game.board);
+    // ConsoleView.printAllValidMoves(game.board);
 
-    game.move('exd7');
+    game.move('d7'); // TODO : exd7
 
     expect(game.board.get(Position.fromCoords(game.board, 'e8')) == null, true);
     expect(game.board.get(Position.fromCoords(game.board, 'd8')) == null, true);

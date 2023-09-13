@@ -6,8 +6,8 @@ void main() {
   var board = game.board;
 
   test('Game is properly initialized', () {
-    expect(game.board.movesHistory.isEmpty, true);
-    expect(game.turn == 'w', true);
+    expect(board.movesHistory.isEmpty, true);
+    expect(board.turn == 'w', true);
     expect(game.result == 0, true);
     expect(game.winner == 0, true);
   });

@@ -1,6 +1,6 @@
 part of iratus_game;
 
-class Move {
+abstract class Move {
   // Private fields
   int _capturesCounter = 0;
   final List<Command> _commands = [];
@@ -27,6 +27,8 @@ class Move {
   late int turnNumber;
 
   Move(this.board, this.start, this.end) : piece = board.get(start)! {
+    board.currentMove = this;
+
     _nextTurn = piece.enemyColor;
     turn = piece.color;
 
@@ -198,13 +200,13 @@ class Move {
         _commands.add(command);
         _executeCommands(args[0].identity.capture(args[1]));
         break;
-      case "extraMove":
-        final extraMove = board._move(args[0], args[1], main: false);
-        extraMove.turnNumber = turnNumber;
-        command.args = [extraMove];
+      case "extra":
+        final extra = ExtraMove(board, args[0], args[1]);
+        extra.turnNumber = turnNumber;
+        command.args = [extra];
         _commands.add(command);
         break;
-      case "mainMove":
+      case "main":
         _commands.add(command);
         _executeCommands(piece.identity.goTo(end));
         _initNotation();
@@ -238,13 +240,13 @@ class Move {
   void redoCommands() {
     for (final command in _commands) {
       switch (command.name) {
-        case "extraMove":
+        case "extra":
           board.redo(command.args[0], main: false);
           break;
         case "capture":
           command.args[0].capture(command.args[1]);
           break;
-        case "mainMove":
+        case "main":
           piece.identity.redo(end);
           break;
         case "setDynamite":
@@ -259,13 +261,13 @@ class Move {
 
   void undoCommand(Command command) {
     switch (command.name) {
-      case "extraMove":
+      case "extra":
         board.undo(command.args[0]);
         break;
       case "capture":
         command.args[0].uncapture();
         break;
-      case "mainMove":
+      case "main":
         piece.identity.undo(this);
         break;
       case "setDynamite":
@@ -275,6 +277,20 @@ class Move {
         command.args[0].transform(command.args[1]);
         break;
     }
+  }
+}
+
+class MainMove extends Move {
+  MainMove(super.board, super.start, super.end) {
+    board.mainCurrentMove = this;
+    executeCommand(Main());
+    board.lastMove = this;
+  }
+}
+
+class ExtraMove extends Move {
+  ExtraMove(super.board, super.start, super.end) {
+    executeCommand(Main());
   }
 }
 
@@ -289,12 +305,12 @@ class Capture extends Command {
   Capture(Piece captured, Piece capturer) : super('capture', [captured, capturer]);
 }
 
-class ExtraMove extends Command {
-  ExtraMove(Position start, Position end) : super('extraMove', [start, end]);
+class Extra extends Command {
+  Extra(Position start, Position end) : super('extra', [start, end]);
 }
 
-class MainMove extends Command {
-  MainMove() : super('mainMove', []);
+class Main extends Command {
+  Main() : super('main', []);
 }
 
 class Notation extends Command {

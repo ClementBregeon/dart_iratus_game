@@ -387,7 +387,7 @@ class _Dog extends PieceIdentity {
 
     if (dogIsTooFar(p.linkedPiece!.pos, p.pos)) {
       // happens when a dog is pulled by a grapple
-      commands.add(ExtraMove(p.linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
+      commands.add(Extra(p.linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
     }
     return commands;
   }
@@ -516,7 +516,7 @@ class _Grapple extends RollingPiece {
     return [
       Notation('G:${grappled.id.toUpperCase()}${grappled.coord}->${p.pos.coord}'), // ex : G:Nf6->d4
       Capture(p, p),
-      if (grappled.dynamited) Capture(grappled, p) else ExtraMove(grappled.pos, p.pos)
+      if (grappled.dynamited) Capture(grappled, p) else Extra(grappled.pos, p.pos)
     ];
   }
 
@@ -574,12 +574,12 @@ class _King extends PieceIdentity {
     if (!hasMoved) {
       if (pos.col == 2 && castleRights[0] == '1') {
         // Long castle
-        commands.add(ExtraMove(Position.fromRowCol(p.board, row: pos.row, col: pos.col - 2),
+        commands.add(Extra(Position.fromRowCol(p.board, row: pos.row, col: pos.col - 2),
             Position.fromRowCol(p.board, row: pos.row, col: pos.col + 1)));
         commands.add(Notation('0-0-0'));
       } else if (pos.col == 6 && castleRights[1] == '1') {
         // Short castle
-        commands.add(ExtraMove(Position.fromRowCol(p.board, row: pos.row, col: pos.col + 1),
+        commands.add(Extra(Position.fromRowCol(p.board, row: pos.row, col: pos.col + 1),
             Position.fromRowCol(p.board, row: pos.row, col: pos.col - 1)));
         commands.add(Notation('0-0'));
       }
@@ -941,7 +941,7 @@ class _Soldier extends RollingPiece {
     }
 
     if (dogIsTooFar(p.pos, p.linkedPiece!.pos)) {
-      commands.add(ExtraMove(p.linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
+      commands.add(Extra(p.linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
     }
 
     return commands;
