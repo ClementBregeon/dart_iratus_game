@@ -255,16 +255,9 @@ class IratusFEN extends FEN {
 
     // PIECE MOVING AGAIN
     String parts4 = parts[4];
-    if (parts4 != "-") {
-      Piece? pieceMovingAgain = board.get(Position.fromCoords(board, parts4));
-      if (pieceMovingAgain == null) {
-        throw ArgumentError.value(parts4, 'Invalid FEN :\nNo piece at');
-      }
-      (pieceMovingAgain.identity as PieceMovingTwice).stillHasToMove = true;
+    if (parts4 != "-" && board.get(Position.fromCoords(board, parts4)) == null) {
+      throw ArgumentError.value(parts4, 'Invalid FEN :\nNo piece moving twice at coord');
     }
-    // else {
-    //   pieceMovingAgain = null;
-    // }
   }
 
   IratusFEN.fromBoard(Board board) {

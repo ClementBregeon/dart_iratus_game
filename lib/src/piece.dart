@@ -257,28 +257,34 @@ abstract class RollingPiece extends PieceIdentity {
 }
 
 abstract class PieceMovingTwice extends PieceIdentity {
-  bool stillHasToMove = false; // TODO : remove usage
-
   PieceMovingTwice(super.p);
 
   @override
   List<Command> goTo(Position pos) {
     List<Command> commands = super.goTo(pos);
 
-    // if captured, ignore second move
-    // happens when capturing a dynamited piece
-    if (p.isCaptured) {
-      stillHasToMove = false;
-      return commands;
+    /// Return, during the move of a PieceMovingTwice, wether the movement
+    /// has to be followed by a second move or not.
+    ///
+    /// Return true when :
+    ///   - the move is the first on the board, and startFEN.coordPMA is null.
+    ///   - the last move was not moving this piece but the main current move is.
+    bool hasToMoveAgain() {
+      // happens when capturing a dynamited piece
+      if (p.isCaptured) return false;
+
+      // if movingAgain is set in the starting fen, the first move on the board has to be
+      // a second move for a piece moving twice. We don't want a third move.
+      if (p.board.lastMove == null) return p.board.startFEN.coordPMA == null;
+
+      if (p.board.lastMove!.piece == p) return false; // probably, this is during the second move
+
+      // if pulled by the grapple, no second move
+      return p.board.mainCurrentMove.piece == p;
     }
 
-    // else, ask for second move
-    // if pulled by the grapple, no second move
-    if (p.board.mainCurrentMove.piece == p) {
-      stillHasToMove = !stillHasToMove;
-      if (stillHasToMove) {
-        commands.add(SetMovingAgain(p));
-      }
+    if (hasToMoveAgain()) {
+      commands.add(SetMovingAgain(p));
     }
 
     return commands;
@@ -286,17 +292,11 @@ abstract class PieceMovingTwice extends PieceIdentity {
 
   @override
   void undo(Move move) {
-    super.undo(move);
+    // skip call to PieceMovingTwice.goTo() because we don't care about SetMovingAgain
+    super.goTo(move.start);
 
-    if (p.board.lastMove == null) {
-      stillHasToMove = p.board.startFEN.coordPMA == p.coord;
-    } else {
-      if (p.forCalcul) {
-        // TODO : try to remove
-        stillHasToMove = p.board.lastMove!.piece == p.original;
-      } else {
-        stillHasToMove = p.board.lastMove!.piece == p;
-      }
+    if (p.firstMove == move) {
+      p.firstMove = null;
     }
   }
 

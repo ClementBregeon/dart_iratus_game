@@ -317,10 +317,10 @@ class IratusBoard extends Board {
             calc2._moveFromTo(clonedPiece.pos, validMove);
             Move moveObject = calc2.lastMove!;
             for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
-              enemyClonedPiece.identity.updateValidMoves();
+              enemyClonedPiece.identity.updateValidMoves(); // TODO : needed ? after a PieceMovingTwice's first move ??
             }
             bool valid;
-            if (moveObject.nextTurn == piece.color) {
+            if (moveObject.nextTurn == piece.color) { // TODO : isn't it always true ?
               valid = false;
               clonedPiece.identity.updateValidMoves();
               for (Position validMove2 in clonedPiece.validMoves) {
