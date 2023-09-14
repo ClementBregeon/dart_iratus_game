@@ -279,6 +279,7 @@ class IratusBoard extends Board {
     bool secondMove = false;
     if (lastMove != null || startFEN.pieceMovingAgain != null) {
       Piece lastMovedPiece = lastMove == null ? startFEN.pieceMovingAgain! : lastMove!.piece;
+      // TODO : if (lastMove.pieceMovingAgain)
       if (lastMovedPiece.identity is PieceMovingTwice && (lastMovedPiece.identity as PieceMovingTwice).stillHasToMove) {
         secondMove = true;
         Piece clonedPiece = calc.getSimulatedPiece(lastMovedPiece);

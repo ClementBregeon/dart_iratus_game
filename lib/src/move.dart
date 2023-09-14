@@ -343,6 +343,7 @@ class SetEnPassant extends Command {
   SetEnPassant(Position pos) : super('setEnPassant', [pos]);
 }
 
+// TODO : SetMovingAgain
 class SetNextTurn extends Command {
   SetNextTurn(String turn) : super('setNextTurn', [turn]);
 }

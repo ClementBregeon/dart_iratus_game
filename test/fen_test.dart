@@ -14,8 +14,6 @@ void main() {
 
   // TODO : castlings
 
-  // TODO : piece moving again
-
   // TODO : a random complex board
   // TODO : check dynamite moves
 

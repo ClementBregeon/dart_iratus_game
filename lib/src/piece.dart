@@ -2,8 +2,6 @@ import 'game.dart';
 import 'position.dart';
 import 'utils.dart';
 
-// TODO : solve : a king captured an elite soldier protected by its king
-
 class Piece {
   // Class attributes
 

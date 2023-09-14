@@ -44,9 +44,7 @@ void main() {
   // the king can eat the pawn but not go forward : k7/3r~4/2S(0)1S(1)3/2D(0)KD(1)3/2PpP3/8/8/8/8/8 w - - - 000000-0 0 10
   // promotion checkmate works ?
   // A king protects its pieces from the enemy king
-  // fen_test.dart
-  // pgn_test.dart
-  // TODO : can a pawn capture en passant a promoted pawn ?
+  // link_test.dart
 
   // TODO : PUZZLES
 
