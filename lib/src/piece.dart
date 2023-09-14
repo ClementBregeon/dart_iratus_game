@@ -129,13 +129,6 @@ abstract class PieceIdentity {
     return commands;
   }
 
-  /// return false if this piece can't actually capture
-  /// examples : Dynamite & Grapple
-  /// TODO from method to attribute ?
-  bool capturerCheck() {
-    return true;
-  }
-
   /// move the piece to a position
   List<Command> goTo(Position pos) {
     List<Command> commands = [];
@@ -392,11 +385,6 @@ class _Dynamite extends PieceIdentity {
   }
 
   @override
-  bool capturerCheck() {
-    return false;
-  }
-
-  @override
   List<Command> goTo(Position pos) {
     List<Command> commands = [];
     commands.add(Capture(p, p));
@@ -475,11 +463,6 @@ class _Grapple extends RollingPiece {
 
     // The only piece tha grapple can't move is the unequipped dynamite
     return piece == null ? true : piece.id != 'y';
-  }
-
-  @override
-  bool capturerCheck() {
-    return false;
   }
 
   @override
@@ -729,7 +712,6 @@ class _Pawn extends PieceIdentity {
 
   void requirePromotionInput() {
     p.board.pawnToPromote = p;
-    // TODO
   }
 
   @override
@@ -847,8 +829,6 @@ class _Soldier extends RollingPiece {
   final List<List<int>> moves;
   @override
   final int range = 2; // TODO : check if working
-
-  // TODO : final Dog _linkedPiece; ?
   final int promotionRow;
 
   _Soldier(super.container)

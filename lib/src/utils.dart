@@ -4,7 +4,10 @@ import 'position.dart';
 final String colors = 'bw';
 final String ids = 'bcdefgknpqrsy';
 
-/// ids of pieces that can access the same square, and therefore, sometimes,
+/// Ids of pieces who can't capture other pieces.
+final String cantCapture = 'gy';
+
+/// Ids of pieces that can access the same square, and therefore, sometimes,
 /// the notation needs clarification.
 final String competitivePieces = 'bcefnqrsy';
 final String dynamitables = 'bdnps';

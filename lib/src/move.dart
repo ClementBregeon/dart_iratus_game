@@ -62,7 +62,7 @@ abstract class Move {
     }
 
     final Piece? captured = board.get(end);
-    if (captured != null && piece.identity.capturerCheck()) {
+    if (captured != null && !cantCapture.contains(piece.id)) {
       executeCommand(Capture(captured, piece));
     }
 
