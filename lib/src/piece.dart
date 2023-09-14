@@ -1,6 +1,4 @@
-import 'game.dart';
-import 'position.dart';
-import 'utils.dart';
+part of iratus_game;
 
 class Piece {
   // Class attributes
@@ -13,6 +11,9 @@ class Piece {
   final String color;
   final String enemyColor;
   late PieceIdentity _identity;
+
+  /// An ally piece. Designed for dog-soldier link.
+  Piece? _linkedPiece;
   Position _pos;
   Move? firstMove;
   bool _hasMovedInAnotherLife = false; // if the game starts from a fen where this piece has already moved
@@ -29,6 +30,7 @@ class Piece {
   Piece? original;
 
   // Getters
+  Piece? get linkedPiece => _linkedPiece;
   bool get phantomized => _phantomized;
   Position get pos => _pos;
   String get coord => _pos.coord;
@@ -39,9 +41,6 @@ class Piece {
   PieceIdentity get identity => _identity;
   String get id => _identity.id;
   List<List<int>> get moves => _identity.moves;
-
-  // Dog & Soldier - tricky attribute
-  Piece? linkedPiece; // TODO : rethink when transfomation will be done
 
   Piece(this.board, this.color, this._pos, String id) : enemyColor = (color == "w") ? "b" : "w" {
     if (!colors.contains(color)) throw ArgumentError.value(color, 'A piece color can only be \'w\' or \'b\'');
@@ -367,7 +366,7 @@ class _Dog extends PieceIdentity {
   List<Command> capture(Piece capturer) {
     List<Command> commands = super.capture(capturer);
 
-    if (!p.linkedPiece!.isCaptured) {
+    if (!p._linkedPiece!.isCaptured) {
       // If the dog is captured while its soldier is alive, the phantom is an enraged dog instead of classic dog
       for (final Command command in commands) {
         if (command is Transform) {
@@ -385,9 +384,9 @@ class _Dog extends PieceIdentity {
     final Position oldPos = p.pos;
     List<Command> commands = super.goTo(pos);
 
-    if (dogIsTooFar(p.linkedPiece!.pos, p.pos)) {
+    if (dogIsTooFar(p._linkedPiece!.pos, p.pos)) {
       // happens when a dog is pulled by a grapple
-      commands.add(Extra(p.linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
+      commands.add(Extra(p._linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
     }
     return commands;
   }
@@ -879,7 +878,7 @@ class _Soldier extends RollingPiece {
   @override
   final int range = 2; // TODO : check if working
 
-  // TODO : final Dog linkedPiece; ?
+  // TODO : final Dog _linkedPiece; ?
   final int promotionRow;
 
   _Soldier(super.container)
@@ -913,9 +912,9 @@ class _Soldier extends RollingPiece {
     // If this is the phantom of the soldier
     if (p.phantomized) return commands;
 
-    if (!p.linkedPiece!.isCaptured) {
+    if (!p._linkedPiece!.isCaptured) {
       // If the dog is still alive when the soldier is captured
-      commands.add(Transform(p.linkedPiece!, 'd', 'c'));
+      commands.add(Transform(p._linkedPiece!, 'd', 'c'));
     } else {
       // Else, the soldier is captured because the dog just got captured
       // In this case, the dog is phantomized, not the soldier
@@ -930,7 +929,7 @@ class _Soldier extends RollingPiece {
     final Position oldPos = p.pos;
     List<Command> commands = super.goTo(pos);
 
-    if (p.linkedPiece == null) {
+    if (p._linkedPiece == null) {
       // If this is the phantom of the soldier
       if (p.row == promotionRow) {
         commands.add(Transform(p, id, 'e'));
@@ -940,11 +939,11 @@ class _Soldier extends RollingPiece {
 
     if (p.row == promotionRow) {
       commands.add(Transform(p, id, 'e'));
-      commands.add(Transform(p.linkedPiece!, p.linkedPiece!.id, 'c'));
+      commands.add(Transform(p._linkedPiece!, p._linkedPiece!.id, 'c'));
     }
 
-    if (dogIsTooFar(p.pos, p.linkedPiece!.pos)) {
-      commands.add(Extra(p.linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
+    if (dogIsTooFar(p.pos, p._linkedPiece!.pos)) {
+      commands.add(Extra(p._linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
     }
 
     return commands;

@@ -1,4 +1,4 @@
-import 'piece.dart';
+import 'game.dart';
 import 'position.dart';
 
 final String colors = 'bw';

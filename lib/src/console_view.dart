@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:iratus_game/src/utils.dart';
 
 import 'game.dart';
-import 'piece.dart';
 import 'position.dart';
 
 /// A bridge between the console input and an Iratus game.

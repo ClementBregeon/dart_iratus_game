@@ -1,4 +1,3 @@
-import 'fen.dart';
 import 'game.dart';
 
 /// An object representating an Iratus game.

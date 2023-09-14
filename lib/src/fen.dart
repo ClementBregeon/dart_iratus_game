@@ -1,7 +1,4 @@
-import 'game.dart';
-import 'piece.dart';
-import 'position.dart';
-import 'utils.dart';
+part of iratus_game;
 
 class _PieceInformations {
   int col = -1;
@@ -162,8 +159,8 @@ class IratusFEN extends FEN {
       if (pieceInfos.linkID != null) {
         final waitingPiece = waitingForLink[pieceInfos.linkID];
         if (waitingPiece != null) {
-          waitingPiece.linkedPiece = piece;
-          piece.linkedPiece = waitingPiece;
+          waitingPiece._linkedPiece = piece;
+          piece._linkedPiece = waitingPiece;
         } else {
           waitingForLink[pieceInfos.linkID] = piece;
         }
@@ -295,9 +292,9 @@ class IratusFEN extends FEN {
           fenIP += '~';
         }
 
-        if (piece.linkedPiece != null && !piece.linkedPiece!.isCaptured) {
+        if (piece._linkedPiece != null && !piece._linkedPiece!.isCaptured) {
           String pieceCoord = piece.coord;
-          String linkedPieceCoord = piece.linkedPiece!.coord;
+          String linkedPieceCoord = piece._linkedPiece!.coord;
 
           if (linkedPieces.containsKey(linkedPieceCoord)) {
             linkedPieces[pieceCoord] = linkedPieces[linkedPieceCoord]!;

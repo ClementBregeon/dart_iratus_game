@@ -1,14 +1,14 @@
 library iratus_game;
 
 // import 'board.dart';
-import 'fen.dart';
 import 'pgn.dart';
-import 'piece.dart';
 import 'position.dart';
 import 'utils.dart';
 
 part 'board.dart';
+part 'fen.dart';
 part 'move.dart';
+part 'piece.dart';
 
 /// A chess player, regardless of the variant.
 class Player {
