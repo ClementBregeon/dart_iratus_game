@@ -1,6 +1,8 @@
 library iratus_game;
 
 // import 'board.dart';
+import 'dart:math';
+
 import 'pgn.dart';
 import 'position.dart';
 import 'utils.dart';

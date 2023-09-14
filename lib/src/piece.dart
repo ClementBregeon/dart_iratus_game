@@ -186,9 +186,11 @@ abstract class PieceIdentity {
 }
 
 abstract class RollingPiece extends PieceIdentity {
-  final int range = 10;
+  final int range;
 
-  RollingPiece(super.container);
+  RollingPiece(Piece container, {int? range})
+      : range = range ?? 10,
+        super(container);
 
   @override
   void updateValidMoves() {
@@ -827,11 +829,9 @@ class _Soldier extends RollingPiece {
   final String id = 's';
   @override
   final List<List<int>> moves;
-  @override
-  final int range = 2; // TODO : check if working
   final int promotionRow;
 
-  _Soldier(super.container)
+  _Soldier(Piece container)
       : promotionRow = container.color == 'w' ? 0 : 9,
         moves = container.color == 'w'
             ? [
@@ -841,7 +841,8 @@ class _Soldier extends RollingPiece {
             : [
                 [1, 1],
                 [1, -1]
-              ];
+              ],
+        super(container, range: 2);
 
   @override
   bool canGoTo(Position pos) {
