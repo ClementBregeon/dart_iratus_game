@@ -213,7 +213,23 @@ void main() {
   //
   game.move('Exh6');
   game.move('Eg5');
-  // TODO : resign button
+  game.move('c5');
+
+  //
+  game.move('b8');
+  game.move('Kf5');
+
+  //
+  game.move('b9');
+  game.move('=Q');
+  game.move('Kg6');
+
+  //
+  game.move('Kf3');
+  game.move('Kh5');
+
+  //
+  game.move('Qd9');
 
   print(game.getPGN());
   print('\n');
@@ -221,3 +237,5 @@ void main() {
   print('\n');
   ConsoleView.printAllValidMoves(game.board);
 }
+
+  // TODO : resign button

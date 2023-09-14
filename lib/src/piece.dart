@@ -672,9 +672,7 @@ class _Pawn extends PieceIdentity {
 
     // Promotion
     if (p.row == promotionRow) {
-      if (!p.forCalcul) {
-        requirePromotionInput();
-      }
+      requirePromotionInput();
     }
 
     // Capturing en passant

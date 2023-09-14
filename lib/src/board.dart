@@ -135,7 +135,8 @@ abstract class Board {
     if (this is! CalculatorInterface) {
       (calculator! as Board)._moveFromTo(start, end);
     }
-    if (this is CalculatorInterface || !waitingForInput) {
+
+    if (!waitingForInput) {
       _turn = move.nextTurn;
       _fenHistory.add(getFEN());
       if (!_duringCalcul) {
@@ -147,13 +148,12 @@ abstract class Board {
 
   /// Move a piece or complete an input request (like promotion)
   void _move(String notation) {
-    if (this is CalculatorInterface) throw Exception('A calculator can\'t call the _move() method');
-
     if (waitingForInput) {
       if (!promotionValidNotations.contains(notation)) {
         throw ArgumentError.value(
             notation, 'A promotion notation must be in the format \'=\' + promotionId (upper case)');
       }
+
       lastMove!.executeCommand(Transform(pawnToPromote!, 'p', notation[1].toLowerCase()));
       lastMove!._notation += notation.toUpperCase();
 
@@ -161,9 +161,15 @@ abstract class Board {
       _fenHistory.add(getFEN());
       _backMovesHistory.clear();
       _turn = lastMove!.nextTurn;
+      if (calculator != null) {
+        (calculator as IratusBoard)._move(notation);
+      }
+
       updateAllValidMoves();
       return;
     }
+
+    if (this is CalculatorInterface) throw Exception('A calculator can\'t call the _move() method');
 
     Move? calcMove = allValidMoves[notation];
     if (calcMove == null) {
