@@ -345,6 +345,7 @@ class _Dog extends PieceIdentity {
           break;
         }
       }
+      commands.add(Capture(p.linkedPiece!, capturer));
     }
 
     return commands;
