@@ -21,6 +21,16 @@ void main() {
     expect(game.board.validNotations.join(', ') == 'Kg4, Ke4, Kf5, Ke5, Kg3, Kf3', true);
   });
 
+  test('A piece can be pinned, being between its king and an enemy rolling piece.', () {
+    game.move('Kf3');
+    game.move('Qc0');
+    game.move('Ne2');
+    game.move('Kb3');
+
+    expect(game.board.get(Position.fromCoords(game.board, 'e2'))!.validMoves.isEmpty, true);
+    expect(game.board.validNotations.join(', ') == 'Kg3, Ke3, Kg4, Kf4, Ke4, Kg2, Kf2', true);
+  });
+
   test('A rolling piece can have a short range.', () {
     fen = '8/8/8/8/8/K4k2/8/8/8/S4n2 w - - - 0-0 0 1';
     game = IratusGame.fromFEN(fen);
