@@ -37,7 +37,13 @@ void main() {
     expect(movingAgainGame2.board.validNotations.join(', ') == 'Ce5, Cc5, Cd4, Cd6', true);
   });
 
-  // TODO : castlings
+  // FEN TESTS
+  // All the pieces are at the same position
+  // Turn is applied, even when a piece moving twice has to move again
+  // Dynamited pieces are correctly dynamited
+  // Dynamitables.hasMoved() are kept the same
+  // Counter50rule is used
+  // TurnNumber is used
 
   // TODO : a random complex board
   // TODO : check dynamite moves

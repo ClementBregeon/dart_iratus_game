@@ -150,8 +150,8 @@ abstract class PieceIdentity {
   }
 
   /// redo a move
-  List<Command> redo(Position pos) {
-    return goTo(pos);
+  redo(Position pos) {
+    goTo(pos);
   }
 
   /// undo a move
@@ -715,12 +715,12 @@ class _Pawn extends PieceIdentity {
   }
 
   @override
-  List<Command> redo(pos) {
+  redo(pos) {
     if (p.board.currentMove.notation.contains('=')) {
       // If the redone move has a promotion, skip call to Pawn.redo(), avoiding the promotion choice
-      return super.goTo(pos);
+      super.goTo(pos);
     } else {
-      return super.redo(pos);
+      super.redo(pos);
     }
   }
 
