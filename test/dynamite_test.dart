@@ -2,11 +2,11 @@ import 'package:iratus_game/iratus_game.dart';
 import 'package:test/test.dart';
 
 void main() {
-  IratusGame game = IratusGame();
-
   String validMovesToString(Piece piece) {
     return piece.validMoves.map((element) => element.coord).join(', ');
   }
+
+  IratusGame game = IratusGame();
 
   test('From standart start, a dynamite can attach itself 16 pieces.', () {
     for (Piece piece in game.board.pieces) {
@@ -82,3 +82,5 @@ void main() {
     expect(validMovesToString(pawnF6) == 'f5, f4', true);
   });
 }
+
+// TODO : an enemy can't go to the dynamite

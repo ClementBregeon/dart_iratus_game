@@ -150,8 +150,8 @@ abstract class PieceIdentity {
   }
 
   /// redo a move
-  void redo(Position pos) {
-    goTo(pos);
+  List<Command> redo(Position pos) {
+    return goTo(pos);
   }
 
   /// undo a move
@@ -502,8 +502,6 @@ class _King extends PieceIdentity {
     [1, -1],
   ];
 
-  String castleRights = '00';
-
   _King(super.container);
 
   @override
@@ -523,15 +521,16 @@ class _King extends PieceIdentity {
   @override
   List<Command> goTo(Position pos) {
     bool hasMoved = p.hasMoved();
+    Position oldPos = p.pos;
     List<Command> commands = super.goTo(pos);
 
-    if (!hasMoved) {
-      if (pos.col == 2 && castleRights[0] == '1') {
+    if (!hasMoved && ((oldPos.col - pos.col).abs() == 2)) {
+      if (pos.col == 2) {
         // Long castle
         commands.add(Extra(Position.fromRowCol(p.board, row: pos.row, col: pos.col - 2),
             Position.fromRowCol(p.board, row: pos.row, col: pos.col + 1)));
         commands.add(Notation('0-0-0'));
-      } else if (pos.col == 6 && castleRights[1] == '1') {
+      } else if (pos.col == 6) {
         // Short castle
         commands.add(Extra(Position.fromRowCol(p.board, row: pos.row, col: pos.col + 1),
             Position.fromRowCol(p.board, row: pos.row, col: pos.col - 1)));
@@ -606,8 +605,6 @@ class _King extends PieceIdentity {
         }
       }
     }
-
-    castleRights = (canLongCastle ? '1' : '0') + (canShortCastle ? '1' : '0');
   }
 }
 
@@ -717,12 +714,12 @@ class _Pawn extends PieceIdentity {
   }
 
   @override
-  void redo(pos) {
+  List<Command> redo(pos) {
     if (p.board.currentMove.notation.contains('=')) {
       // If the redone move has a promotion, skip call to Pawn.redo(), avoiding the promotion choice
-      super.goTo(pos);
+      return super.goTo(pos);
     } else {
-      super.redo(pos);
+      return super.redo(pos);
     }
   }
 

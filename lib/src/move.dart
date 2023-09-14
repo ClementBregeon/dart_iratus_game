@@ -246,7 +246,15 @@ abstract class Move {
           command.args[0].identity.capture(command.args[1]);
           break;
         case "main":
-          piece.identity.redo(end);
+          List<Command> redoCommands = piece.identity.redo(end);
+          switch (command.name) {
+            case "notation":
+              _notation = command.args[0];
+              break;
+            case "notationHint":
+              notationHints.add(command.args[0]);
+              break;
+          }
           break;
         case "setDynamite":
           command.args[0].setDynamite(true);
