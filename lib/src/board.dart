@@ -316,11 +316,9 @@ class IratusBoard extends Board {
           for (Position validMove in piece.validMoves) {
             calc2._moveFromTo(clonedPiece.pos, validMove);
             Move moveObject = calc2.lastMove!;
-            for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
-              enemyClonedPiece.identity.updateValidMoves(); // TODO : needed ? after a PieceMovingTwice's first move ??
-            }
             bool valid;
-            if (moveObject.nextTurn == piece.color) { // TODO : isn't it always true ?
+            if (moveObject.movingAgain) {
+              // If there is 1 second move who doesn't leave the king in check, the first move is legal
               valid = false;
               clonedPiece.identity.updateValidMoves();
               for (Position validMove2 in clonedPiece.validMoves) {
@@ -338,6 +336,10 @@ class IratusBoard extends Board {
                 }
               }
             } else {
+              // happens when clonedPiece was blown up by dynamite on first move
+              for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
+                enemyClonedPiece.identity.updateValidMoves();
+              }
               valid = !inCheck(calc2.king[piece.color]!, dontCareAboutPhantoms: false);
             }
             calc2.undo();
