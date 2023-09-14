@@ -24,7 +24,7 @@ abstract class Move {
   final Position end;
   final Piece piece;
   final Map<String, List<String>> capturedPieces = {'w': [], 'b': []}; // just for materialistic eval
-  final List<String> notationHints = [];
+  final List<Function> notationTransformations = [];
   late final String turn;
   late int turnNumber;
 
@@ -82,7 +82,7 @@ abstract class Move {
     if (board.calculator != null) {
       for (final command in _commands) {
         if (command is Capture) {
-          final Piece capturedPiece = command.args[0];
+          final Piece capturedPiece = command.captured;
           if (capturedPiece.id == 'y') {
             continue;
           } // dynamite equipment
@@ -181,101 +181,79 @@ abstract class Move {
     nIP += end.coord;
 
     // hints
-    for (final String hint in notationHints) {
-      nIP += hint;
+    for (final Function notationTransform in notationTransformations) {
+      nIP = notationTransform(nIP);
+      // nIP += hint;
     }
 
     _notation = nIP;
   }
 
   void executeCommand(Command command) {
-    final args = command.args;
-    switch (command.name) {
-      case "capture":
-        _capturesCounter += 1;
-        _counter50rule = 0;
-        _commands.add(command);
-        _executeCommands(args[0].identity.capture(args[1]));
-        break;
-      case "extra":
-        final extra = ExtraMove(board, args[0], args[1]);
-        extra.turnNumber = turnNumber;
-        command.args = [extra];
-        _commands.add(command);
-        break;
-      case "main":
-        _commands.add(command);
-        _executeCommands(piece.identity.goTo(end));
-        _initNotation();
-        _initCapturedPieces();
-        break;
-      case "notation":
-        _notation = args[0];
-        break;
-      case "notationHint":
-        notationHints.add(args[0]);
-        break;
-      case "setDynamite":
-        _commands.add(command);
-        args[0].setDynamite(true);
-        break;
-      case "setEnPassant":
-        _enPassant = args[0];
-        break;
-      case "setMovingAgain":
-        _nextTurn = args[0].color;
-        _movingAgain = true;
-        break;
-      case "transform":
-        _commands.add(command);
-        args[0].transform(args[2]);
-        break;
-      default:
-        throw Error();
+    if (command is Capture) {
+      _capturesCounter += 1;
+      _counter50rule = 0;
+      _commands.add(command);
+      _executeCommands(command.captured.identity.capture(command.capturer));
+      return;
+    } else if (command is Extra) {
+      command.move = ExtraMove(board, command.start, command.end);
+      command.move.turnNumber = turnNumber;
+      _commands.add(command);
+    } else if (command is Main) {
+      _commands.add(command);
+      _executeCommands(piece.identity.goTo(end));
+      _initNotation();
+      _initCapturedPieces();
+    } else if (command is Notation) {
+      _notation = command.notation;
+    } else if (command is NotationTransform) {
+      notationTransformations.add(command.transform);
+    } else if (command is SetDynamite) {
+      _commands.add(command);
+      command.piece.setDynamite(true);
+    } else if (command is SetEnPassant) {
+      _enPassant = command.pos;
+    } else if (command is SetMovingAgain) {
+      _nextTurn = command.piece.color;
+      _movingAgain = true;
+    } else if (command is Transform) {
+      _commands.add(command);
+      command.piece.transform(command.newId);
+    } else {
+      throw ArgumentError.value(command, 'Unknown command');
     }
   }
 
   void redoCommands() {
     board.currentMove = this;
     for (final command in _commands) {
-      switch (command.name) {
-        case "extra":
-          command.args[0].redoCommands();
-          break;
-        case "capture":
-          command.args[0].identity.capture(command.args[1]);
-          break;
-        case "main":
-          piece.identity.redo(end);
-          break;
-        case "setDynamite":
-          command.args[0].setDynamite(true);
-          break;
-        case "transform":
-          command.args[0].transform(command.args[2]);
-          break;
+      if (command is Extra) {
+        command.move.redoCommands();
+      } else if (command is Capture) {
+        command.captured.identity.capture(command.capturer);
+      } else if (command is Main) {
+        piece.identity.redo(end);
+      } else if (command is SetDynamite) {
+        command.piece.setDynamite(true);
+      } else if (command is Transform) {
+        command.piece.transform(command.newId);
       }
     }
   }
 
   void undoCommands() {
     for (final Command command in _commands.reversed) {
-      switch (command.name) {
-        case "extra":
-          command.args[0].undoCommands();
-          break;
-        case "capture":
-          command.args[0].uncapture();
-          break;
-        case "main":
-          piece.identity.undo(this);
-          break;
-        case "setDynamite":
-          command.args[0].setDynamite(false);
-          break;
-        case "transform":
-          command.args[0].transform(command.args[1]);
-          break;
+      if (command is Extra) {
+        command.move.undoCommands();
+      } else if (command is Capture) {
+        command.captured.uncapture();
+      } else if (command is Main) {
+        piece.identity.undo(this);
+      } else if (command is SetDynamite) {
+        command.piece.setDynamite(false);
+      } else if (command is Transform) {
+        command.piece.transform(command.oldId);
       }
     }
   }
@@ -305,45 +283,56 @@ class ExtraMove extends Move {
   }
 }
 
-abstract class Command {
-  final String name;
-  List<dynamic> args;
-
-  Command(this.name, this.args);
-}
+abstract class Command {}
 
 class Capture extends Command {
-  Capture(Piece captured, Piece capturer) : super('capture', [captured, capturer]);
+  Piece captured;
+  Piece capturer;
+
+  Capture(this.captured, this.capturer);
 }
 
 class Extra extends Command {
-  Extra(Position start, Position end) : super('extra', [start, end]);
+  Position start;
+  Position end;
+  late Move move;
+
+  Extra(this.start, this.end);
 }
 
 class Main extends Command {
-  Main() : super('main', []);
+  Main();
 }
 
 class Notation extends Command {
-  Notation(String notation) : super('notation', [notation]);
+  String notation;
+  Notation(this.notation);
 }
 
-class NotationHint extends Command {
-  NotationHint(String hint) : super('notationHint', [hint]);
+class NotationTransform extends Command {
+  FunctionWithStringParameter transform;
+  NotationTransform(this.transform);
 }
 
 class SetDynamite extends Command {
-  SetDynamite(Piece piece) : super('setDynamite', [piece]);
+  Piece piece;
+  SetDynamite(this.piece);
 }
 
 class SetEnPassant extends Command {
-  SetEnPassant(Position pos) : super('setEnPassant', [pos]);
+  Position pos;
+  SetEnPassant(this.pos);
 }
 
 class SetMovingAgain extends Command {
-  SetMovingAgain(Piece piece) : super('setMovingAgain', [piece]);
+  Piece piece;
+  SetMovingAgain(this.piece);
 }
 
 class Transform extends Command {
-  Transform(Piece piece, String oldId, String newId) : super('transform', [piece, oldId, newId]);
+  Piece piece;
+  String oldId;
+  String newId;
+
+  Transform(this.piece, this.oldId, this.newId);
 }

@@ -25,7 +25,6 @@ abstract class FEN {
   abstract final String fenEqualizer;
 }
 
-// TODO : ChessFEN
 // TODO : improve documentation
 
 /// An object representating an Iratus position.

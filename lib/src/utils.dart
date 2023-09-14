@@ -1,6 +1,8 @@
 import 'game.dart';
 import 'position.dart';
 
+typedef FunctionWithStringParameter = void Function(String);
+
 final String colors = 'bw';
 final String ids = 'bcdefgknpqrsy';
 

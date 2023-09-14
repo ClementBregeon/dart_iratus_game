@@ -74,10 +74,6 @@ class Piece {
     if (id == pieceId) return;
 
     _identity = identitiyConstructors[pieceId]!(this);
-
-    if (!forCalcul) {
-      board.calculator!.getSimulatedPiece(this).transform(pieceId);
-    }
   }
 
   void uncapture() {
@@ -115,7 +111,7 @@ abstract class PieceIdentity {
 
     if (p.dynamited && !capturer.isCaptured) {
       commands.add(Capture(capturer, p));
-      commands.add(NotationHint('*'));
+      commands.add(NotationTransform((String notation) => '$notation*'));
     }
 
     if (p.board is IratusBoard) {
@@ -341,7 +337,7 @@ class _Dog extends PieceIdentity {
       // If the dog is captured while its soldier is alive, the phantom is an enraged dog instead of classic dog
       for (final Command command in commands) {
         if (command is Transform) {
-          command.args[2] = 'c'; // replace 'd' by 'c'
+          command.newId = 'c'; // replace 'd' by 'c'
           break;
         }
       }
@@ -475,7 +471,9 @@ class _Grapple extends RollingPiece {
     if (grappled == null) return super.goTo(pos);
 
     return [
-      Notation('G:${grappled.id.toUpperCase()}${grappled.coord}->${p.pos.coord}'), // ex : G:Nf6->d4
+      // ex : G:Nf6->d4
+      // ex : G:Nf6->*     here, the piece on f6 was dynamited
+      Notation('G:${grappled.id.toUpperCase()}${grappled.coord}->${grappled.dynamited ? '*' : p.pos.coord}'),
       Capture(p, p),
       if (grappled.dynamited) Capture(grappled, p) else Extra(grappled.pos, p.pos)
     ];
@@ -882,6 +880,7 @@ class _Soldier extends RollingPiece {
       // If this is the phantom of the soldier
       if (p.row == promotionRow) {
         commands.add(Transform(p, id, 'e'));
+        commands.add(NotationTransform((String notation) => 'S${notation.substring(1)}=E'));
       }
       return commands;
     }
@@ -889,6 +888,7 @@ class _Soldier extends RollingPiece {
     if (p.row == promotionRow) {
       commands.add(Transform(p, id, 'e'));
       commands.add(Transform(p._linkedPiece!, p._linkedPiece!.id, 'c'));
+      commands.add(NotationTransform((String notation) => 'S${notation.substring(1)}=E'));
     }
 
     if (dogIsTooFar(p.pos, p._linkedPiece!.pos)) {

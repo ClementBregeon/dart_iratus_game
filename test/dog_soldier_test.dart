@@ -1,5 +1,3 @@
-// TODO : linked + dynamite
-
 import 'package:iratus_game/iratus_game.dart';
 import 'package:test/test.dart';
 
@@ -17,6 +15,9 @@ void main() {
 
   Piece dogG9 = game.board.get(Position.fromCoords(game.board, 'g9'))!;
   Piece soldierF9 = game.board.get(Position.fromCoords(game.board, 'f9'))!;
+
+  Piece wPhantom = game.board.get(Position.fromCoords(game.board, 'a0'))!;
+  Piece bPhantom = game.board.get(Position.fromCoords(game.board, 'a9'))!;
 
   test('From standart start, dogs and soldiers are correctly linked.', () {
     expect(dogB0.linkedPiece == soldierC0, true);
@@ -62,6 +63,10 @@ void main() {
     expect(game.board.get(Position.fromCoords(game.board, 'f4'))!.id == 'c', true);
   });
 
+  test('The phantom of the previous capture is a soldier.', () {
+    expect(wPhantom.id == 's', true);
+  });
+
   test('When a dog dies, the soldier dies too.', () {
     game.move('Nxe5');
     game.move('Sc5');
@@ -72,6 +77,10 @@ void main() {
     expect(game.board.get(Position.fromCoords(game.board, 'b6')) is Piece, true);
     expect(game.board.get(Position.fromCoords(game.board, 'b6'))!.id == 'n', true);
     expect(game.board.get(Position.fromCoords(game.board, 'c5')) == null, true);
+  });
+
+  test('The phantom of the previous capture is an enraged dog.', () {
+    expect(bPhantom.id == 'c', true);
   });
 
   test('When a dog dies, if the soldier is dynamited, the capturer dies too.', () {
@@ -85,5 +94,14 @@ void main() {
     expect(game.board.get(Position.fromCoords(game.board, 'e8')) == null, true);
     expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
     expect(game.board.get(Position.fromCoords(game.board, 'f6')) == null, true);
+  });
+
+  test('The phantom of the previous capture is an enraged dog.', () {
+    expect(bPhantom.id == 'c', true);
+    expect(wPhantom.id == 'n', true);
+  });
+
+  test('When a soldier promotes, the promotion is shown on the notation.', () {
+    // TODO
   });
 }

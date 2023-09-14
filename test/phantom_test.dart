@@ -102,4 +102,7 @@ void main() {
 
     expect(game.board.lastMove!.notation == 'Qf7#', true);
   });
+
+  // TODO : the phantom of a pawn promotion + notation
+  // TODO : the phantom of a soldier promotion + notation
 }
