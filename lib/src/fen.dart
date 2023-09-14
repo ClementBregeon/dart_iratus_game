@@ -38,19 +38,19 @@ class IratusFEN extends FEN {
   Works just like a chess FEN
 
   Rule reminder : a repetition occurs when the fen equalizers are the same
-  fenEqualizer = pieces turn castleRights enPassant pieceMovingAgain
+  fenEqualizer = pieces turn castleRights enPassant coordPieceMovingAgain
 
 
 
   VALUES ORDER
 
-  pieces turn castleRights enPassant pieceMovingAgain dynamitablesHasMoved counter50rule turnNumber
+  pieces turn castleRights enPassant coordPieceMovingAgain dynamitablesHasMoved counter50rule turnNumber
   
 
 
   NEW VALUES
 
-  pieceMovingAgain :
+  coordPieceMovingAgain :
 
     coordinate or "-"
     exemples : "a4" or "-"
@@ -84,12 +84,18 @@ class IratusFEN extends FEN {
   @override
   late final String fen;
   @override
-  late final String fenEqualizer; // pieces turn castleRights enPassant pieceMovingAgain
+  late final String fenEqualizer; // pieces turn castleRights enPassant coordPieceMovingAgain
   late final String pieces;
   late final String turn;
   late final String castleRights;
-  late final Position? enPassant; // the pos where a pawn can go to capture an enemy pawn who just moved 2 squares
-  late final Piece? pieceMovingAgain;
+
+  // TODO : documentation
+
+  /// The position where a pawn can go to capture an enemy pawn who just moved 2 squares.
+  late final Position? enPassant;
+
+  /// abbreviation for coordPieceMovingAgain. The coord of the piece who has to move again.
+  late final String? coordPMA;
   late final Map<String, String> dynamitablesHasMoved;
   late final int counter50rule;
   late final int turnNumber;
@@ -110,6 +116,7 @@ class IratusFEN extends FEN {
     turn = parts[1];
     castleRights = parts[2];
     enPassant = parts[3] == '-' ? null : Position.fromCoords(board, parts[3]);
+    coordPMA = parts[4] == '-' ? null : parts[4];
     fenEqualizer = '$pieces $turn $castleRights ${parts[3]} ${parts[4]}';
     counter50rule = int.parse(parts[6]);
     turnNumber = int.parse(parts[7]);
@@ -249,22 +256,20 @@ class IratusFEN extends FEN {
     // PIECE MOVING AGAIN
     String parts4 = parts[4];
     if (parts4 != "-") {
-      pieceMovingAgain = board.get(Position.fromCoords(board, parts4));
+      Piece? pieceMovingAgain = board.get(Position.fromCoords(board, parts4));
       if (pieceMovingAgain == null) {
         throw ArgumentError.value(parts4, 'Invalid FEN :\nNo piece at');
       }
-      (pieceMovingAgain!.identity as PieceMovingTwice).stillHasToMove = true;
-    } else {
-      pieceMovingAgain = null;
+      (pieceMovingAgain.identity as PieceMovingTwice).stillHasToMove = true;
     }
+    // else {
+    //   pieceMovingAgain = null;
+    // }
   }
 
   IratusFEN.fromBoard(Board board) {
-    pieceMovingAgain = null;
-
     String fenIP = ''; // fen in progress
     dynamitablesHasMoved = {'w': '', 'b': ''};
-    String coordsPma = '-';
     Map<String, int> linkedPieces = {'i': 0};
 
     // Pieces
@@ -313,10 +318,6 @@ class IratusFEN extends FEN {
         if (dynamitables.contains(piece.id)) {
           dynamitablesHasMoved[piece.color] = dynamitablesHasMoved[piece.color]! + (piece.hasMoved() ? "1" : "0");
         }
-
-        if (piece.identity is PieceMovingTwice && (piece.identity as PieceMovingTwice).stillHasToMove) {
-          coordsPma = piece.coord;
-        }
       }
 
       if (space > 0) {
@@ -355,20 +356,25 @@ class IratusFEN extends FEN {
     // En Passant
     Move? lastMove = board.lastMove;
     if (lastMove == null) {
-      // if (board.startFEN.enPassant == null) {
-      //   fenIP += ' -';
-      // } else {
-      //   fenIP += board.startFEN.enPassant!.coord;
-      // }
-      fenIP += ' ${board.startFEN.enPassant?.coord ?? '-'}';
-    } else if (lastMove.enPassant == null) {
-      fenIP += ' -';
+      enPassant = board.startFEN.enPassant;
     } else {
-      fenIP += ' ${lastMove.enPassant!.coord}';
+      enPassant = lastMove.enPassant;
     }
+    // The following is the equivalent of :
+    // if (enPassant == null) {
+    //   fenIP += ' -';
+    // } else {
+    //   fenIP += enPassant!.coord;
+    // }
+    fenIP += ' ${enPassant?.coord ?? '-'}';
 
     // PieceMovingAgain
-    fenIP += ' $coordsPma';
+    if (lastMove == null) {
+      coordPMA = board.startFEN.coordPMA;
+    } else {
+      coordPMA = lastMove.movingAgain ? lastMove.end.coord : null;
+    }
+    fenIP += ' ${coordPMA ?? '-'}';
 
     // Same position if same pieces, turn, castleRights & enPassant
     fenEqualizer = fenIP;

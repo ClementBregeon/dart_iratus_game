@@ -276,38 +276,43 @@ class IratusBoard extends Board {
 
     allValidMoves.clear();
 
-    bool secondMove = false;
-    if (lastMove != null || startFEN.pieceMovingAgain != null) {
-      Piece lastMovedPiece = lastMove == null ? startFEN.pieceMovingAgain! : lastMove!.piece;
-      // TODO : if (lastMove.pieceMovingAgain)
-      if (lastMovedPiece.identity is PieceMovingTwice && (lastMovedPiece.identity as PieceMovingTwice).stillHasToMove) {
-        secondMove = true;
-        Piece clonedPiece = calc.getSimulatedPiece(lastMovedPiece);
-        List<Position> validMoves = [];
-        for (Position validMove in lastMovedPiece.validMoves) {
-          calc2._moveFromTo(clonedPiece.pos, validMove);
-          Move moveObject = calc2.lastMove!;
-          for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
-            enemyClonedPiece.identity.updateValidMoves();
-          }
-          if (!inCheck(calc2.king[lastMovedPiece.color]!, dontCareAboutPhantoms: false)) {
-            validMoves.add(validMove);
-            allValidMoves[moveObject.notation] = moveObject;
-          }
-          calc2.undo();
-        }
-        lastMovedPiece.validMoves = validMoves;
-        if (lastMovedPiece.validMoves.isEmpty) {
-          throw Exception('A piece moving twice started moving, but can\'t make its second move');
-        }
+    if (lastMove != null ? lastMove!.movingAgain : startFEN.coordPMA != null) {
+      Piece movingAgain;
+      if (lastMove == null) {
+        movingAgain = get(Position.fromCoords(this, startFEN.coordPMA!))!;
+      } else {
+        movingAgain = lastMove!.piece;
       }
-    }
-    if (secondMove == false) {
+
+      if (movingAgain.identity is! PieceMovingTwice) {
+        throw Exception('Wrong piece movingAgain');
+      }
+
+      Piece clonedPiece = calc.getSimulatedPiece(movingAgain);
+      List<Position> validMoves = [];
+      for (Position validMove in movingAgain.validMoves) {
+        calc2._moveFromTo(clonedPiece.pos, validMove);
+        Move moveObject = calc2.lastMove!;
+        for (Piece enemyClonedPiece in calc2.piecesColored[clonedPiece.enemyColor]!) {
+          enemyClonedPiece.identity.updateValidMoves();
+        }
+        if (!inCheck(calc2.king[movingAgain.color]!, dontCareAboutPhantoms: false)) {
+          validMoves.add(validMove);
+          allValidMoves[moveObject.notation] = moveObject;
+        }
+        calc2.undo();
+      }
+      movingAgain.validMoves = validMoves;
+      if (movingAgain.validMoves.isEmpty) {
+        throw Exception('A piece has to move again, but has to legal move');
+      }
+    } else {
       for (Piece piece in piecesColored[_turn]!) {
         if (piece.isCaptured) continue;
         Piece clonedPiece = calc.getSimulatedPiece(piece);
         List<Position> validMoves = [];
-        if (piece.identity is PieceMovingTwice && !(piece.identity as PieceMovingTwice).stillHasToMove) {
+
+        if (piece.identity is PieceMovingTwice) {
           for (Position validMove in piece.validMoves) {
             calc2._moveFromTo(clonedPiece.pos, validMove);
             Move moveObject = calc2.lastMove!;

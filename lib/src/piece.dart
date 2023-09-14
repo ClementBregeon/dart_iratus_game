@@ -52,6 +52,7 @@ class Piece {
 
   /// used by calculator pieces
   void copyFrom(Piece originalPiece) {
+    // TODO : remove copyFrom & clone
     isCaptured = originalPiece.isCaptured;
     if (isCaptured) {
       return;
@@ -256,15 +257,9 @@ abstract class RollingPiece extends PieceIdentity {
 }
 
 abstract class PieceMovingTwice extends PieceIdentity {
-  bool stillHasToMove = false;
+  bool stillHasToMove = false; // TODO : remove usage
 
   PieceMovingTwice(super.p);
-
-  @override
-  void copyFrom(PieceIdentity identity) {
-    super.copyFrom(identity);
-    stillHasToMove = (identity as PieceMovingTwice).stillHasToMove;
-  }
 
   @override
   List<Command> goTo(Position pos) {
@@ -278,10 +273,11 @@ abstract class PieceMovingTwice extends PieceIdentity {
     }
 
     // else, ask for second move
+    // if pulled by the grapple, no second move
     if (p.board.mainCurrentMove.piece == p) {
       stillHasToMove = !stillHasToMove;
       if (stillHasToMove) {
-        commands.add(SetNextTurn(p.color));
+        commands.add(SetMovingAgain(p));
       }
     }
 
@@ -292,14 +288,15 @@ abstract class PieceMovingTwice extends PieceIdentity {
   void undo(Move move) {
     super.undo(move);
 
-    if (p.board.lastMove != null) {
+    if (p.board.lastMove == null) {
+      stillHasToMove = p.board.startFEN.coordPMA == p.coord;
+    } else {
       if (p.forCalcul) {
+        // TODO : try to remove
         stillHasToMove = p.board.lastMove!.piece == p.original;
       } else {
         stillHasToMove = p.board.lastMove!.piece == p;
       }
-    } else {
-      stillHasToMove = p.board.startFEN.pieceMovingAgain == p;
     }
   }
 

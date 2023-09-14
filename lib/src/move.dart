@@ -5,7 +5,8 @@ abstract class Move {
   int _capturesCounter = 0;
   final List<Command> _commands = [];
   int _counter50rule = 0;
-  Position? _enPassant; // TODO : String pieceMovingAgain
+  Position? _enPassant;
+  bool _movingAgain = false; // true if the moved piece has to move again
   late String _nextTurn;
   String _notation = '';
 
@@ -13,6 +14,7 @@ abstract class Move {
   List<Command> get commands => _commands;
   int get counter50rule => _counter50rule;
   Position? get enPassant => _enPassant;
+  bool get movingAgain => _movingAgain;
   String get nextTurn => _nextTurn;
   String get notation => _notation;
 
@@ -226,8 +228,9 @@ abstract class Move {
       case "setEnPassant":
         _enPassant = args[0];
         break;
-      case "setNextTurn":
-        _nextTurn = args[0];
+      case "setMovingAgain":
+        _nextTurn = args[0].color;
+        _movingAgain = true;
         break;
       case "transform":
         _commands.add(command);
@@ -343,9 +346,8 @@ class SetEnPassant extends Command {
   SetEnPassant(Position pos) : super('setEnPassant', [pos]);
 }
 
-// TODO : SetMovingAgain
-class SetNextTurn extends Command {
-  SetNextTurn(String turn) : super('setNextTurn', [turn]);
+class SetMovingAgain extends Command {
+  SetMovingAgain(Piece piece) : super('setMovingAgain', [piece]);
 }
 
 class Transform extends Command {
