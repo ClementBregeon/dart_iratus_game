@@ -254,8 +254,6 @@ class IratusBoard extends Board {
 
   @override
   void updateAllValidMoves() {
-    // TODO : Improve !
-
     // A calculator can't call the updateAllValidMoves() method
     if (this is CalculatorInterface) return;
 

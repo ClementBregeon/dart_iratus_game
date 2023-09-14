@@ -98,97 +98,95 @@ abstract class Game {
   ];
 
   /// Update result & winner.
-  // TODO : merge with _updateResult()
   void _checkForEnd() {
     if (board.movesHistory.isEmpty) return;
     if (_result > 0) throw ArgumentError('The game has already ended');
 
-    _updateResult();
-
-    if (_result == 1) {
-      board.lastMove!.addNotationHint('#');
-    } else if (inCheck(board.king[board.turn]!, dontCareAboutPhantoms: false)) {
-      board.lastMove!.addNotationHint('+');
-    }
-  }
-
-  /// Update result & winner.
-  void _updateResult() {
-    if (board.king['w'] == null || board.king['b'] == null) {
-      return; // can't stop a game if a king is missing
-    }
-
-    Map<String, List<Piece>> remainingPieces = {'w': [], 'b': []};
-
-    for (Piece piece in board.pieces) {
-      if (!piece.isCaptured) {
-        if (piece.id == 'k') {
-          continue;
-        }
-        remainingPieces[piece.color]!.add(piece);
+    void updateResult() {
+      if (board.king['w'] == null || board.king['b'] == null) {
+        return; // can't stop a game if a king is missing
       }
-    }
 
-    String cantMateAlone = 'ben';
+      Map<String, List<Piece>> remainingPieces = {'w': [], 'b': []};
 
-    bool insufficient(List<Piece> set) {
-      if (set.isEmpty) {
-        return true;
-      }
-      if (set.length == 1) {
-        return cantMateAlone.contains(set[0].id);
-      }
-      if (set.length == 2) {
-        return set[0].id == set[1].id;
-      }
-      return false;
-    }
-
-    if (insufficient(remainingPieces['w']!) && insufficient(remainingPieces['b']!)) {
-      _result = 7; // draw by insufficient material
-      _winner = 1; // draw
-      return;
-    }
-
-    if (board._fenHistory.length > 5) {
-      FEN currentFEN = board._fenHistory.last;
-      int count = 1;
-
-      for (FEN fen in board._fenHistory) {
-        if (currentFEN == fen) {
-          continue;
-        }
-        if (currentFEN.fenEqualizer == fen.fenEqualizer) {
-          count += 1;
+      for (Piece piece in board.pieces) {
+        if (!piece.isCaptured) {
+          if (piece.id == 'k') {
+            continue;
+          }
+          remainingPieces[piece.color]!.add(piece);
         }
       }
 
-      if (count == 3) {
-        _result = 6; // draw by repetition
+      String cantMateAlone = 'ben';
+
+      bool insufficient(List<Piece> set) {
+        if (set.isEmpty) {
+          return true;
+        }
+        if (set.length == 1) {
+          return cantMateAlone.contains(set[0].id);
+        }
+        if (set.length == 2) {
+          return set[0].id == set[1].id;
+        }
+        return false;
+      }
+
+      if (insufficient(remainingPieces['w']!) && insufficient(remainingPieces['b']!)) {
+        _result = 7; // draw by insufficient material
         _winner = 1; // draw
         return;
       }
-    }
 
-    for (Piece piece in board.piecesColored[board.turn]!) {
-      if (!piece.isCaptured && piece.validMoves.isNotEmpty) {
-        if (board.movesHistory.isNotEmpty && board.movesHistory.last.counter50rule > 100) {
-          _result = 8; // draw by 50-moves rule
+      if (board._fenHistory.length > 5) {
+        FEN currentFEN = board._fenHistory.last;
+        int count = 1;
+
+        for (FEN fen in board._fenHistory) {
+          if (currentFEN == fen) {
+            continue;
+          }
+          if (currentFEN.fenEqualizer == fen.fenEqualizer) {
+            count += 1;
+          }
+        }
+
+        if (count == 3) {
+          _result = 6; // draw by repetition
           _winner = 1; // draw
           return;
         }
-        return; // game in progress
+      }
+
+      for (Piece piece in board.piecesColored[board.turn]!) {
+        if (!piece.isCaptured && piece.validMoves.isNotEmpty) {
+          if (board.movesHistory.isNotEmpty && board.movesHistory.last.counter50rule > 100) {
+            _result = 8; // draw by 50-moves rule
+            _winner = 1; // draw
+            return;
+          }
+          return; // game in progress
+        }
+      }
+
+      // if this code is executed, it means the current player has to legal move
+      Piece currentKing = board.king[board.turn]!;
+      if (inCheck(currentKing, dontCareAboutPhantoms: false)) {
+        _result = 1; // checkmate
+        _winner = board.turn == 'b' ? 2 : 3; // ... won
+      } else {
+        _result = 4; // stalemate
+        _winner = 1; // draw
       }
     }
 
-    // if this code is executed, it means the current player has to legal move
-    Piece currentKing = board.king[board.turn]!;
-    if (inCheck(currentKing, dontCareAboutPhantoms: false)) {
-      _result = 1; // checkmate
-      _winner = board.turn == 'b' ? 2 : 3; // ... won
-    } else {
-      _result = 4; // stalemate
-      _winner = 1; // draw
+    updateResult();
+
+    if (_result == 1) {
+      board.lastMove!._notation += '#';
+    } else if (inCheck(board.king[board.turn]!, dontCareAboutPhantoms: false)) {
+      board.lastMove!._notation += '+';
     }
   }
 

@@ -188,12 +188,6 @@ abstract class Move {
     _notation = nIP;
   }
 
-  // used for '+' (check) and '#' (checkmate) symbols
-  // TODO : change
-  void addNotationHint(String hint) {
-    _notation += hint;
-  }
-
   void executeCommand(Command command) {
     final args = command.args;
     switch (command.name) {

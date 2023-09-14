@@ -8,6 +8,9 @@ class Position {
   final int index; // col * board.nbrows + row
   final String coord;
 
+  @override
+  int get hashCode => index;
+
   Position.fromCoords(this.board, this.coord)
       : col = inversedFileDict[coord[0]]!,
         row = board.nbrows - 1 - int.parse(coord[1]),
@@ -34,7 +37,9 @@ class Position {
   }
 
   @override
-  int get hashCode => index;
+  String toString() {
+    return coord;
+  }
 
   void _checkValidity() {
     if (0 > row || 0 > col || row > board.nbrows || col > board.nbcols || coord.length != 2) {
