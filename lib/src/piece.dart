@@ -49,24 +49,6 @@ class Piece {
     board.addPiece(this);
   }
 
-  /// used by calculator pieces
-  void copyFrom(Piece originalPiece) {
-    // TODO : remove copyFrom & clone
-    isCaptured = originalPiece.isCaptured;
-    if (isCaptured) {
-      return;
-    }
-
-    _pos = originalPiece._pos;
-    board.piecesByPos[_pos.index] = this;
-    validMoves.clear();
-    validMoves.addAll(originalPiece.validMoves);
-    firstMove = originalPiece.firstMove;
-    dynamited = originalPiece.dynamited;
-    original = originalPiece;
-    _identity.copyFrom(originalPiece._identity);
-  }
-
   /// Tells if a piece has already moved or not
   bool hasMoved() {
     return _hasMovedInAnotherLife || firstMove != null;
@@ -152,12 +134,6 @@ abstract class PieceIdentity {
   /// TODO from method to attribute ?
   bool capturerCheck() {
     return true;
-  }
-
-  void copyFrom(PieceIdentity identity) {
-    if (identity.id != id) {
-      throw ArgumentError('Can\'t copy identity from $id to ${identity.id}');
-    }
   }
 
   /// move the piece to a position
@@ -557,12 +533,6 @@ class _King extends PieceIdentity {
     } else {
       return piece.color != p.color && !piece.dynamited;
     }
-  }
-
-  @override
-  void copyFrom(PieceIdentity identity) {
-    super.copyFrom(identity);
-    castleRights = (identity as _King).castleRights;
   }
 
   @override

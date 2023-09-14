@@ -372,8 +372,6 @@ abstract class CalculatorInterface {
   abstract IratusBoard original;
   // abstract List<Piece> piecesCorrespondence;
 
-  void clone();
-
   Piece getSimulatedPiece(Piece originalPiece);
 }
 
@@ -383,14 +381,6 @@ class CalculatorIratusBoard extends IratusBoard implements CalculatorInterface {
 
   CalculatorIratusBoard({required this.original}) : super(original.startFEN.fen, original._game) {
     calculator = null;
-  }
-
-  @override
-  void clone() {
-    piecesByPos = List.filled(original.piecesByPos.length, null);
-    for (int i = 0; i < original.pieces.length; i++) {
-      pieces[i].copyFrom(original.pieces[i]);
-    }
   }
 
   @override
