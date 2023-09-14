@@ -123,7 +123,7 @@ abstract class Move {
     if (competitivePieces.contains(pieceTrueId)) {
       final sameTypeAllies = <Piece>[];
       for (final ally in board.piecesColored[piece.color]!) {
-        if (trueId(ally) == pieceTrueId && ally != piece) {
+        if (!ally.isCaptured && trueId(ally) == pieceTrueId && ally != piece) {
           sameTypeAllies.add(ally);
         }
       }
@@ -243,7 +243,7 @@ abstract class Move {
           command.args[0].redoCommands();
           break;
         case "capture":
-          command.args[0].capture(command.args[1]);
+          command.args[0].identity.capture(command.args[1]);
           break;
         case "main":
           piece.identity.redo(end);
