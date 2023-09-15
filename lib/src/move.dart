@@ -6,27 +6,42 @@ abstract class Move {
   final List<Command> _commands = [];
   int _counter50rule = 0;
   Position? _enPassant;
+  late final FEN _fen;
+  bool _isLocked = false;
   bool _movingAgain = false; // true if the moved piece has to move again
   late String _nextTurn;
   String _notation = '';
+  bool _waitingForPromotion = false;
+  bool _waitingForSecondMove = false;
 
   // Getters
   List<Command> get commands => _commands;
   int get counter50rule => _counter50rule;
   Position? get enPassant => _enPassant;
-  bool get movingAgain => _movingAgain;
+  String get fen => _fen.fen;
+  String get fenEqualizer => _fen.fenEqualizer;
+  FEN get fenObject => _fen;
+  bool get movingAgain => _movingAgain; // TODO : remove ?
   String get nextTurn => _nextTurn;
   String get notation => _notation;
 
+  /// Return true if the move is incomplete.
+  ///
+  /// 2 cases :
+  ///   - when a pawn reaches the end of the board, we wait for a promotion id.
+  ///   - when a piece moving twice makes a first move, we wait for the second move.
+  bool get waitingForInput => _waitingForPromotion || _waitingForSecondMove; // TODO : rework
+
   // Final fields
   final Board board;
-  final Position start;
-  final Position end;
-  final Piece piece;
   final Map<String, List<String>> capturedPieces = {'w': [], 'b': []}; // just for materialistic eval
+  final Position end;
   final List<Function> notationTransformations = [];
+  final Piece piece;
+  final Position start;
   late final String turn;
   late int turnNumber;
+  late List<String> validInputs;
 
   Move(this.board, this.start, this.end) : piece = board.get(start)! {
     board.currentMove = this;
@@ -189,7 +204,21 @@ abstract class Move {
     _notation = nIP;
   }
 
+  void _initValidInputs() {
+    if (_waitingForPromotion) {
+      validInputs = promotionValidNotations;
+    } else if (_waitingForSecondMove) {
+      validInputs = []; // TODO
+    } else {
+      validInputs = [];
+    }
+  }
+
   void executeCommand(Command command) {
+    if (_isLocked) {
+      throw Exception('Can\'t modify a move once it is locked.');
+    }
+
     if (command is Capture) {
       _capturesCounter += 1;
       _counter50rule = 0;
@@ -205,24 +234,90 @@ abstract class Move {
       _executeCommands(piece.identity.goTo(end));
       _initNotation();
       _initCapturedPieces();
+      _initValidInputs();
     } else if (command is Notation) {
       _notation = command.notation;
     } else if (command is NotationTransform) {
       notationTransformations.add(command.transform);
+    } else if (command is RequirePromotion) {
+      _waitingForPromotion = true;
+    } else if (command is RequireAnotherMove) {
+      if (this is! MainMove) {
+        throw Exception('A piece cannot move twice if it started moving because of another piece.');
+      }
+      _waitingForSecondMove = true;
+      _nextTurn = piece.color;
+      _movingAgain = true;
     } else if (command is SetDynamite) {
       _commands.add(command);
       command.piece.setDynamite(true);
     } else if (command is SetEnPassant) {
       _enPassant = command.pos;
-    } else if (command is SetMovingAgain) {
-      _nextTurn = command.piece.color;
-      _movingAgain = true;
     } else if (command is Transform) {
       _commands.add(command);
       command.piece.transform(command.newId);
     } else {
       throw ArgumentError.value(command, 'Unknown command');
     }
+  }
+
+  /// Called when the move for waitingForInput
+  void input(String notation) {
+    if (_waitingForPromotion) {
+      if (!promotionValidNotations.contains(notation)) {
+        throw ArgumentError.value(notation, 'A promotion notation must be in the format \'=\' + id (upper case)');
+      }
+
+      executeCommand(Transform(piece, 'p', notation[1].toLowerCase()));
+      _notation += notation.toUpperCase();
+      lock();
+    } else {
+      if (!_waitingForSecondMove) {
+        throw Exception('Can\'t call the input method if the move is not waiting for input.');
+      }
+    }
+  }
+
+  /// Return whether this move is legal or not.
+  /// Should only be called by a calculator.
+  bool isLegal() {
+    // This method is only designed for calculs.
+    if (board is! CalculatorInterface) {
+      throw Exception('A real move can\'t call isLegal()');
+    }
+
+    // A promotion changes neither the position of pieces nor the valid moves of enemies.
+    // Therefore, we do not take it into account.
+
+    // If the move is waiting for a second move, we need to simulate every possible input.
+    // If one input doesn't leave the king in check, the first move is legal.
+    if (_waitingForSecondMove) {
+      // First, we update the valid second moves.
+      piece.identity.updateValidMoves();
+
+      for (Position validMove in piece.validMoves) {
+        Extra secondMoveCommand = Extra(piece.pos, validMove);
+        executeCommand(secondMoveCommand);
+
+        // TODO : is this move legal ?
+        // TODO : store second move for valid notation
+      }
+    }
+
+    // We update the enemies antiking squares.
+    for (Piece enemyClonedPiece in board.piecesColored[piece.enemyColor]!) {
+      enemyClonedPiece.identity.updateValidMoves();
+    }
+
+    // If the king is not on an enemy's antiking square, the move is legal
+    // There is no more move for this king's army anymore, so the phantoms won't change.
+    return !inCheck(board.king[turn]!, dontCareAboutPhantoms: false);
+  }
+
+  /// Called when the move is finally completed. The fields of the move shouldn't change anymore.
+  void lock() {
+    _isLocked = true;
+    _fen = board.getFEN();
   }
 
   void redoCommands() {
@@ -314,6 +409,14 @@ class NotationTransform extends Command {
   NotationTransform(this.transform);
 }
 
+class RequirePromotion extends Command {
+  RequirePromotion();
+}
+
+class RequireAnotherMove extends Command {
+  RequireAnotherMove();
+}
+
 class SetDynamite extends Command {
   Piece piece;
   SetDynamite(this.piece);
@@ -322,11 +425,6 @@ class SetDynamite extends Command {
 class SetEnPassant extends Command {
   Position pos;
   SetEnPassant(this.pos);
-}
-
-class SetMovingAgain extends Command {
-  Piece piece;
-  SetMovingAgain(this.piece);
 }
 
 class Transform extends Command {

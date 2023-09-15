@@ -11,21 +11,14 @@ abstract class Board {
   /// Without it, _backMovesHistory would be mest up by the calculs.
   bool _duringCalcul = false;
 
-  /// All the board's position sinc the game started.
-  ///
-  /// This field is used for checking 3 times repetition.
-  final List<FEN> _fenHistory = [];
-
   /// The game managing the board
   final Game _game;
 
-  /// The color of the player who has to make the next move.
-  ///
-  /// Can be 'w' or 'b'.
-  late String _turn;
-
   /// All the possible moves in the position
-  Map<String, Move> allValidMoves = {};
+  Map<String, Move> allLegalMoves = {};
+  // TODO : allLegalMoves (distinction between legal and valid move)
+  // TODO : replace piece.validMoves by piece.reachableSquares ? squaresWithinReach ? accessibleSquares ?
+  // TODO : look at an official chess library
 
   /// The board used to simulate moves, to check if the king is in check
   late CalculatorInterface? calculator;
@@ -37,7 +30,7 @@ abstract class Board {
   Map<String, Piece?> king = {'w': null, 'b': null};
 
   /// The last MainMove played
-  MainMove? lastMove;
+  MainMove? get lastMove => movesHistory.lastOrNull;
 
   /// The currentMove or the move who created the currentMove
   late MainMove mainCurrentMove;
@@ -50,9 +43,6 @@ abstract class Board {
 
   /// The number of columns in this board
   final int nbcols;
-
-  /// The pawn to promote, waiting for an input
-  Piece? pawnToPromote;
 
   /// All the pieces, sorted by time of creation
   List<Piece> pieces = [];
@@ -69,22 +59,20 @@ abstract class Board {
   /// The color of the player who has to make the next move.
   ///
   /// Can be 'w' or 'b'.
-  String get turn => _turn;
+  String get turn => lastMove?.nextTurn ?? startFEN.turn;
 
-  Iterable<String> get validNotations => waitingForInput ? promotionValidNotations : allValidMoves.keys;
+  Iterable<String> get validNotations => waitingForInput ? promotionValidNotations : allLegalMoves.keys;
 
   /// Return true if the last move played needs an input.
   ///
   /// Exemple : when a pawn reaches the end of the board,
   /// the pawn is waiting for a promotion id.
-  bool get waitingForInput => pawnToPromote != null;
+  bool get waitingForInput => lastMove?.waitingForInput ?? false;
 
   Board(String fen, Game game, this.nbrows, this.nbcols)
       : _game = game,
         piecesByPos = List.filled(nbcols * nbrows, null) {
     createPieces(fen);
-    _fenHistory.add(startFEN);
-    _turn = startFEN.turn;
 
     // piece.isWidgeted needs to be set after all the pieces creation, because
     // when a piece is phantomized, if it is widgeted, it will try to phantomize
@@ -94,7 +82,7 @@ abstract class Board {
       for (Piece piece in pieces) {
         piece.forCalcul = false;
       }
-      updateAllValidMoves();
+      updateAllLegalMoves();
     }
   }
 
@@ -129,49 +117,42 @@ abstract class Board {
   void _moveFromTo(Position start, Position end) {
     MainMove move = MainMove(this, start, end);
 
-    lastMove = move;
     movesHistory.add(move);
 
     if (this is! CalculatorInterface) {
       (calculator! as Board)._moveFromTo(start, end);
     }
 
-    if (!waitingForInput) {
-      _turn = move.nextTurn;
-      _fenHistory.add(getFEN());
+    if (!move.waitingForInput) {
+      move.lock();
       if (!_duringCalcul) {
         _backMovesHistory.clear();
       }
-      updateAllValidMoves();
+      updateAllLegalMoves();
     }
   }
 
   /// Move a piece or complete an input request (like promotion)
   void _move(String notation) {
-    if (waitingForInput) {
-      if (!promotionValidNotations.contains(notation)) {
-        throw ArgumentError.value(
-            notation, 'A promotion notation must be in the format \'=\' + promotionId (upper case)');
-      }
+    if (lastMove?.waitingForInput ?? false) {
+      if (!validNotations.contains(notation)) {
+        throw ArgumentError.value(notation, 'Unknown move');
+      } // TODO : remove ?
 
-      lastMove!.executeCommand(Transform(pawnToPromote!, 'p', notation[1].toLowerCase()));
-      lastMove!._notation += notation.toUpperCase();
+      lastMove!.input(notation);
 
-      pawnToPromote = null;
-      _fenHistory.add(getFEN());
       _backMovesHistory.clear();
-      _turn = lastMove!.nextTurn;
       if (calculator != null) {
         (calculator as IratusBoard)._move(notation);
       }
 
-      updateAllValidMoves();
+      updateAllLegalMoves();
       return;
     }
 
     if (this is CalculatorInterface) throw Exception('A calculator can\'t call the _move() method');
 
-    Move? calcMove = allValidMoves[notation];
+    Move? calcMove = allLegalMoves[notation];
     if (calcMove == null) {
       throw ArgumentError.value(notation, 'Unknown move');
     }
@@ -189,20 +170,13 @@ abstract class Board {
 
     lastUndoneMove.redoCommands();
 
-    lastMove = lastUndoneMove;
     movesHistory.add(lastUndoneMove);
-
-    if (!waitingForInput) {
-      _turn = lastUndoneMove.nextTurn;
-      _fenHistory.add(getFEN());
-      // TODO : move fen to Move
-    }
 
     if (this is! CalculatorInterface) {
       (calculator! as Board).redo();
     }
 
-    updateAllValidMoves();
+    updateAllLegalMoves();
   }
 
   /// Undo the last move played
@@ -212,16 +186,11 @@ abstract class Board {
     }
 
     MainMove undoneMove = movesHistory.removeLast();
+
     if (!_duringCalcul) {
+      // _backMovesHistory only stores real moves, not calcul moves
       _backMovesHistory.add(undoneMove);
     }
-    if (waitingForInput) {
-      pawnToPromote = null; // If was waiting for promotion input
-    } else {
-      _fenHistory.removeLast();
-    }
-    _turn = undoneMove.turn;
-    lastMove = movesHistory.isEmpty ? null : movesHistory.last;
 
     undoneMove.undoCommands();
 
@@ -229,10 +198,72 @@ abstract class Board {
       (calculator! as Board).undo();
     }
 
-    updateAllValidMoves();
+    updateAllLegalMoves();
   }
 
-  void updateAllValidMoves();
+  /// Updates board.allLegalMoves
+  void updateAllLegalMoves() {
+    // A calculator doesn't ask for calculs.
+    if (this is CalculatorInterface) return;
+
+    // This is the field to update
+    allLegalMoves.clear();
+
+    // First, we update the valid moves, regardless of checks.
+
+    // The antiking squares need to be cleared because ?
+    // TODO : remove ?
+    for (Piece piece in pieces) {
+      piece.antiking.clear();
+    }
+    for (Piece piece in pieces) {
+      piece.identity.updateValidMoves();
+    }
+    // We need to update again the king's valid moves, because of the castling moves.
+    // Castling depends on the enemies antiking, so they are updated last.
+    for (Piece? king in king.values) {
+      if (king == null) return;
+      king.identity.updateValidMoves();
+    }
+
+    // Then, we set up the calculator.
+
+    CalculatorInterface calc = calculator!;
+    Board calc2 = calc as Board;
+    // Prevent changes to calculator._backMovesHistory
+    calc2._duringCalcul = true;
+
+    // Next, we remove the moves that leave their king in check.
+
+    for (Piece piece in piecesColored[turn]!) {
+      // Captured pieces can't move.
+      if (piece.isCaptured) continue;
+
+      // The list of the piece's moves that don't leave their king in check.
+      List<Position> legalMoves = [];
+
+      // The equivalent of this piece, but on the calculator board.
+      Piece clonedPiece = calc.getSimulatedPiece(piece);
+
+      for (Position validMove in piece.validMoves) {
+        // We simulate the move on the calculator board.
+        calc2._moveFromTo(clonedPiece.pos, validMove);
+        MainMove move = calc2.lastMove!;
+        if (move.isLegal()) {
+          // We validate the move.
+          legalMoves.add(validMove);
+          allLegalMoves[move.notation] = move;
+        }
+        calc2.undo();
+      }
+
+      // We update this piece's valid moves so that they are all legal.
+      piece.validMoves = legalMoves;
+    }
+
+    // Enables changes to calculator._backMovesHistory.
+    calc2._duringCalcul = true;
+  }
 }
 
 class IratusBoard extends Board {
@@ -263,7 +294,7 @@ class IratusBoard extends Board {
   }
 
   @override
-  void updateAllValidMoves() {
+  void updateAllLegalMoves() {
     // A calculator doesn't ask for calculs
     if (this is CalculatorInterface) return;
 
@@ -282,7 +313,7 @@ class IratusBoard extends Board {
     Board calc2 = calc as Board;
     calc2._duringCalcul = true; // prevent changes to _backMovesHistory
 
-    allValidMoves.clear();
+    allLegalMoves.clear();
 
     if (lastMove != null ? lastMove!.movingAgain : startFEN.coordPMA != null) {
       Piece movingAgain;
@@ -306,7 +337,7 @@ class IratusBoard extends Board {
         }
         if (!inCheck(calc2.king[movingAgain.color]!, dontCareAboutPhantoms: false)) {
           validMoves.add(validMove);
-          allValidMoves[moveObject.notation] = moveObject;
+          allLegalMoves[moveObject.notation] = moveObject;
         }
         calc2.undo();
       }
@@ -315,7 +346,7 @@ class IratusBoard extends Board {
         throw Exception('A piece has to move again, but has to legal move');
       }
     } else {
-      for (Piece piece in piecesColored[_turn]!) {
+      for (Piece piece in piecesColored[turn]!) {
         if (piece.isCaptured) continue;
         Piece clonedPiece = calc.getSimulatedPiece(piece);
         List<Position> validMoves = [];
@@ -353,7 +384,7 @@ class IratusBoard extends Board {
             calc2.undo();
             if (valid) {
               validMoves.add(validMove);
-              allValidMoves[moveObject.notation] = moveObject;
+              allLegalMoves[moveObject.notation] = moveObject;
             }
           }
         } else {
@@ -365,7 +396,7 @@ class IratusBoard extends Board {
             }
             if (!inCheck(calc2.king[piece.color]!, dontCareAboutPhantoms: false)) {
               validMoves.add(validMove);
-              allValidMoves[moveObject.notation] = moveObject;
+              allLegalMoves[moveObject.notation] = moveObject;
             }
             calc2.undo();
           }

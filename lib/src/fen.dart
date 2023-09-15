@@ -381,10 +381,6 @@ class IratusFEN extends FEN {
     }
 
     fen = fenIP;
-
-    if (fen == "8/8/8/2P1s3/8/8/8/8/1K2p~1k1/8 b - - - 1-00 0 10") {
-      print('sfbfb');
-    }
   }
 
   @override

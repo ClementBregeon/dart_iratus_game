@@ -138,15 +138,20 @@ abstract class Game {
         return;
       }
 
-      if (board._fenHistory.length > 5) {
-        FEN currentFEN = board._fenHistory.last;
+      if (board.movesHistory.length > 7) {
+        Move lastMove = board.lastMove!;
+        String currentFenEqualizer = lastMove.fenEqualizer;
         int count = 1;
 
-        for (FEN fen in board._fenHistory) {
-          if (currentFEN == fen) {
+        if (currentFenEqualizer == board.startFEN.fenEqualizer) {
+          count += 1;
+        }
+
+        for (Move move in board.movesHistory) {
+          if (move == lastMove) {
             continue;
           }
-          if (currentFEN.fenEqualizer == fen.fenEqualizer) {
+          if (currentFenEqualizer == move.fenEqualizer) {
             count += 1;
           }
         }
@@ -215,13 +220,8 @@ abstract class Game {
 
     board._move(notation);
 
-    if (board.waitingForInput) {
-      // wait for promotion input
-      return;
-    }
-
-    if (board.lastMove!.nextTurn == board.lastMove!.turn) {
-      // wait for second move
+    if (board.lastMove!.waitingForInput) {
+      // wait for promotion input or second move
       return;
     }
 

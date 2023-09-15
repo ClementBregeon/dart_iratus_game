@@ -233,24 +233,30 @@ abstract class PieceMovingTwice extends PieceIdentity {
     /// has to be followed by a second move or not.
     ///
     /// Return true when :
-    ///   - the move is the first on the board, and startFEN.coordPMA is null.
+    ///   - the move is the first on the board.
     ///   - the last move was not moving this piece but the main current move is.
     bool hasToMoveAgain() {
       // happens when capturing a dynamited piece
       if (p.isCaptured) return false;
 
-      // if movingAgain is set in the starting fen, the first move on the board has to be
-      // a second move for a piece moving twice. We don't want a third move.
-      if (p.board.lastMove == null) return p.board.startFEN.coordPMA == null;
+      // a piece cannot move twice if it started moving because of another piece
+      // ex : if pulled by the grapple, no second move
+      if (p.board.mainCurrentMove.piece != p) return false;
 
-      if (p.board.lastMove!.piece == p) return false; // probably, this is during the second move
+      // if this is the first move on the board, this is the first move of the piece
+      if (p.board.lastMove == null) return true;
 
-      // if pulled by the grapple, no second move
-      return p.board.mainCurrentMove.piece == p;
+      // this is during the second move
+      if (p.board.lastMove!.piece == p) return false;
+
+      // this is during the first move
+      return true;
+
+      // TODO : if the second move becomes an ExtraMove, we can simplify
     }
 
     if (hasToMoveAgain()) {
-      commands.add(SetMovingAgain(p));
+      commands.add(RequireAnotherMove());
     }
 
     return commands;
@@ -285,7 +291,7 @@ abstract class PieceMovingTwice extends PieceIdentity {
       if (canGoTo(pos)) {
         p.validMoves.add(pos);
 
-        // second move
+        // antiking squares accessible at second move
 
         Piece? piece = p.board.get(pos);
         if (piece != null && piece.dynamited) continue; // no second move when blown by dynamite
@@ -672,7 +678,7 @@ class _Pawn extends PieceIdentity {
 
     // Promotion
     if (p.row == promotionRow) {
-      requirePromotionInput();
+      commands.add(RequirePromotion());
     }
 
     // Capturing en passant
@@ -704,10 +710,6 @@ class _Pawn extends PieceIdentity {
     }
 
     return commands;
-  }
-
-  void requirePromotionInput() {
-    p.board.pawnToPromote = p;
   }
 
   @override
@@ -920,6 +922,7 @@ Map<String, Function(Piece piece)> identitiyConstructors = {
 };
 
 bool inCheck(Piece king, {required bool dontCareAboutPhantoms}) {
+  // TODO : replace dontCareAboutPhantoms by phantomsCanTransformBeforeCapturingTheKing ?
   if (king.id != 'k') throw ArgumentError.value(king, 'The argument of inCheck must be a king');
   return (king._identity as _King).posIsUnderCheck(king.pos, dontCareAboutPhantoms: dontCareAboutPhantoms);
 }
