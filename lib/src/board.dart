@@ -195,6 +195,7 @@ abstract class Board {
     if (!waitingForInput) {
       _turn = lastUndoneMove.nextTurn;
       _fenHistory.add(getFEN());
+      // TODO : move fen to Move
     }
 
     if (this is! CalculatorInterface) {
@@ -214,10 +215,13 @@ abstract class Board {
     if (!_duringCalcul) {
       _backMovesHistory.add(undoneMove);
     }
-    _fenHistory.removeLast();
+    if (waitingForInput) {
+      pawnToPromote = null; // If was waiting for promotion input
+    } else {
+      _fenHistory.removeLast();
+    }
     _turn = undoneMove.turn;
     lastMove = movesHistory.isEmpty ? null : movesHistory.last;
-    pawnToPromote = null; // If was waiting for promotion input
 
     undoneMove.undoCommands();
 

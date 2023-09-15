@@ -855,7 +855,7 @@ class _Soldier extends RollingPiece {
     List<Command> commands = super.capture(capturer);
 
     // If this is the phantom of the soldier
-    if (p.phantomized) return commands;
+    if (p.phantomized || p._linkedPiece == null) return commands;
 
     if (!p._linkedPiece!.isCaptured) {
       // If the dog is still alive when the soldier is captured

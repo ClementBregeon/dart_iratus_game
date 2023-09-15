@@ -54,7 +54,7 @@ void main() {
     expect(board.lastMove!.notation == 'R~xa6', true);
   });
 
-  test('A phantom\'s check can be avoiding by capture, turning it into another piece.', () {
+  test('A phantom\'s check can be avoided by capture, turning it into another piece.', () {
     game.move('R~xa6');
     game.move('f5');
     game.move('R~f6');
@@ -103,6 +103,35 @@ void main() {
     expect(game.board.lastMove!.notation == 'Qf7#', true);
   });
 
-  // TODO : the phantom of a pawn promotion + notation
-  // TODO : the phantom of a soldier promotion + notation
+  test('A king can avoid a phantom`s check by capturing a piece, even if it was protected by the phantom.', () {
+    // In this starting fen, the king can eat the pawn but not go forward.
+    game = IratusGame.fromFEN('k7/3r~4/2S(0)1S(1)3/2D(0)KD(1)3/2PpP3/8/8/8/8/8 w - - - 000000-0 0 10');
+
+    expect(validMovesToString(game.board.king['w']!) == 'd5', true);
+    expect(game.board.validNotations.join(', ') == 'Kxd5', true);
+  });
+
+  test('The promotion of a pawn\'s phantom works.', () {
+    // In this starting fen, the white pawn can take a pawn or a soldier. The black phantom will then promote.
+    game = IratusGame.fromFEN('8/8/8/2p1s3/3P4/8/8/8/1K2f1k1/8 w - - - 0-00 0 10');
+
+    bPhantom = game.board.get(Position.fromCoords(game.board, 'e1'))!;
+
+    game.move('dxc6');
+    game.move('P~e0');
+    game.move('=Q');
+
+    expect(game.board.lastMove!.notation == 'P~e0=Q', true);
+    expect(bPhantom.id == 'q', true);
+  });
+
+  test('The promotion of a soldier\'s phantom works.', () {
+    game.undo();
+    game.undo();
+    game.move('dxe6');
+    game.move('S~d0=E');
+
+    expect(game.board.lastMove!.notation == 'S~d0=E', true);
+    expect(bPhantom.id == 'e', true);
+  });
 }
