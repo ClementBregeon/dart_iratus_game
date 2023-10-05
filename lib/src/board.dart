@@ -126,7 +126,8 @@ abstract class Board {
     }
     MainMove move = allLegalMoves[_allLegalNotations.indexOf(notation)];
 
-    move.redoCommands(); // TODO :
+    // The move has already been played after the last move, during check calculation
+    move.redoCommands();
 
     movesHistory.add(move);
 

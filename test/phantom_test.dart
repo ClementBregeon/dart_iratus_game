@@ -7,7 +7,10 @@ import 'package:test/test.dart';
 
 void main() {
   String legalMovesToString(Piece piece) {
-    return piece.board.allLegalMoves.where((m) => m.piece == piece).map((m) => m.end.coord).join(', ');
+    return piece.board.allLegalMoves
+        .where((m) => m.piece == piece)
+        .map((m) => m.end.coord)
+        .join(', ');
   }
 
   IratusGame game = IratusGame();
@@ -47,13 +50,16 @@ void main() {
     expect(legalMovesToString(bPhantom) == 'a8, a7, a6', true);
   });
 
-  test('A phantom move is noted with the id of the piece followed by \'~\'.', () {
+  test('A phantom move is noted with the id of the piece followed by \'~\'.',
+      () {
     game.move('R~xa6');
 
     expect(board.lastMove!.notation == 'R~xa6', true);
   });
 
-  test('A phantom\'s check can be avoided by capture, turning it into another piece.', () {
+  test(
+      'A phantom\'s check can be avoided by capture, turning it into another piece.',
+      () {
     game.move('R~xa6');
     game.move('f5');
     game.move('R~f6');
@@ -102,9 +108,12 @@ void main() {
     expect(game.board.lastMove!.notation == 'Qf7#', true);
   });
 
-  test('A king can avoid a phantom`s check by capturing a piece, even if it was protected by the phantom.', () {
+  test(
+      'A king can avoid a phantom`s check by capturing a piece, even if it was protected by the phantom.',
+      () {
     // In this starting fen, the king can eat the pawn but not go forward.
-    game = IratusGame.fromFEN('k7/3r~4/2S(0)1S(1)3/2D(0)KD(1)3/2PpP3/8/8/8/8/8 w - - - 000000-0 0 10');
+    game = IratusGame.fromFEN(
+        'k7/3r~4/2S(0)1S(1)3/2D(0)KD(1)3/2PpP3/8/8/8/8/8 w - - 000000-0 0 10');
 
     expect(legalMovesToString(game.board.king['w']!) == 'd5', true);
     expect(game.board.validNotations.join(', ') == 'Kxd5', true);
@@ -112,7 +121,8 @@ void main() {
 
   test('The promotion of a pawn\'s phantom works.', () {
     // In this starting fen, the white pawn can take a pawn or a soldier. The black phantom will then promote.
-    game = IratusGame.fromFEN('8/8/8/2p1s3/3P4/8/8/8/1K2f1k1/8 w - - - 0-00 0 10');
+    game =
+        IratusGame.fromFEN('8/8/8/2p1s3/3P4/8/8/8/1K2f1k1/8 w - - 0-00 0 10');
 
     bPhantom = game.board.get(Position.fromCoords(game.board, 'e1'))!;
 

@@ -1,7 +1,5 @@
 part of iratus_game;
 
-// TODO : remove fen.movingAgain
-
 class _PieceInformations {
   int col = -1;
   String color = 'n';
@@ -77,12 +75,13 @@ class IratusFEN extends FEN {
   */
 
   static final String start =
-      'fd(0)s(0)yys(1)d(1)g/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/FD(2)S(2)YYS(3)D(3)G w QKqk - - 0000000000000000-0000000000000000 0 1';
+      'fd(0)s(0)yys(1)d(1)g/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/FD(2)S(2)YYS(3)D(3)G w QKqk - 0000000000000000-0000000000000000 0 1';
 
   @override
   late final String fen;
   @override
-  late final String fenEqualizer; // pieces turn castleRights enPassant coordPieceMovingAgain
+  late final String
+      fenEqualizer; // pieces turn castleRights enPassant coordPieceMovingAgain
   late final String pieces;
   late final String turn;
   late final String castleRights;
@@ -92,8 +91,6 @@ class IratusFEN extends FEN {
   /// The position where a pawn can go to capture an enemy pawn who just moved 2 squares.
   late final Position? enPassant;
 
-  /// abbreviation for coordPieceMovingAgain. The coord of the piece who has to move again.
-  late final String? coordPMA;
   late final Map<String, String> dynamitablesHasMoved;
   late final int counter50rule;
   late final int turnNumber;
@@ -103,10 +100,10 @@ class IratusFEN extends FEN {
 
     List<String> parts = fen.split(" ");
 
-    if (parts.length != 8) {
+    if (parts.length != 7) {
       throw ArgumentError.value(
         fen,
-        'Invalid FEN : An Iratus FEN should have 8 values (pieces, turn, casle rights, en passant, piece moving again, dynamitables has moved, counter for 50 moves rules, half turn number)',
+        'Invalid FEN : An Iratus FEN should have 7 values (pieces, turn, casle rights, en passant, dynamitables has moved, counter for 50 moves rules, half turn number)',
       );
     }
 
@@ -114,13 +111,12 @@ class IratusFEN extends FEN {
     turn = parts[1];
     castleRights = parts[2];
     enPassant = parts[3] == '-' ? null : Position.fromCoords(board, parts[3]);
-    coordPMA = parts[4] == '-' ? null : parts[4];
-    fenEqualizer = '$pieces $turn $castleRights ${parts[3]} ${parts[4]}';
-    counter50rule = int.parse(parts[6]);
-    turnNumber = int.parse(parts[7]);
+    fenEqualizer = '$pieces $turn $castleRights ${parts[3]}}';
+    counter50rule = int.parse(parts[5]);
+    turnNumber = int.parse(parts[6]);
 
     // DYNAMITABLES HAS MOVED
-    List<String> splittedDynamitablesHasMoved = parts[5].split('-');
+    List<String> splittedDynamitablesHasMoved = parts[4].split('-');
     dynamitablesHasMoved = {
       'w': splittedDynamitablesHasMoved[0],
       'b': splittedDynamitablesHasMoved[1],
@@ -131,7 +127,8 @@ class IratusFEN extends FEN {
     String firstChar = fen[0].toLowerCase();
     if (!pieceIDs.contains(firstChar)) {
       if (!"12345678".contains(firstChar)) {
-        throw ArgumentError.value(firstChar, 'Invalid FEN :\nA FEN must start with either a piece id or a number.');
+        throw ArgumentError.value(firstChar,
+            'Invalid FEN :\nA FEN must start with either a piece id or a number.');
       }
     }
     String linkID = '';
@@ -143,11 +140,13 @@ class IratusFEN extends FEN {
 
     void createPiece(_PieceInformations pieceInfos) {
       if (!ids.contains(pieceInfos.id)) {
-        throw ArgumentError.value(pieceInfos.id, 'Invalid FEN : Unknown piece id');
+        throw ArgumentError.value(
+            pieceInfos.id, 'Invalid FEN : Unknown piece id');
       }
 
       Piece piece;
-      Position pos = Position.fromRowCol(board, row: pieceInfos.row, col: pieceInfos.col);
+      Position pos =
+          Position.fromRowCol(board, row: pieceInfos.row, col: pieceInfos.col);
       if (pieceInfos.phantomized) {
         piece = Piece(board, pieceInfos.color, pos, 'f');
         piece.transform(pieceInfos.id);
@@ -167,7 +166,9 @@ class IratusFEN extends FEN {
         }
       }
       if (dynamitables.contains(pieceInfos.id)) {
-        if (dynamitablesHasMoved[pieceInfos.color]![dhmIndexes[pieceInfos.color]!] == '1') {
+        if (dynamitablesHasMoved[pieceInfos.color]![
+                dhmIndexes[pieceInfos.color]!] ==
+            '1') {
           piece.setUnknownFirstMove();
         }
         dhmIndexes[pieceInfos.color] = dhmIndexes[pieceInfos.color]! + 1;
@@ -188,7 +189,8 @@ class IratusFEN extends FEN {
             continue;
           }
           if (!charIsNumber) {
-            throw ArgumentError.value(row, 'Invalid FEN :\nParentheses only accept numbers.');
+            throw ArgumentError.value(
+                row, 'Invalid FEN :\nParentheses only accept numbers.');
           }
           linkID += char;
           continue;
@@ -241,20 +243,17 @@ class IratusFEN extends FEN {
 
       Piece? k = board.king[castle == castle.toUpperCase() ? 'w' : 'b'];
       if (k == null) continue; // an army without king
-      if (k.col != 4 || (k.color == 'w' && k.row != 8) || (k.color == 'b' && k.row != 1)) {
+      if (k.col != 4 ||
+          (k.color == 'w' && k.row != 8) ||
+          (k.color == 'b' && k.row != 1)) {
         k.setUnknownFirstMove();
         continue;
       }
-      Piece? rook = getRookAt(castle.toUpperCase() == 'K' ? 'right' : 'left', k);
+      Piece? rook =
+          getRookAt(castle.toUpperCase() == 'K' ? 'right' : 'left', k);
       if (rook != null) {
         rook.setUnknownFirstMove();
       }
-    }
-
-    // PIECE MOVING AGAIN
-    String parts4 = parts[4];
-    if (parts4 != "-" && board.get(Position.fromCoords(board, parts4)) == null) {
-      throw ArgumentError.value(parts4, 'Invalid FEN :\nNo piece moving twice at coord');
     }
   }
 
@@ -267,7 +266,8 @@ class IratusFEN extends FEN {
     for (int row = 0; row < 10; row++) {
       int space = 0;
       for (int col = 0; col < 8; col++) {
-        Piece? piece = board.get(Position.fromRowCol(board, row: row, col: col));
+        Piece? piece =
+            board.get(Position.fromRowCol(board, row: row, col: col));
 
         if (piece == null) {
           space += 1;
@@ -307,7 +307,9 @@ class IratusFEN extends FEN {
         }
 
         if (dynamitables.contains(piece.id)) {
-          dynamitablesHasMoved[piece.color] = dynamitablesHasMoved[piece.color]! + (piece.hasMoved() ? "1" : "0");
+          dynamitablesHasMoved[piece.color] =
+              dynamitablesHasMoved[piece.color]! +
+                  (piece.hasMoved() ? "1" : "0");
         }
       }
 
@@ -359,14 +361,6 @@ class IratusFEN extends FEN {
     // }
     fenIP += ' ${enPassant?.coord ?? '-'}';
 
-    // PieceMovingAgain
-    if (lastMove == null) {
-      coordPMA = board.startFEN.coordPMA;
-    } else {
-      coordPMA = lastMove.movingAgain ? lastMove.end.coord : null;
-    }
-    fenIP += ' ${coordPMA ?? '-'}';
-
     // Same position if same pieces, turn, castleRights & enPassant
     fenEqualizer = fenIP;
 
@@ -394,7 +388,7 @@ class IratusFEN extends FEN {
 final pieceIDs = 'bcdefgknpqrsy';
 final ids = '$pieceIDs${pieceIDs.toUpperCase()}~_()0-9';
 final fenRegexPattern =
-    '^([$ids]+\\/){9}[$ids]+\\s[wb]\\s(-|[KQkq]+)\\s(-|[a-h][1-8])\\s(-|[a-h]([0-9]|10))\\s(([01]+)?-([01]+)?)\\s\\d+\\s\\d+\$';
+    '^([$ids]+\\/){9}[$ids]+\\s[wb]\\s(-|[KQkq]+)\\s(-|[a-h][1-8])\\s(([01]+)?-([01]+)?)\\s\\d+\\s\\d+\$';
 final fenRegex = RegExp(fenRegexPattern);
 
 bool isValidFEN(String fen) {

@@ -9,7 +9,6 @@ abstract class Move {
   late final FEN _fen;
   bool _isLocked = false;
   final Map<String, ExtraMove> _legalSecondMoves = {};
-  bool _movingAgain = false; // true if the moved piece has to move again
   late String _nextTurn;
   String _notation = '';
   bool _waitingForPromotion = false;
@@ -22,7 +21,6 @@ abstract class Move {
   String get fen => _fen.fen;
   String get fenEqualizer => _fen.fenEqualizer;
   FEN get fenObject => _fen;
-  bool get movingAgain => _movingAgain; // TODO : remove ?
   String get nextTurn => _nextTurn;
   String get notation => _notation;
 
@@ -31,7 +29,8 @@ abstract class Move {
   /// 2 cases :
   ///   - when a pawn reaches the end of the board, we wait for a promotion id.
   ///   - when a piece moving twice makes a first move, we wait for the second move.
-  bool get waitingForInput => _waitingForPromotion || _waitingForSecondMove; // TODO : rework
+  bool get waitingForInput =>
+      _waitingForPromotion || _waitingForSecondMove; // TODO : rework
 
   // Final fields
   /// A representation of all the squares where the king of the current player can go or not.
@@ -44,7 +43,10 @@ abstract class Move {
   /// ```
   late final List<bool> antiking;
   final Board board;
-  final Map<String, List<String>> capturedPieces = {'w': [], 'b': []}; // just for materialistic eval
+  final Map<String, List<String>> capturedPieces = {
+    'w': [],
+    'b': []
+  }; // just for materialistic eval
   final Position end;
   late final bool isLegal;
   final List<Function> notationTransformations = [];
@@ -136,7 +138,8 @@ abstract class Move {
         executeCommand(secondMoveCommand);
         if (secondMoveCommand.move.isLegal) {
           // We validate the second move.
-          _legalSecondMoves[secondMoveCommand.move.notation] = secondMoveCommand.move;
+          _legalSecondMoves[secondMoveCommand.move.notation] =
+              secondMoveCommand.move;
         }
         // We undo the simulation.
         secondMoveCommand.move.undoCommands();
@@ -311,11 +314,11 @@ abstract class Move {
       _nextTurn = piece.color;
     } else if (command is RequireAnotherMove) {
       if (this is! MainMove) {
-        throw Exception('A piece cannot move twice if it started moving because of another piece.');
+        throw Exception(
+            'A piece cannot move twice if it started moving because of another piece.');
       }
       _waitingForSecondMove = true;
       _nextTurn = piece.color;
-      _movingAgain = true;
     } else if (command is SetDynamite) {
       _commands.add(command);
       command.piece.setDynamite(true);
@@ -333,7 +336,8 @@ abstract class Move {
   void input(String notation) {
     if (_waitingForPromotion) {
       if (!promotionValidNotations.contains(notation)) {
-        throw ArgumentError.value(notation, 'A promotion notation must be in the format \'=\' + id (upper case)');
+        throw ArgumentError.value(notation,
+            'A promotion notation must be in the format \'=\' + id (upper case)');
       }
 
       executeCommand(Transform(piece, 'p', notation[1].toLowerCase()));
@@ -344,7 +348,8 @@ abstract class Move {
       lock();
     } else {
       if (!_waitingForSecondMove) {
-        throw Exception('Can\'t call the input method if the move is not waiting for input.');
+        throw Exception(
+            'Can\'t call the input method if the move is not waiting for input.');
       }
 
       ExtraMove secondMove = _legalSecondMoves[notation]!;

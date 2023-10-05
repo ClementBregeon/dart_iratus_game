@@ -4,14 +4,17 @@ import 'package:test/test.dart';
 void main() {
   // In this starting fen, there is two kings and a white pawn.
   // White to move and promote.
-  String fen = '8/8/3P4/8/8/2K2k2/8/8/8/8 w - - - 1- 0 1';
+  String fen = '8/8/3P4/8/8/2K2k2/8/8/8/8 w - - 1- 0 1';
 
   IratusGame game = IratusGame.fromFEN(fen);
   String oldTurn = game.board.turn;
 
   test('After d9, the game is waiting for the promotion input.', () {
     expect(game.board.waitingForInput, false);
-    expect(game.board.validNotations.join(', ') == 'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3', true);
+    expect(
+        game.board.validNotations.join(', ') ==
+            'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3',
+        true);
 
     game.move('d9');
 
@@ -19,9 +22,12 @@ void main() {
     expect(game.board.waitingForInput, true);
     expect(oldTurn == game.board.turn, true);
     expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'p', true);
-    expect(game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'p', true);
+    expect(
+        game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
   });
 
   test('Undoing a pawn move before its promotion.', () {
@@ -29,14 +35,24 @@ void main() {
 
     expect(game.board.waitingForInput, false);
     expect(oldTurn == game.board.turn, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'p', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'p', true);
     expect(game.board.get(Position.fromCoords(game.board, 'd9')) == null, true);
-    expect(game.board.validNotations.join(', ') == 'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3', true);
+    expect(
+        game.board.validNotations.join(', ') ==
+            'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3',
+        true);
   });
 
-  test('After redoing the undone move, the game is waiting for the promotion input.', () {
-    expect(game.board.validNotations.join(', ') == 'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3', true);
+  test(
+      'After redoing the undone move, the game is waiting for the promotion input.',
+      () {
+    expect(
+        game.board.validNotations.join(', ') ==
+            'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3',
+        true);
 
     game.redo();
 
@@ -44,9 +60,12 @@ void main() {
     expect(game.board.waitingForInput, true);
     expect(oldTurn == game.board.turn, true);
     expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'p', true);
-    expect(game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'p', true);
+    expect(
+        game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
   });
 
   test('Promoting to a queen.', () {
@@ -58,8 +77,10 @@ void main() {
     expect(game.board.waitingForInput, false);
     expect(oldTurn != game.board.turn, true);
     expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'q', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'q', true);
   });
 
   test('An undone promotion moves the pawn.', () {
@@ -67,8 +88,10 @@ void main() {
 
     expect(game.board.waitingForInput, false);
     expect(oldTurn == game.board.turn, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'p', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'p', true);
     expect(game.board.get(Position.fromCoords(game.board, 'd9')) == null, true);
   });
 
@@ -79,14 +102,16 @@ void main() {
     expect(game.board.waitingForInput, false);
     expect(oldTurn != game.board.turn, true);
     expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'q', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'q', true);
   });
 
   test('A promotion with discovered check is correctly noted.', () {
     // In this starting fen, there is two kings, a white rook and a white pawn.
     // White to move, promote and make a discovered check.
-    fen = '8/8/1R1P2k1/8/8/2K5/8/8/8/8 w - - - 1- 0 1';
+    fen = '8/8/1R1P2k1/8/8/2K5/8/8/8/8 w - - 1- 0 1';
     game = IratusGame.fromFEN(fen);
 
     game.move('d9');

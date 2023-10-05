@@ -56,9 +56,10 @@ class Piece {
 
   Piece(this.board, this.color, this._pos, String id)
       : enemyColor = (color == "w") ? "b" : "w" {
-    if (!colors.contains(color))
+    if (!colors.contains(color)) {
       throw ArgumentError.value(
           color, 'A piece color can only be \'w\' or \'b\'');
+    }
     if (!ids.contains(id)) throw ArgumentError.value(id, 'Unknown piece id');
     _identity = identitiyConstructors[id]!(this);
     board.addPiece(this);
@@ -317,8 +318,8 @@ abstract class PieceMovingTwice extends PieceIdentity {
 
         // antiking squares accessible at second move
         for (Position pos2 in getPositions(from: pos, to: moves)) {
-          if (pos2 == pos)
-            continue; // a piece cannot set its own pos in antiking
+          // a piece cannot set its own pos in antiking
+          if (pos2 == pos) continue;
 
           antiking[pos2.index] = true;
         }

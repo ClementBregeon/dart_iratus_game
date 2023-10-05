@@ -18,8 +18,9 @@ class Player {
   String get formattedName => name;
 
   Player(this.color, this.name) {
-    if (!colors.contains(color))
+    if (!colors.contains(color)) {
       throw ArgumentError.value(color, 'A Player color must be \'w\' or \'b\'');
+    }
   }
 }
 
