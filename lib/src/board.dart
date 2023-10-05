@@ -1,6 +1,9 @@
 part of iratus_game;
 
 abstract class Board {
+  /// All the notations of the possible moves in the position, extept inputs
+  final List<String> _allLegalNotations = [];
+
   /// All the undone moves.
   final List<MainMove> _backMovesHistory = [];
 
@@ -10,9 +13,6 @@ abstract class Board {
   /// This field prevents changes to _backMovesHistory during calculs.
   /// Without it, _backMovesHistory would be mest up by the calculs.
   bool _duringCalcul = false;
-
-  /// All the notations of the possible moves in the position
-  final List<String> allLegalNotations = [];
 
   /// All the possible moves in the position
   final List<MainMove> allLegalMoves = [];
@@ -65,9 +65,8 @@ abstract class Board {
   /// Can be 'w' or 'b'.
   String get turn => lastMove?.nextTurn ?? startFEN.turn;
 
-  // TODO : update with second move or remove
   Iterable<String> get validNotations =>
-      waitingForInput ? lastMove!.validInputs : allLegalNotations;
+      waitingForInput ? lastMove!.validInputs : _allLegalNotations;
 
   /// Return true if the last move played needs an input.
   ///
@@ -122,10 +121,10 @@ abstract class Board {
       return;
     }
 
-    if (!allLegalNotations.contains(notation)) {
+    if (!_allLegalNotations.contains(notation)) {
       throw ArgumentError.value(notation, 'Unknown move');
     }
-    MainMove move = allLegalMoves[allLegalNotations.indexOf(notation)];
+    MainMove move = allLegalMoves[_allLegalNotations.indexOf(notation)];
 
     move.redoCommands(); // TODO :
 
@@ -180,7 +179,7 @@ abstract class Board {
     // This is the field to update.
     allLegalMoves.clear();
     // This also need to be cleared, duh
-    allLegalNotations.clear();
+    _allLegalNotations.clear();
 
     // Clear the antiking board.
     antiking.fillRange(0, antiking.length, false);
@@ -229,7 +228,7 @@ abstract class Board {
     // we only know how to write the notation after we gathered all the legal moves.
     for (MainMove move in allLegalMoves) {
       move._initNotation();
-      allLegalNotations.add(move.notation);
+      _allLegalNotations.add(move.notation);
     }
 
     // Enables changes to calculator._backMovesHistory.
