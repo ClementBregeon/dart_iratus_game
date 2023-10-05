@@ -247,6 +247,11 @@ abstract class Game {
     }
   }
 
+  void resign(String color) {
+    _result = 2;
+    _winner = color == 'w' ? 3 : 2;
+  }
+
   /// Undo the last move played.
   void undo() {
     board.undo();

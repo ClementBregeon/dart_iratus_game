@@ -9,14 +9,28 @@ void main() {
     game.move('g4');
     game.move('Qh4');
 
+    expect(game.result == 1, true);
     expect(game.winner == 3, true);
   });
 
-  test('Pat.', () {
+  test('Resignation.', () {
+    IratusGame game = IratusGame();
+    game.resign('w');
+    expect(game.result == 2, true);
+    expect(game.winner == 3, true);
+
+    IratusGame game2 = IratusGame();
+    game2.resign('b');
+    expect(game.result == 2, true);
+    expect(game2.winner == 2, true);
+  });
+
+  test('Stalemate.', () {
     IratusGame game =
         IratusGame.fromFEN('K/1r8/8/k8/8/8/8/8/8/8 b - - - 1 150');
     game.move('Ka7');
 
+    expect(game.result == 4, true);
     expect(game.winner == 1, true);
   });
 
@@ -33,6 +47,16 @@ void main() {
     game.move('Ng1');
     game.move('Ng8');
 
+    expect(game.result == 6, true);
+    expect(game.winner == 1, true);
+  });
+
+  test('Draw by insufficient material.', () {
+    IratusGame game =
+        IratusGame.fromFEN('K/1q~8/8/8/8/8/k8/8/8/8 w - - - 1 150');
+    game.move('Kxb8');
+
+    expect(game.result == 7, true);
     expect(game.winner == 1, true);
   });
 
@@ -42,14 +66,7 @@ void main() {
     game.move('Nc3');
     game.move('Nc6');
 
-    expect(game.winner == 1, true);
-  });
-
-  test('Draw by insufficient material.', () {
-    IratusGame game =
-        IratusGame.fromFEN('K/1q~8/8/8/8/8/k8/8/8/8 w - - - 1 150');
-    game.move('Kxb8');
-
+    expect(game.result == 8, true);
     expect(game.winner == 1, true);
   });
 }
