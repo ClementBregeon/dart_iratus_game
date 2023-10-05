@@ -1,7 +1,5 @@
 library iratus_game;
 
-import 'dart:io';
-
 import 'pgn.dart';
 import 'position.dart';
 import 'utils.dart';
@@ -20,7 +18,8 @@ class Player {
   String get formattedName => name;
 
   Player(this.color, this.name) {
-    if (!colors.contains(color)) throw ArgumentError.value(color, 'A Player color must be \'w\' or \'b\'');
+    if (!colors.contains(color))
+      throw ArgumentError.value(color, 'A Player color must be \'w\' or \'b\'');
   }
 }
 
@@ -40,7 +39,10 @@ abstract class Game {
   /// ```dart
   /// Player white = game.player['w'];
   /// ```
-  final Map<String, Player> player = {'w': Player('w', 'Winston'), 'b': Player('b', 'Bellucci')};
+  final Map<String, Player> player = {
+    'w': Player('w', 'Winston'),
+    'b': Player('b', 'Bellucci')
+  };
 
   /// The result of the game.
   ///
@@ -134,7 +136,8 @@ abstract class Game {
         return false;
       }
 
-      if (insufficient(remainingPieces['w']!) && insufficient(remainingPieces['b']!)) {
+      if (insufficient(remainingPieces['w']!) &&
+          insufficient(remainingPieces['b']!)) {
         _result = 7; // draw by insufficient material
         _winner = 1; // draw
         return;
@@ -166,7 +169,8 @@ abstract class Game {
       }
 
       if (board.validNotations.isNotEmpty) {
-        if (board.movesHistory.isNotEmpty && board.movesHistory.last.counter50rule > 100) {
+        if (board.movesHistory.isNotEmpty &&
+            board.movesHistory.last.counter50rule > 100) {
           _result = 8; // draw by 50-moves rule
           _winner = 1; // draw
           return;

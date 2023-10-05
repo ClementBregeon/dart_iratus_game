@@ -84,7 +84,6 @@ void main() {
     game.move('Cxd4*');
 
     expect(game.board.lastMove!.notation == 'Cxd4*', true);
-    var pgn = game.getPGN();
     expect(game.getPGN().moveText == '1. Ce5-Ce4+ 2. Cd5-Cd4+ Cxd4*', true);
     expect(oldTurn != game.board.turn, true);
     expect(game.board.validNotations.join(', ') == 'Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3, a2, a3', true);

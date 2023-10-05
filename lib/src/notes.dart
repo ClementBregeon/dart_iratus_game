@@ -171,8 +171,8 @@ Some games
 [Result "1-0"]
 [Variant "Iratus"]
 
-1. Ye+g1 Ye+f1
-2. Y+b1 Y+c1
+1. Ye+g1 Ye+f8
+2. Y+b1 Y+c8
 3. g3 e5
 4. Bg2 Bc5
 5. b3 Bxf2+
@@ -189,13 +189,13 @@ Some games
 16. Sb1 Sf5
 17. Sd3 Be6
 18. Sxe4 dxe4
-19. Ce4-Cxe4 Bf7
+19. Ce3-Cxe4 Bf7
 20. h4 Kf9
-21. e3 Nc6
+21. e3 Nbc6
 22. hxg5 fxg5
 23. Rxh5 Sg4
 24. Rxh8 Qxh8
-25. Bb4 Nd5
+25. Bb5 Nd5
 26. Ce5-Cxf5 Nxc3
 27. Qf3 Rf8
 28. Bxc6 bxc6

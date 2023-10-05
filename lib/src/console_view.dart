@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:iratus_game/src/utils.dart';
-
 import 'game.dart';
 import 'position.dart';
 

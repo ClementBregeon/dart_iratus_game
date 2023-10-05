@@ -11,9 +11,6 @@ abstract class Board {
   /// Without it, _backMovesHistory would be mest up by the calculs.
   bool _duringCalcul = false;
 
-  /// The game managing the board
-  final Game _game;
-
   /// All the notations of the possible moves in the position
   final List<String> allLegalNotations = [];
 
@@ -69,7 +66,8 @@ abstract class Board {
   String get turn => lastMove?.nextTurn ?? startFEN.turn;
 
   // TODO : update with second move or remove
-  Iterable<String> get validNotations => waitingForInput ? lastMove!.validInputs : allLegalNotations;
+  Iterable<String> get validNotations =>
+      waitingForInput ? lastMove!.validInputs : allLegalNotations;
 
   /// Return true if the last move played needs an input.
   ///
@@ -78,8 +76,7 @@ abstract class Board {
   bool get waitingForInput => lastMove?.waitingForInput ?? false;
 
   Board(String fen, Game game, this.nbrows, this.nbcols)
-      : _game = game,
-        antiking = List.filled(nbcols * nbrows, false),
+      : antiking = List.filled(nbcols * nbrows, false),
         piecesByPos = List.filled(nbcols * nbrows, null) {
     createPieces(fen);
     updateAllLegalMoves();

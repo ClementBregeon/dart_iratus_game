@@ -1,6 +1,7 @@
 part of iratus_game;
 
-List<Position> getPositions({required Position from, required List<List<int>> to}) {
+List<Position> getPositions(
+    {required Position from, required List<List<int>> to}) {
   List<Position> positions = [];
 
   for (List<int> move in to) {
@@ -27,7 +28,8 @@ class Piece {
   Piece? _linkedPiece;
   Position _pos;
   Move? firstMove;
-  bool _hasMovedInAnotherLife = false; // if the game starts from a fen where this piece has already moved
+  bool _hasMovedInAnotherLife =
+      false; // if the game starts from a fen where this piece has already moved
 
   /// A list of attacked squares, where the enemy king can't go
   List<Position> antiking = [];
@@ -52,8 +54,11 @@ class Piece {
   String get id => _identity.id;
   List<List<int>> get moves => _identity.moves;
 
-  Piece(this.board, this.color, this._pos, String id) : enemyColor = (color == "w") ? "b" : "w" {
-    if (!colors.contains(color)) throw ArgumentError.value(color, 'A piece color can only be \'w\' or \'b\'');
+  Piece(this.board, this.color, this._pos, String id)
+      : enemyColor = (color == "w") ? "b" : "w" {
+    if (!colors.contains(color))
+      throw ArgumentError.value(
+          color, 'A piece color can only be \'w\' or \'b\'');
     if (!ids.contains(id)) throw ArgumentError.value(id, 'Unknown piece id');
     _identity = identitiyConstructors[id]!(this);
     board.addPiece(this);
@@ -106,7 +111,9 @@ abstract class PieceIdentity {
     if (piece == null) {
       return true;
     } else if (piece.id == 'y') {
-      return piece.color == p.color && dynamitables.contains(id) && !p.dynamited;
+      return piece.color == p.color &&
+          dynamitables.contains(id) &&
+          !p.dynamited;
     } else {
       return piece.color != p.color;
     }
@@ -125,7 +132,8 @@ abstract class PieceIdentity {
     }
 
     if (p.board is IratusBoard) {
-      for (final Piece alliedPhantom in (p.board as IratusBoard).phantoms[p.color]!) {
+      for (final Piece alliedPhantom
+          in (p.board as IratusBoard).phantoms[p.color]!) {
         if (!alliedPhantom.isCaptured) {
           commands.add(Transform(alliedPhantom, alliedPhantom.id, id));
         }
@@ -157,15 +165,15 @@ abstract class PieceIdentity {
     int oldPosIndex = p._pos.index;
     p._pos = pos;
 
+    // if firstMove is null, it is set to board.currentMove
+    p.firstMove ??= p.board.currentMove;
+
     if (p.isCaptured) {
       return commands;
     }
 
     p.board.piecesByPos[oldPosIndex] = null;
     p.board.piecesByPos[pos.index] = p;
-
-    // if firstMove is null, it is set to board.currentMove
-    p.firstMove ??= p.board.currentMove;
 
     return commands;
   }
@@ -309,7 +317,8 @@ abstract class PieceMovingTwice extends PieceIdentity {
 
         // antiking squares accessible at second move
         for (Position pos2 in getPositions(from: pos, to: moves)) {
-          if (pos2 == pos) continue; // a piece cannot set its own pos in antiking
+          if (pos2 == pos)
+            continue; // a piece cannot set its own pos in antiking
 
           antiking[pos2.index] = true;
         }
@@ -505,9 +514,13 @@ class _Grapple extends RollingPiece {
     return [
       // ex : G:Nf6->d4
       // ex : G:Nf6->*     here, the piece on f6 was dynamited
-      Notation('G:${grappled.id.toUpperCase()}${grappled.coord}->${grappled.dynamited ? '*' : p.pos.coord}'),
+      Notation(
+          'G:${grappled.id.toUpperCase()}${grappled.coord}->${grappled.dynamited ? '*' : p.pos.coord}'),
       Capture(p, p),
-      if (grappled.dynamited) Capture(grappled, p) else Extra(grappled.pos, p.pos)
+      if (grappled.dynamited)
+        Capture(grappled, p)
+      else
+        Extra(grappled.pos, p.pos)
     ];
   }
 
@@ -548,17 +561,21 @@ class _King extends PieceIdentity {
       if (leftRook != null && !leftRook.hasMoved()) {
         canLongCastle = true;
         for (int dx in [-1, -2]) {
-          Position pos = Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
+          Position pos =
+              Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
           if (p.board.get(pos) != null || posIsUnderCheck(pos)) {
             canLongCastle = false;
             break;
           }
         }
-        if (p.board.get(Position.fromRowCol(p.board, row: p.row, col: p.col - 3)) != null) {
+        if (p.board.get(
+                Position.fromRowCol(p.board, row: p.row, col: p.col - 3)) !=
+            null) {
           canLongCastle = false;
         }
         if (canLongCastle) {
-          validMoves.add(Position.fromRowCol(p.board, row: p.row, col: p.col - 2));
+          validMoves
+              .add(Position.fromRowCol(p.board, row: p.row, col: p.col - 2));
         }
       }
       // Short castle
@@ -566,14 +583,16 @@ class _King extends PieceIdentity {
       if (rightRook != null && !rightRook.hasMoved()) {
         canShortCastle = true;
         for (int dx in [1, 2]) {
-          Position pos = Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
+          Position pos =
+              Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
           if (p.board.get(pos) != null || posIsUnderCheck(pos)) {
             canShortCastle = false;
             break;
           }
         }
         if (canShortCastle) {
-          validMoves.add(Position.fromRowCol(p.board, row: p.row, col: p.col + 2));
+          validMoves
+              .add(Position.fromRowCol(p.board, row: p.row, col: p.col + 2));
         }
       }
     }
@@ -593,12 +612,14 @@ class _King extends PieceIdentity {
     if (!hasMoved && ((oldPos.col - pos.col).abs() == 2)) {
       if (pos.col == 2) {
         // Long castle
-        commands.add(Extra(Position.fromRowCol(p.board, row: pos.row, col: pos.col - 2),
+        commands.add(Extra(
+            Position.fromRowCol(p.board, row: pos.row, col: pos.col - 2),
             Position.fromRowCol(p.board, row: pos.row, col: pos.col + 1)));
         commands.add(Notation('0-0-0'));
       } else if (pos.col == 6) {
         // Short castle
-        commands.add(Extra(Position.fromRowCol(p.board, row: pos.row, col: pos.col + 1),
+        commands.add(Extra(
+            Position.fromRowCol(p.board, row: pos.row, col: pos.col + 1),
             Position.fromRowCol(p.board, row: pos.row, col: pos.col - 1)));
         commands.add(Notation('0-0'));
       }
@@ -706,7 +727,8 @@ class _Pawn extends PieceIdentity {
     if ((oldRow - p.row).abs() == 2 &&
         p.board.currentMove == p.board.mainCurrentMove &&
         p.board.currentMove.end == pos) {
-      Position enPassantPos = Position.fromRowCol(p.board, row: p.row + (p.color == 'w' ? 1 : -1), col: p.col);
+      Position enPassantPos = Position.fromRowCol(p.board,
+          row: p.row + (p.color == 'w' ? 1 : -1), col: p.col);
       commands.add(SetEnPassant(enPassantPos));
     }
 
@@ -728,15 +750,16 @@ class _Pawn extends PieceIdentity {
         commands.add(Capture(lastMove.piece, p));
       } else {
         // happens when capturing en passant is the first move after a load from fen
-        Position enemyPawnPos =
-            Position.fromRowCol(p.board, row: enPassant.row + (p.color == 'w' ? 1 : -1), col: enPassant.col);
+        Position enemyPawnPos = Position.fromRowCol(p.board,
+            row: enPassant.row + (p.color == 'w' ? 1 : -1), col: enPassant.col);
         Piece? captured = p.board.get(enemyPawnPos);
         if (captured == null || captured.id != 'p') {
           // There is a very rare case, where the pawn moved two squares and promoted,
           // and an enemy pawn is on the first row (which is illegal in classic chess).
           // In this case, the enemy pawn can capture the promoted piece en passant.
           if (captured == null || !promotionIds.contains(captured.id)) {
-            throw ArgumentError('Invalid FEN : en-passant doesn\'t match a pawn');
+            throw ArgumentError(
+                'Invalid FEN : en-passant doesn\'t match a pawn');
           }
         }
         commands.add(Capture(captured, p));
@@ -847,9 +870,12 @@ class _Soldier extends RollingPiece {
     if (piece == null) {
       return true;
     } else if (piece.id == 'y') {
-      return piece.color == p.color && dynamitables.contains(id) && !p.dynamited;
+      return piece.color == p.color &&
+          dynamitables.contains(id) &&
+          !p.dynamited;
     } else {
-      return piece.color != p.color && piece.id == 'p'; // the soldier only captures pawns
+      return piece.color != p.color &&
+          piece.id == 'p'; // the soldier only captures pawns
     }
   }
 
@@ -881,7 +907,8 @@ class _Soldier extends RollingPiece {
       // If this is the phantom of the soldier
       if (p.row == promotionRow) {
         commands.add(Transform(p, id, 'e'));
-        commands.add(NotationTransform((String notation) => 'S${notation.substring(1)}=E'));
+        commands.add(NotationTransform(
+            (String notation) => 'S${notation.substring(1)}=E'));
       }
       return commands;
     }
@@ -889,7 +916,8 @@ class _Soldier extends RollingPiece {
     if (p.row == promotionRow) {
       commands.add(Transform(p, id, 'e'));
       commands.add(Transform(p._linkedPiece!, p._linkedPiece!.id, 'c'));
-      commands.add(NotationTransform((String notation) => 'S${notation.substring(1)}=E'));
+      commands.add(NotationTransform(
+          (String notation) => 'S${notation.substring(1)}=E'));
     }
 
     if (dogIsTooFar(p.pos, p._linkedPiece!.pos)) {
