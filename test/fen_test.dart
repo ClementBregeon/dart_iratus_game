@@ -41,8 +41,5 @@ void main() {
   // Counter50rule is used
   // TurnNumber is used
 
-  // TODO : a random complex board
-  // TODO : check dynamite moves
-
   // TODO : a position just before the draw by 50 moves rule
 }

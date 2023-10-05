@@ -29,8 +29,7 @@ abstract class Move {
   /// 2 cases :
   ///   - when a pawn reaches the end of the board, we wait for a promotion id.
   ///   - when a piece moving twice makes a first move, we wait for the second move.
-  bool get waitingForInput =>
-      _waitingForPromotion || _waitingForSecondMove; // TODO : rework
+  bool get waitingForInput => _waitingForPromotion || _waitingForSecondMove;
 
   // Final fields
   /// A representation of all the squares where the king of the current player can go or not.
@@ -271,7 +270,7 @@ abstract class Move {
     if (_waitingForPromotion) {
       validInputs = promotionValidNotations;
     } else if (_waitingForSecondMove) {
-      validInputs = _legalSecondMoves.keys; // TODO
+      validInputs = _legalSecondMoves.keys;
     } else {
       validInputs = [];
     }

@@ -284,8 +284,6 @@ abstract class PieceMovingTwice extends PieceIdentity {
 
       // this is during the first move
       return true;
-
-      // TODO : if the second move becomes an ExtraMove, we can simplify
     }
 
     if (hasToMoveAgain()) {

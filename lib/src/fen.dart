@@ -25,55 +25,46 @@ abstract class FEN {
   abstract final String fenEqualizer;
 }
 
-// TODO : improve documentation
-
 /// An object representating an Iratus position.
+///
+/// Works just like a chess FEN
+///
+/// Rule reminder : a repetition occurs when the fen equalizers are the same
+/// fenEqualizer = pieces turn castleRights enPassant coordPieceMovingAgain
+///
+///
+/// VALUES ORDER
+///
+/// pieces turn castleRights enPassant coordPieceMovingAgain dynamitablesHasMoved counter50rule turnNumber
+///
+///
+/// NEW VALUES
+///
+/// coordPieceMovingAgain :
+///
+///   coordinate or "-"
+///   exemples : "a4" or "-"
+///
+///   If a PieceMovingTwice has moved once, this is the coordinates of this piece.
+///
+/// dynamitablesHasMoved :
+///
+///   listOf0or1 + "-" + listOf0or1
+///   exemple : 001110110010000-00000000111011001
+///
+///   The first list represents the white dynamitable pieces, the seceond represents the black dynamitable pieces.
+///   From white's perspective, from left to right then top to bottom.
+///
+///   0 : the piece has not moved yet
+///   1 : the piece already moved
+///
+///
+/// NEW CHARACTERS :
+///
+/// ~ : after a phantomized piece
+/// _ : after a dynamited piece
+/// (X) : after a linked piece, X is the link ID
 class IratusFEN extends FEN {
-  /* DOCUMENTATION 
-  
-  Works just like a chess FEN
-
-  Rule reminder : a repetition occurs when the fen equalizers are the same
-  fenEqualizer = pieces turn castleRights enPassant coordPieceMovingAgain
-
-
-
-  VALUES ORDER
-
-  pieces turn castleRights enPassant coordPieceMovingAgain dynamitablesHasMoved counter50rule turnNumber
-  
-
-
-  NEW VALUES
-
-  coordPieceMovingAgain :
-
-    coordinate or "-"
-    exemples : "a4" or "-"
-
-    If a PieceMovingTwice has moved once, this is the coordinates of this piece.
-
-  dynamitablesHasMoved :
-
-    listOf0or1 + "-" + listOf0or1
-    exemple : 001110110010000-00000000111011001
-
-    The first list represents the white dynamitable pieces, the seceond represents the black dynamitable pieces.
-    From white's perspective, from left to right then top to bottom.
-
-    0 : the piece has not moved yet
-    1 : the piece already moved
-
-
-
-  NEW CHARACTERS :
-
-  ~ : after a phantomized piece
-  _ : after a dynamited piece
-  (X) : after a linked piece, X is the link ID
-  
-  */
-
   static final String start =
       'fd(0)s(0)yys(1)d(1)g/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/FD(2)S(2)YYS(3)D(3)G w QKqk - 0000000000000000-0000000000000000 0 1';
 
@@ -85,8 +76,6 @@ class IratusFEN extends FEN {
   late final String pieces;
   late final String turn;
   late final String castleRights;
-
-  // TODO : documentation
 
   /// The position where a pawn can go to capture an enemy pawn who just moved 2 squares.
   late final Position? enPassant;

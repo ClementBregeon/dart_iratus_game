@@ -12,10 +12,6 @@ void main() {
     expect(game.winner == 0, true);
   });
 
-  test('Board is properly initialized', () {
-    // TODO
-  });
-
   test('IratusBoard is properly initialized', () {
     expect(board.nbcols == 8, true);
     expect(board.nbrows == 10, true);
@@ -28,11 +24,9 @@ void main() {
   });
 
   // TODO :
-  // the king can eat the pawn but not go forward : k7/3r~4/2S(0)1S(1)3/2D(0)KD(1)3/2PpP3/8/8/8/8/8 w - - - 000000-0 0 10
   // game_end_test.dart
 
   // TODO : PUZZLES
-
   // Tonado pawns
   // 8/8/2k5/P7/8/2K5/8/8/8/8 w - - - 1- 1 60 => a7 (to prevent the king from touching the a9 square)
 }
