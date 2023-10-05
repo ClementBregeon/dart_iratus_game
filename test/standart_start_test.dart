@@ -22,8 +22,4 @@ void main() {
     expect(board.piecesColored['w']![0].color == 'w', true);
     expect(board.piecesColored['b']![0].color == 'b', true);
   });
-
-  // TODO : PUZZLES
-  // Tonado pawns
-  // 8/8/2k5/P7/8/2K5/8/8/8/8 w - - - 1- 1 60 => a7 (to prevent the king from touching the a9 square)
 }
