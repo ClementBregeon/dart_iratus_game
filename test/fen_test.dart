@@ -32,14 +32,4 @@ void main() {
             'e7, e6, exd7, Kg4, Ke4, Kg5, Kf5, Ke5, Kg3, Kf3, Ke3',
         true);
   });
-
-  // FEN TESTS
-  // All the pieces are at the same position
-  // Turn is applied, even when a piece moving twice has to move again
-  // Dynamited pieces are correctly dynamited
-  // Dynamitables.hasMoved() are kept the same
-  // Counter50rule is used
-  // TurnNumber is used
-
-  // TODO : a position just before the draw by 50 moves rule
 }

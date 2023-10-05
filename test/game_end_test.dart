@@ -1,0 +1,55 @@
+import 'package:iratus_game/iratus_game.dart';
+import 'package:test/test.dart';
+
+void main() {
+  test('Checkmate.', () {
+    IratusGame game = IratusGame();
+    game.move('f3');
+    game.move('e6');
+    game.move('g4');
+    game.move('Qh4');
+
+    expect(game.winner == 3, true);
+  });
+
+  test('Pat.', () {
+    IratusGame game =
+        IratusGame.fromFEN('K/1r8/8/k8/8/8/8/8/8/8 b - - - 1 150');
+    game.move('Ka7');
+
+    expect(game.winner == 1, true);
+  });
+
+  test('Draw by three time repetition.', () {
+    IratusGame game = IratusGame();
+    game.move('Nc3');
+    game.move('Nc6');
+    game.move('Nf3');
+    game.move('Nf6');
+    game.move('Ng1');
+    game.move('Ng8');
+    game.move('Nf3');
+    game.move('Nf6');
+    game.move('Ng1');
+    game.move('Ng8');
+
+    expect(game.winner == 1, true);
+  });
+
+  test('Draw by 50 moves rule.', () {
+    IratusGame game = IratusGame.fromFEN(
+        'f7/rnbqkbnr/8/8/8/8/8/8/RNBQKBNR/F7 w QKqk - 0000-0000 99 1');
+    game.move('Nc3');
+    game.move('Nc6');
+
+    expect(game.winner == 1, true);
+  });
+
+  test('Draw by insufficient material.', () {
+    IratusGame game =
+        IratusGame.fromFEN('K/1q~8/8/8/8/8/k8/8/8/8 w - - - 1 150');
+    game.move('Kxb8');
+
+    expect(game.winner == 1, true);
+  });
+}

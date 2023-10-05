@@ -243,8 +243,6 @@ void main() {
         true);
   });
 
-  // TODO : Can\'t castle through a square checked by a phantom.
-
   test('Can\'t castle while in check.', () {
     game.move('Qf3');
     game.move('Qe3');

@@ -144,7 +144,7 @@ abstract class Game {
         return;
       }
 
-      if (board.movesHistory.length > 7) {
+      if (board.movesHistory.length > 6) {
         Move lastMove = board.lastMove!;
         String currentFenEqualizer = lastMove.fenEqualizer;
         int count = 1;
@@ -162,6 +162,8 @@ abstract class Game {
           }
         }
 
+        // Note : currently, the three time repetion
+        // does not include the start position
         if (count == 3) {
           _result = 6; // draw by repetition
           _winner = 1; // draw

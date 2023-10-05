@@ -32,22 +32,30 @@ void main() {
     game.move('h4');
     game.move('Sb8');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'b8')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'b8'))!.id == 's', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'b8')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'b8'))!.id == 's', true);
     expect(game.board.get(Position.fromCoords(game.board, 'c9')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'b9')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'b9'))!.id == 'd', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'b9')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'b9'))!.id == 'd', true);
   });
 
   test('When a soldier moves far away from the dog, the dog follows.', () {
     game.move('Sh2');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'h2')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'h2'))!.id == 's', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'h2')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'h2'))!.id == 's', true);
     expect(game.board.get(Position.fromCoords(game.board, 'f0')) == null, true);
     expect(game.board.get(Position.fromCoords(game.board, 'g0')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'g1')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'g1'))!.id == 'd', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'g1')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'g1'))!.id == 'd', true);
   });
 
   test('When a soldier dies, the dog enrages.', () {
@@ -57,10 +65,14 @@ void main() {
     game.move('Se5');
     game.move('Nxe5');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'e5')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e5'))!.id == 'n', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'f4')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'f4'))!.id == 'c', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'e5')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'e5'))!.id == 'n', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'f4')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'f4'))!.id == 'c', true);
   });
 
   test('The phantom of the previous capture is a soldier.', () {
@@ -74,8 +86,10 @@ void main() {
     game.move('Ye+f9');
     game.move('Nxb6');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'b6')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'b6'))!.id == 'n', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'b6')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'b6'))!.id == 'n', true);
     expect(game.board.get(Position.fromCoords(game.board, 'c5')) == null, true);
   });
 
@@ -83,7 +97,8 @@ void main() {
     expect(bPhantom.id == 'c', true);
   });
 
-  test('When a dog dies, if the soldier is dynamited, the capturer dies too.', () {
+  test('When a dog dies, if the soldier is dynamited, the capturer dies too.',
+      () {
     game.move('Qc9');
     game.move('Nxd7');
     game.move('Kd8');
@@ -102,6 +117,17 @@ void main() {
   });
 
   test('When a soldier promotes, the promotion is shown on the notation.', () {
-    // TODO
+    game.undo();
+    game.move('g3');
+    game.move('Sf5');
+    game.move('B+e0');
+    game.move('Sh3');
+    game.move('Gg1');
+    game.move('Sf1');
+    game.move('Gh0');
+    game.move('Sg0=E');
+
+    print(game.board.lastMove!.notation);
+    expect(game.board.lastMove!.notation == 'Sg0=E+', true);
   });
 }
