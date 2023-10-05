@@ -166,9 +166,7 @@ class ConsoleView {
             break;
 
           default:
-            Iterable<String> validNotations =
-                _board.pawnToPromote == null ? _board.allLegalMoves.keys : promotionValidNotations;
-            for (String valid in validNotations) {
+            for (String valid in _board.validNotations) {
               if (input == valid) {
                 _game.move(input);
                 played = true;

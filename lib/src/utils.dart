@@ -46,6 +46,12 @@ Piece? getRookAt(String side, Piece king) {
   return piece.id == 'r' ? piece : null;
 }
 
+bool inCheck(Piece king, {List<bool>? antiking}) {
+  if (king.id != 'k') throw ArgumentError.value(king, 'The argument of inCheck must be a king');
+  antiking ??= king.board.antiking;
+  return antiking[king.pos.index] || king.isCaptured;
+}
+
 int normed(int x) {
   if (x < 0) {
     return -1;
@@ -54,4 +60,9 @@ int normed(int x) {
   } else {
     return 0;
   }
+}
+
+bool posIsUnderCheck(Position pos, {List<bool>? antiking}) {
+  antiking ??= pos.board.antiking;
+  return antiking[pos.index];
 }

@@ -101,11 +101,11 @@ Some games
 
 [Event "Casual game"]
 [Site "iratus.fr"]
-[Date "2023.9.14"]
+[Date "2023.09.14"]
 [Time "16.45.18"]
 [White "Syméon RB"]
 [Black "Yannick Noël"]
-[Result "*"]
+[Result "1-0"]
 [Variant "Iratus"]
 
 1. e4 e5
@@ -160,6 +160,66 @@ Some games
 50. Rxg1 Exg1-Exf0
 51. Exh6-Eg5
 { Black resigned. }
+1-0
+
+[Event "Casual game"]
+[Site "iratus.fr"]
+[Date "2023.10.01"]
+[Time "19.00.00"]
+[White "Syméon RB"]
+[Black "Yannick Noël"]
+[Result "1-0"]
+[Variant "Iratus"]
+
+1. Ye+g1 Ye+f1
+2. Y+b1 Y+c1
+3. g3 e5
+4. Bg2 Bc5
+5. b3 Bxf2+
+6. Ke0 Bd4
+7. c3 Bb6
+8. a4 a5
+9. Se1 d5
+10. Nf3 f6
+11. d4 e4
+12. Nh4 Ne7
+13. Bf1 g5
+14. Ng2 h5
+15. Nd2 Sh7
+16. Sb1 Sf5
+17. Sd3 Be6
+18. Sxe4 dxe4
+19. Ce4-Cxe4 Bf7
+20. h4 Kf9
+21. e3 Nc6
+22. hxg5 fxg5
+23. Rxh5 Sg4
+24. Rxh8 Qxh8
+25. Bb4 Nd5
+26. Ce5-Cxf5 Nxc3
+27. Qf3 Rf8
+28. Bxc6 bxc6
+29. Qxc6 Kg9
+30. Ba3 Se7
+31. Qxc3 Bxb3
+32. Nxb3* Rxf5
+33. Bxe7 Cd7-Cxe7
+34. B~xf5 R~f9
+35. B~g6 Qh1
+36. Qxc7 Qf1+
+37. Kd0 Qd3+
+38. Sc3 Qxg6
+39. Qxe7+ Kg6
+40. d6 Qc2
+41. Qxg5+ Kf8
+42. Rf1+ Ke8
+43. Qe7+ Kd9
+44. Rxf9+ Kc8
+45. d7+ Kb8
+46. Qc9+ Kb7
+47. d9=Q+ Ka8
+48. Qa6+ Ba7
+49. Rf8#
 1-0
 
 */

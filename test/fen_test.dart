@@ -23,20 +23,6 @@ void main() {
         enPassantGame2.board.validNotations.join(', ') == 'e7, e6, exd7, Kg4, Ke4, Kg5, Kf5, Ke5, Kg3, Kf3, Ke3', true);
   });
 
-  test('moving again is correctly written in FEN', () {
-    IratusGame movingAgainGame = IratusGame.fromFEN('8/8/8/3C4/8/2K1k3/8/8/8/8 w - - - - 3 2');
-    movingAgainGame.move('Cd5');
-
-    expect(movingAgainGame.board.getFEN().fen == '8/8/8/8/3C4/2K1k3/8/8/8/8 w - - d5 - 4 2', true);
-  });
-
-  test('moving again FEN is correctly read & duplicated', () {
-    IratusGame movingAgainGame2 = IratusGame.fromFEN('8/8/8/8/3C4/2K1k3/8/8/8/8 w - - d5 - 4 2');
-
-    expect(movingAgainGame2.board.startFEN.fen == movingAgainGame2.board.getFEN().fen, true);
-    expect(movingAgainGame2.board.validNotations.join(', ') == 'Ce5, Cc5, Cd4, Cd6', true);
-  });
-
   // FEN TESTS
   // All the pieces are at the same position
   // Turn is applied, even when a piece moving twice has to move again

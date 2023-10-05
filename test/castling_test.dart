@@ -2,8 +2,8 @@ import 'package:iratus_game/iratus_game.dart';
 import 'package:test/test.dart';
 
 void main() {
-  String validMovesToString(Piece piece) {
-    return piece.validMoves.map((element) => element.coord).join(', ');
+  String legalMovesToString(Piece piece) {
+    return piece.board.allLegalMoves.where((m) => m.piece == piece).map((m) => m.end.coord).join(', ');
   }
 
   IratusGame game = IratusGame();
@@ -135,8 +135,11 @@ void main() {
     expect(game.board.validNotations.contains('0-0'), true);
     expect(game.board.validNotations.contains('0-0-0'), true);
     // g1 & g8 are short castles, c1 & c8 are long castles
-    expect(validMovesToString(game.board.king['w']!) == 'f1, d1, f2, e2, d2, f0, e0, d0, c1, g1', true);
-    expect(validMovesToString(game.board.king['b']!) == 'f8, d8, f9, e9, d9, f7, e7, d7, c8, g8', true);
+    expect(legalMovesToString(game.board.king['w']!) == 'f1, d1, f2, e2, d2, f0, e0, d0, c1, g1', true);
+
+    game.move('Kd0');
+
+    expect(legalMovesToString(game.board.king['b']!) == 'f8, d8, f9, e9, d9, f7, e7, d7, c8, g8', true);
   });
 
   test('Castlings can be disabled by FEN.', () {
@@ -146,32 +149,47 @@ void main() {
     expect(!game.board.validNotations.contains('0-0'), true);
     expect(!game.board.validNotations.contains('0-0-0'), true);
     // g1 & g8 are short castles, c1 & c8 are long castles
-    expect(validMovesToString(game.board.king['w']!) == 'f1, d1, f2, e2, d2, f0, e0, d0', true);
-    expect(validMovesToString(game.board.king['b']!) == 'f8, d8, f9, e9, d9, f7, e7, d7', true);
+    expect(legalMovesToString(game.board.king['w']!) == 'f1, d1, f2, e2, d2, f0, e0, d0', true);
+
+    game.move('Ke0');
+
+    expect(legalMovesToString(game.board.king['b']!) == 'f8, d8, f9, e9, d9, f7, e7, d7', true);
   });
 
   test('Can\'t castle through a checked square.', () {
     // In this starting fen, there is a king, two rooks and a queen for each side.
-    game = IratusGame.fromFEN('8/r3k2r/8/1Q6/8/8/1q6/8/R3K2R/8 w QKqk - - - 3 46');
+    game = IratusGame.fromFEN('8/r3k2r/1Q6/8/8/8/1q6/8/R3K2R/8 w QKqk - - - 3 46');
 
     expect(game.board.validNotations.contains('0-0'), true);
-    // g1 & g8 are short castles
-    expect(validMovesToString(game.board.king['w']!) == 'f1, f2, e2, d2, f0, d0, g1', true);
-    expect(validMovesToString(game.board.king['b']!) == 'f8, f9, d9, f7, e7, d7, g8', true);
+    // g1 is short castle
+    expect(legalMovesToString(game.board.king['w']!) == 'f1, f2, e2, d2, f0, d0, g1', true);
 
-    game.move('Qh6');
+    game.move('Qb6');
+
+    expect(game.board.validNotations.contains('0-0'), true);
+    // g1 is short castle
+    expect(legalMovesToString(game.board.king['b']!) == 'f8, f9, d9, f7, e7, d7, g8', true);
+
     game.move('Qh3');
 
     expect(game.board.validNotations.contains('0-0-0'), true);
-    // c1 & c8 are long castles
-    expect(validMovesToString(game.board.king['w']!) == 'd1, f2, e2, d2, f0, d0, c1', true);
-    expect(validMovesToString(game.board.king['b']!) == 'd8, f9, d9, f7, e7, d7, c8', true);
+    // c1 is long castle
+    expect(legalMovesToString(game.board.king['w']!) == 'd1, f2, e2, d2, f0, d0, c1', true);
+
+    game.move('Qh6');
+
+    expect(game.board.validNotations.contains('0-0-0'), true);
+    // c8 is long castle
+    expect(legalMovesToString(game.board.king['b']!) == 'd8, f9, d9, f7, e7, d7, c8', true);
   });
 
+  // TODO : Can\'t castle through a square checked by a phantom.
+
   test('Can\'t castle while in check.', () {
+    game.move('Qf3');
     game.move('Qe3');
 
     expect(game.board.lastMove!.notation == 'Qe3+', true);
-    expect(validMovesToString(game.board.king['b']!) == 'f8, d8, f9, d9, f7, d7', true);
+    expect(legalMovesToString(game.board.king['b']!) == 'f8, d8, f9, d9, f7, d7', true);
   });
 }

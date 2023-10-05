@@ -8,6 +8,7 @@ abstract class Move {
   Position? _enPassant;
   late final FEN _fen;
   bool _isLocked = false;
+  final Map<String, ExtraMove> _legalSecondMoves = {};
   bool _movingAgain = false; // true if the moved piece has to move again
   late String _nextTurn;
   String _notation = '';
@@ -33,17 +34,29 @@ abstract class Move {
   bool get waitingForInput => _waitingForPromotion || _waitingForSecondMove; // TODO : rework
 
   // Final fields
+  /// A representation of all the squares where the king of the current player can go or not.
+  ///
+  /// ```dart
+  /// Piece currentKing = board.king[board.turn]!;
+  /// if (move.antiking[currentKing.pos.index] == true) {
+  ///   print('In check');
+  /// }
+  /// ```
+  late final List<bool> antiking;
   final Board board;
   final Map<String, List<String>> capturedPieces = {'w': [], 'b': []}; // just for materialistic eval
   final Position end;
+  late final bool isLegal;
   final List<Function> notationTransformations = [];
   final Piece piece;
   final Position start;
   late final String turn;
   late int turnNumber;
-  late List<String> validInputs;
+  late final Iterable<String> validInputs;
 
-  Move(this.board, this.start, this.end) : piece = board.get(start)! {
+  Move(this.board, this.start, this.end)
+      : antiking = List.filled(board.nbcols * board.nbrows, false),
+        piece = board.get(start)! {
     board.currentMove = this;
 
     _nextTurn = piece.enemyColor;
@@ -94,20 +107,67 @@ abstract class Move {
 
   void _initCapturedPieces() {
     // Captured pieces display
-    if (board.calculator != null) {
-      for (final command in _commands) {
-        if (command is Capture) {
-          final Piece capturedPiece = command.captured;
-          if (capturedPiece.id == 'y') {
-            continue;
-          } // dynamite equipment
-          capturedPieces[capturedPiece.color]!.add(capturedPiece.id);
-          if (capturedPiece.dynamited) {
-            capturedPieces[capturedPiece.color]!.add('y');
-          }
+    for (final command in _commands) {
+      if (command is Capture) {
+        final Piece capturedPiece = command.captured;
+        if (capturedPiece.id == 'y') {
+          continue;
+        } // dynamite equipment
+        capturedPieces[capturedPiece.color]!.add(capturedPiece.id);
+        if (capturedPiece.dynamited) {
+          capturedPieces[capturedPiece.color]!.add('y');
         }
       }
     }
+  }
+
+  /// Defines whether this move is legal or not.
+  void _initIsLegal() {
+    // A promotion changes neither the position of pieces nor the valid moves of enemies.
+    // Therefore, we do not take it into account.
+
+    if (_waitingForSecondMove) {
+      // If the move is waiting for a second move, we need to simulate every possible input.
+
+      // First, we iterate through the valid second moves.
+      for (Position validMove in piece.identity.getValidMoves()) {
+        // We simulate the second move.
+        Extra secondMoveCommand = Extra(piece.pos, validMove);
+        executeCommand(secondMoveCommand);
+        if (secondMoveCommand.move.isLegal) {
+          // We validate the second move.
+          _legalSecondMoves[secondMoveCommand.move.notation] = secondMoveCommand.move;
+        }
+        // We undo the simulation.
+        secondMoveCommand.move.undoCommands();
+        _commands.remove(secondMoveCommand);
+      }
+      // If one input doesn't leave the king in check, the first move is legal.
+      isLegal = _legalSecondMoves.isNotEmpty;
+      return;
+    }
+
+    // We update the enemies antiking squares.
+    for (Piece enemy in board.piecesColored[piece.enemyColor]!) {
+      // Captured pieces can't check.
+      if (enemy.isCaptured) continue;
+
+      // // A phantom's antiking squares can change after a capture.
+      // // But here, the move has been made, so, if there was a capture,
+      // // the enemy phantom has its final antiking squares.
+      // // Therefore, we do not skip Phantom.updateAntiking().
+
+      // Update antiking
+      enemy.identity.updateAntiking(antiking);
+
+      // A king can't capture a dynamited piece.
+      if (enemy.dynamited) {
+        antiking[enemy.pos.index] = true;
+      }
+    }
+
+    // If the king is not on an enemy's antiking square, the move is legal.
+    isLegal = !inCheck(board.king[turn]!, antiking: antiking);
   }
 
   void _initNotation() {
@@ -145,7 +205,7 @@ abstract class Move {
       if (sameTypeAllies.isNotEmpty) {
         final List<Piece> competitiveAllies = [];
         for (final ally in sameTypeAllies) {
-          for (final validMove in ally.validMoves) {
+          for (final validMove in ally.identity.getValidMoves()) {
             if (end == validMove) {
               competitiveAllies.add(ally);
             }
@@ -208,7 +268,7 @@ abstract class Move {
     if (_waitingForPromotion) {
       validInputs = promotionValidNotations;
     } else if (_waitingForSecondMove) {
-      validInputs = []; // TODO
+      validInputs = _legalSecondMoves.keys; // TODO
     } else {
       validInputs = [];
     }
@@ -232,15 +292,23 @@ abstract class Move {
     } else if (command is Main) {
       _commands.add(command);
       _executeCommands(piece.identity.goTo(end));
-      _initNotation();
+      // A main move notation is wrote after we gathered all the legal moves,
+      // in order to solve ambiguous.
+      if (this is ExtraMove) _initNotation();
       _initCapturedPieces();
+      _initIsLegal();
       _initValidInputs();
+      if (!waitingForInput) {
+        // If not waiting for an input, the move is complete.
+        lock();
+      }
     } else if (command is Notation) {
       _notation = command.notation;
     } else if (command is NotationTransform) {
       notationTransformations.add(command.transform);
     } else if (command is RequirePromotion) {
       _waitingForPromotion = true;
+      _nextTurn = piece.color;
     } else if (command is RequireAnotherMove) {
       if (this is! MainMove) {
         throw Exception('A piece cannot move twice if it started moving because of another piece.');
@@ -270,48 +338,29 @@ abstract class Move {
 
       executeCommand(Transform(piece, 'p', notation[1].toLowerCase()));
       _notation += notation.toUpperCase();
+
+      _waitingForPromotion = false;
+      _nextTurn = piece.enemyColor;
       lock();
     } else {
       if (!_waitingForSecondMove) {
         throw Exception('Can\'t call the input method if the move is not waiting for input.');
       }
+
+      ExtraMove secondMove = _legalSecondMoves[notation]!;
+      Extra extra = Extra(secondMove.start, secondMove.end);
+      extra.move = secondMove;
+      _commands.add(extra);
+      secondMove.redoCommands();
+
+      _notation = '$_notation-${secondMove._notation}';
+
+      _waitingForSecondMove = false;
+      _nextTurn = piece.enemyColor;
+      lock();
+
+      // _commands.removeWhere((command) => command is Extra && _legalSecondMoves.values.contains(command.move));
     }
-  }
-
-  /// Return whether this move is legal or not.
-  /// Should only be called by a calculator.
-  bool isLegal() {
-    // This method is only designed for calculs.
-    if (board is! CalculatorInterface) {
-      throw Exception('A real move can\'t call isLegal()');
-    }
-
-    // A promotion changes neither the position of pieces nor the valid moves of enemies.
-    // Therefore, we do not take it into account.
-
-    // If the move is waiting for a second move, we need to simulate every possible input.
-    // If one input doesn't leave the king in check, the first move is legal.
-    if (_waitingForSecondMove) {
-      // First, we update the valid second moves.
-      piece.identity.updateValidMoves();
-
-      for (Position validMove in piece.validMoves) {
-        Extra secondMoveCommand = Extra(piece.pos, validMove);
-        executeCommand(secondMoveCommand);
-
-        // TODO : is this move legal ?
-        // TODO : store second move for valid notation
-      }
-    }
-
-    // We update the enemies antiking squares.
-    for (Piece enemyClonedPiece in board.piecesColored[piece.enemyColor]!) {
-      enemyClonedPiece.identity.updateValidMoves();
-    }
-
-    // If the king is not on an enemy's antiking square, the move is legal
-    // There is no more move for this king's army anymore, so the phantoms won't change.
-    return !inCheck(board.king[turn]!, dontCareAboutPhantoms: false);
   }
 
   /// Called when the move is finally completed. The fields of the move shouldn't change anymore.
@@ -359,6 +408,9 @@ abstract class Move {
   }
 }
 
+/// Create a move.
+///
+/// Should only be called from Board.updateAllLegalMoves().
 class MainMove extends Move {
   MainMove(super.board, super.start, super.end) {
     board.mainCurrentMove = this;
@@ -390,7 +442,7 @@ class Capture extends Command {
 class Extra extends Command {
   Position start;
   Position end;
-  late Move move;
+  late ExtraMove move;
 
   Extra(this.start, this.end);
 }

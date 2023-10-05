@@ -7,6 +7,10 @@ void main() {
   String fen = '8/8/8/8/8/K4k2/8/8/8/Q4n2 w - - - -0 0 1';
   IratusGame game = IratusGame.fromFEN(fen);
 
+  Iterable<MainMove> legalMoves(Piece piece) {
+    return piece.board.allLegalMoves.where((m) => m.piece == piece);
+  }
+
   test('A rolling piece has rolling moves.', () {
     expect(
         game.board.validNotations.join(', ') ==
@@ -27,7 +31,7 @@ void main() {
     game.move('Ne2');
     game.move('Kb3');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'e2'))!.validMoves.isEmpty, true);
+    expect(legalMoves(game.board.get(Position.fromCoords(game.board, 'e2'))!).isEmpty, true);
     expect(game.board.validNotations.join(', ') == 'Kg3, Ke3, Kg4, Kf4, Ke4, Kg2, Kf2', true);
   });
 

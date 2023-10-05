@@ -1,5 +1,7 @@
 library iratus_game;
 
+import 'dart:io';
+
 import 'pgn.dart';
 import 'position.dart';
 import 'utils.dart';
@@ -163,20 +165,18 @@ abstract class Game {
         }
       }
 
-      for (Piece piece in board.piecesColored[board.turn]!) {
-        if (!piece.isCaptured && piece.validMoves.isNotEmpty) {
-          if (board.movesHistory.isNotEmpty && board.movesHistory.last.counter50rule > 100) {
-            _result = 8; // draw by 50-moves rule
-            _winner = 1; // draw
-            return;
-          }
-          return; // game in progress
+      if (board.validNotations.isNotEmpty) {
+        if (board.movesHistory.isNotEmpty && board.movesHistory.last.counter50rule > 100) {
+          _result = 8; // draw by 50-moves rule
+          _winner = 1; // draw
+          return;
         }
+        return; // game in progress
       }
 
       // if this code is executed, it means the current player has to legal move
       Piece currentKing = board.king[board.turn]!;
-      if (inCheck(currentKing, dontCareAboutPhantoms: false)) {
+      if (inCheck(currentKing)) {
         _result = 1; // checkmate
         _winner = board.turn == 'b' ? 2 : 3; // ... won
       } else {
@@ -189,7 +189,7 @@ abstract class Game {
 
     if (_result == 1) {
       board.lastMove!._notation += '#';
-    } else if (inCheck(board.king[board.turn]!, dontCareAboutPhantoms: false)) {
+    } else if (inCheck(board.king[board.turn]!)) {
       board.lastMove!._notation += '+';
     }
   }

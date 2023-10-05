@@ -1,5 +1,16 @@
 part of iratus_game;
 
+List<Position> getPositions({required Position from, required List<List<int>> to}) {
+  List<Position> positions = [];
+
+  for (List<int> move in to) {
+    Position? pos = from.add(move);
+    if (pos != null) positions.add(pos);
+  }
+
+  return positions;
+}
+
 class Piece {
   // Class attributes
 
@@ -17,7 +28,6 @@ class Piece {
   Position _pos;
   Move? firstMove;
   bool _hasMovedInAnotherLife = false; // if the game starts from a fen where this piece has already moved
-  List<Position> validMoves = [];
 
   /// A list of attacked squares, where the enemy king can't go
   List<Position> antiking = [];
@@ -125,6 +135,21 @@ abstract class PieceIdentity {
     return commands;
   }
 
+  /// Get a list of positions where the piece can go.
+  List<Position> getValidMoves() {
+    if (p.isCaptured) throw Exception('A captured piece can\'t move.');
+
+    List<Position> validMoves = [];
+
+    for (Position pos in getPositions(from: p.pos, to: moves)) {
+      if (canGoTo(pos)) {
+        validMoves.add(pos);
+      }
+    }
+
+    return validMoves;
+  }
+
   /// move the piece to a position
   List<Command> goTo(Position pos) {
     List<Command> commands = [];
@@ -158,25 +183,12 @@ abstract class PieceIdentity {
     }
   }
 
-  /// update a Piece.validMoves
-  void updateValidMoves() {
+  /// Add some 'true' in board.antiking
+  void updateAntiking(List<bool> antiking) {
     if (p.isCaptured) return;
 
-    p.validMoves.clear();
-    p.antiking.clear();
-
-    for (List<int> move in moves) {
-      Position pos;
-      try {
-        pos = Position.fromRowCol(p.board, row: p.row + move[0], col: p.col + move[1]);
-      } catch (e) {
-        continue;
-      }
-
-      p.antiking.add(pos);
-      if (canGoTo(pos)) {
-        p.validMoves.add(pos);
-      }
+    for (Position pos in getPositions(from: p.pos, to: moves)) {
+      antiking[pos.index] = true;
     }
   }
 }
@@ -189,31 +201,46 @@ abstract class RollingPiece extends PieceIdentity {
         super(container);
 
   @override
-  void updateValidMoves() {
-    if (p.isCaptured) return;
+  List<Position> getValidMoves() {
+    if (p.isCaptured) throw Exception('A captured piece can\'t move.');
 
-    p.validMoves.clear();
-    p.antiking.clear();
+    List<Position> validMoves = [];
 
     for (List<int> move in moves) {
-      Position pos;
-      try {
-        pos = Position.fromRowCol(p.board, row: p.row + move[0], col: p.col + move[1]);
-      } catch (e) {
-        continue;
-      }
+      Position? pos = p.pos.add(move);
+      if (pos == null) continue;
 
       for (int i = 0; i < range; i++) {
-        p.antiking.add(pos);
-        if (canGoTo(pos)) {
-          p.validMoves.add(pos);
-          if (p.board.get(pos) != null) break; // capture
+        if (canGoTo(pos!)) {
+          validMoves.add(pos);
 
-          try {
-            pos = Position.fromRowCol(p.board, row: pos.row + move[0], col: pos.col + move[1]);
-          } catch (e) {
-            break;
-          }
+          if (p.board.get(pos) != null) break; // capture
+          pos = pos.add(move);
+          if (pos == null) break;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return validMoves;
+  }
+
+  @override
+  void updateAntiking(List<bool> antiking) {
+    if (p.isCaptured) return;
+
+    for (List<int> move in moves) {
+      Position? pos = p.pos.add(move);
+      if (pos == null) continue;
+
+      for (int i = 0; i < range; i++) {
+        antiking[pos!.index] = true;
+
+        if (canGoTo(pos)) {
+          if (p.board.get(pos) != null) break; // capture
+          pos = pos.add(move);
+          if (pos == null) break;
         } else {
           break;
         }
@@ -243,11 +270,8 @@ abstract class PieceMovingTwice extends PieceIdentity {
       // ex : if pulled by the grapple, no second move
       if (p.board.mainCurrentMove.piece != p) return false;
 
-      // if this is the first move on the board, this is the first move of the piece
-      if (p.board.lastMove == null) return true;
-
       // this is during the second move
-      if (p.board.lastMove!.piece == p) return false;
+      if (p.board.currentMove is ExtraMove) return false;
 
       // this is during the first move
       return true;
@@ -273,40 +297,21 @@ abstract class PieceMovingTwice extends PieceIdentity {
   }
 
   @override
-  void updateValidMoves() {
+  void updateAntiking(List<bool> antiking) {
     if (p.isCaptured) return;
 
-    p.validMoves.clear();
-    p.antiking.clear();
-
-    for (List<int> move in moves) {
-      Position pos;
-      try {
-        pos = Position.fromRowCol(p.board, row: p.row + move[0], col: p.col + move[1]);
-      } catch (e) {
-        continue; // out of board
-      }
-
-      p.antiking.add(pos);
+    for (Position pos in getPositions(from: p.pos, to: moves)) {
+      antiking[pos.index] = true;
       if (canGoTo(pos)) {
-        p.validMoves.add(pos);
+        // no second move when blown by dynamite
+        Piece? piece = p.board.get(pos);
+        if (piece != null && piece.dynamited) continue;
 
         // antiking squares accessible at second move
+        for (Position pos2 in getPositions(from: pos, to: moves)) {
+          if (pos2 == pos) continue; // a piece cannot set its own pos in antiking
 
-        Piece? piece = p.board.get(pos);
-        if (piece != null && piece.dynamited) continue; // no second move when blown by dynamite
-
-        for (List<int> move2 in moves) {
-          Position pos2;
-          try {
-            pos2 = Position.fromRowCol(p.board, row: pos.row + move2[0], col: pos.col + move2[1]);
-          } catch (e) {
-            continue; // out of board
-          }
-          if (pos2 == pos) continue; // without this line, a piece moving twice sets its own pos in antiking
-          if (p.antiking.contains(pos2)) continue;
-
-          p.antiking.add(pos2);
+          antiking[pos2.index] = true;
         }
       }
     }
@@ -354,6 +359,12 @@ class _Dog extends PieceIdentity {
   }
 
   @override
+  List<Position> getValidMoves() {
+    // a dog can't move
+    return [];
+  }
+
+  @override
   List<Command> goTo(Position pos) {
     final Position oldPos = p.pos;
     List<Command> commands = super.goTo(pos);
@@ -363,6 +374,12 @@ class _Dog extends PieceIdentity {
       commands.add(Extra(p._linkedPiece!.pos, getNewDogPos(oldPos, p.pos)));
     }
     return commands;
+  }
+
+  @override
+  void updateAntiking(List<bool> antiking) {
+    // a dog can't check
+    return;
   }
 }
 
@@ -390,18 +407,10 @@ class _Dynamite extends PieceIdentity {
   }
 
   @override
-  List<Command> goTo(Position pos) {
-    List<Command> commands = [];
-    commands.add(Capture(p, p));
-    commands.add(SetDynamite(p.board.get(pos)!));
-    return commands;
-  }
+  List<Position> getValidMoves() {
+    if (p.isCaptured) throw Exception('A captured piece can\'t move.');
 
-  @override
-  void updateValidMoves() {
-    if (p.isCaptured) return;
-
-    p.validMoves.clear();
+    List<Position> validMoves = [];
 
     for (Piece piece in p.board.piecesColored[p.color]!) {
       if (piece.isCaptured ||
@@ -412,8 +421,25 @@ class _Dynamite extends PieceIdentity {
         continue;
       }
 
-      p.validMoves.add(piece.pos);
+      validMoves.add(piece.pos);
     }
+
+    return validMoves;
+  }
+
+  @override
+  List<Command> goTo(Position pos) {
+    List<Command> commands = [];
+    commands.add(Capture(p, p));
+    commands.add(SetDynamite(p.board.get(pos)!));
+    return commands;
+  }
+
+  @override
+  void updateAntiking(List<bool> antiking) {
+    if (p.isCaptured) return;
+
+    antiking[p.pos.index] = true;
   }
 }
 
@@ -486,9 +512,9 @@ class _Grapple extends RollingPiece {
   }
 
   @override
-  void updateValidMoves() {
-    super.updateValidMoves();
-    p.antiking.clear();
+  void updateAntiking(List<bool> antiking) {
+    // a grapple can't check
+    return;
   }
 }
 
@@ -510,21 +536,56 @@ class _King extends PieceIdentity {
   _King(super.container);
 
   @override
-  bool canGoTo(Position pos) {
-    if (posIsUnderCheck(pos, dontCareAboutPhantoms: true)) return false;
+  List<Position> getValidMoves() {
+    List<Position> validMoves = super.getValidMoves();
 
-    Piece? piece = p.board.get(pos);
-    if (piece == null) {
-      return true;
-    } else if (piece.id == 'y') {
-      return false;
-    } else {
-      return piece.color != p.color && !piece.dynamited;
+    bool canLongCastle = false;
+    bool canShortCastle = false;
+
+    if (!p.hasMoved() && !inCheck(p)) {
+      // Long castle
+      Piece? leftRook = getRookAt('left', p);
+      if (leftRook != null && !leftRook.hasMoved()) {
+        canLongCastle = true;
+        for (int dx in [-1, -2]) {
+          Position pos = Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
+          if (p.board.get(pos) != null || posIsUnderCheck(pos)) {
+            canLongCastle = false;
+            break;
+          }
+        }
+        if (p.board.get(Position.fromRowCol(p.board, row: p.row, col: p.col - 3)) != null) {
+          canLongCastle = false;
+        }
+        if (canLongCastle) {
+          validMoves.add(Position.fromRowCol(p.board, row: p.row, col: p.col - 2));
+        }
+      }
+      // Short castle
+      Piece? rightRook = getRookAt('right', p);
+      if (rightRook != null && !rightRook.hasMoved()) {
+        canShortCastle = true;
+        for (int dx in [1, 2]) {
+          Position pos = Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
+          if (p.board.get(pos) != null || posIsUnderCheck(pos)) {
+            canShortCastle = false;
+            break;
+          }
+        }
+        if (canShortCastle) {
+          validMoves.add(Position.fromRowCol(p.board, row: p.row, col: p.col + 2));
+        }
+      }
     }
+
+    return validMoves;
   }
 
   @override
   List<Command> goTo(Position pos) {
+    // If pulled by grapple, no castle
+    if (p.board.mainCurrentMove.piece != p) return super.goTo(pos);
+
     bool hasMoved = p.hasMoved();
     Position oldPos = p.pos;
     List<Command> commands = super.goTo(pos);
@@ -544,72 +605,6 @@ class _King extends PieceIdentity {
     }
 
     return commands;
-  }
-
-  bool posIsUnderCheck(Position pos, {required bool dontCareAboutPhantoms}) {
-    for (Piece piece in p.board.piecesColored[p.enemyColor]!) {
-      // the phantom's antiking squares can change after a capture
-      // so they are taken in account only during calculation
-      // and when checking for a mate
-      if (dontCareAboutPhantoms == true) {
-        if (!piece.forCalcul && piece.phantomized) {
-          continue;
-        }
-      }
-
-      if (!piece.isCaptured) {
-        for (Position antiking in piece.antiking) {
-          if (pos == antiking) {
-            return true;
-          }
-        }
-      }
-    }
-    return false;
-  }
-
-  @override
-  void updateValidMoves() {
-    super.updateValidMoves();
-
-    bool canLongCastle = false;
-    bool canShortCastle = false;
-
-    if (!p.hasMoved() && !inCheck(p, dontCareAboutPhantoms: false)) {
-      // Long castle
-      Piece? leftRook = getRookAt('left', p);
-      if (leftRook != null && !leftRook.hasMoved()) {
-        canLongCastle = true;
-        for (int dx in [-1, -2]) {
-          Position pos = Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
-          if (p.board.get(pos) != null || posIsUnderCheck(pos, dontCareAboutPhantoms: false)) {
-            canLongCastle = false;
-            break;
-          }
-        }
-        if (p.board.get(Position.fromRowCol(p.board, row: p.row, col: p.col - 3)) != null) {
-          canLongCastle = false;
-        }
-        if (canLongCastle) {
-          p.validMoves.add(Position.fromRowCol(p.board, row: p.row, col: p.col - 2));
-        }
-      }
-      // Short castle
-      Piece? rightRook = getRookAt('right', p);
-      if (rightRook != null && !rightRook.hasMoved()) {
-        canShortCastle = true;
-        for (int dx in [1, 2]) {
-          Position pos = Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
-          if (p.board.get(pos) != null || posIsUnderCheck(pos, dontCareAboutPhantoms: false)) {
-            canShortCastle = false;
-            break;
-          }
-        }
-        if (canShortCastle) {
-          p.validMoves.add(Position.fromRowCol(p.board, row: p.row, col: p.col + 2));
-        }
-      }
-    }
   }
 }
 
@@ -660,6 +655,45 @@ class _Pawn extends PieceIdentity {
                 [1, 1],
                 [1, -1]
               ];
+
+  @override
+  List<Position> getValidMoves() {
+    if (p.isCaptured) throw Exception('A captured piece can\'t move.');
+
+    List<Position> validMoves = [];
+
+    for (Position pos in getPositions(from: p.pos, to: moves)) {
+      Piece? blocker = p.board.get(pos);
+      if (blocker == null) {
+        validMoves.add(pos);
+      } else if (blocker.id == 'y' && !p.dynamited) {
+        validMoves.add(pos);
+        break;
+      } else {
+        break;
+      }
+    }
+
+    for (Position pos in getPositions(from: p.pos, to: attackingMoves)) {
+      Piece? attacked = p.board.get(pos);
+      if (attacked == null) {
+        Position? enPassant;
+        if (p.board.lastMove != null) {
+          enPassant = p.board.lastMove!.enPassant;
+        } else {
+          enPassant = p.board.startFEN.enPassant;
+        }
+
+        if (enPassant == pos) {
+          validMoves.add(pos);
+        }
+      } else if (attacked.color != p.color) {
+        validMoves.add(pos);
+      }
+    }
+
+    return validMoves;
+  }
 
   @override
   List<Command> goTo(Position pos) {
@@ -723,56 +757,11 @@ class _Pawn extends PieceIdentity {
   }
 
   @override
-  void updateValidMoves() {
+  void updateAntiking(List<bool> antiking) {
     if (p.isCaptured) return;
 
-    p.validMoves.clear();
-    p.antiking.clear();
-
-    for (List<int> move in moves) {
-      Position pos;
-      try {
-        pos = Position.fromRowCol(p.board, row: p.row + move[0], col: p.col + move[1]);
-      } catch (e) {
-        continue;
-      }
-
-      Piece? blocker = p.board.get(pos);
-      if (blocker == null) {
-        p.validMoves.add(pos);
-      } else if (blocker.id == 'y' && !p.dynamited) {
-        p.validMoves.add(pos);
-        break;
-      } else {
-        break;
-      }
-    }
-
-    for (List<int> attack in attackingMoves) {
-      Position pos;
-      try {
-        pos = Position.fromRowCol(p.board, row: p.row + attack[0], col: p.col + attack[1]);
-      } catch (e) {
-        continue;
-      }
-
-      p.antiking.add(pos);
-
-      Piece? blocker = p.board.get(pos);
-      if (blocker == null) {
-        Position? enPassant;
-        if (p.board.lastMove != null) {
-          enPassant = p.board.lastMove!.enPassant;
-        } else {
-          enPassant = p.board.startFEN.enPassant;
-        }
-
-        if (enPassant != null && enPassant == pos) {
-          p.validMoves.add(pos);
-        }
-      } else if (blocker.color != p.color) {
-        p.validMoves.add(pos);
-      }
+    for (Position pos in getPositions(from: p.pos, to: attackingMoves)) {
+      antiking[pos.index] = true;
     }
   }
 }
@@ -785,6 +774,18 @@ class _Phantom extends PieceIdentity {
 
   _Phantom(Piece container) : super(container) {
     container._phantomized = true; // set once for all
+  }
+
+  @override
+  List<Position> getValidMoves() {
+    // an unphantomized phantom can't move
+    return [];
+  }
+
+  @override
+  void updateAntiking(List<bool> antiking) {
+    // an unphantomized phantom can't check
+    return;
   }
 }
 
@@ -899,9 +900,9 @@ class _Soldier extends RollingPiece {
   }
 
   @override
-  void updateValidMoves() {
-    super.updateValidMoves();
-    p.antiking.clear(); // only captures pawns, can't capture a king
+  void updateAntiking(List<bool> antiking) {
+    // a soldier can't check
+    return;
   }
 }
 
@@ -920,9 +921,3 @@ Map<String, Function(Piece piece)> identitiyConstructors = {
   's': (Piece piece) => _Soldier(piece),
   'y': (Piece piece) => _Dynamite(piece),
 };
-
-bool inCheck(Piece king, {required bool dontCareAboutPhantoms}) {
-  // TODO : replace dontCareAboutPhantoms by phantomsCanTransformBeforeCapturingTheKing ?
-  if (king.id != 'k') throw ArgumentError.value(king, 'The argument of inCheck must be a king');
-  return (king._identity as _King).posIsUnderCheck(king.pos, dontCareAboutPhantoms: dontCareAboutPhantoms);
-}

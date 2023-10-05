@@ -1,5 +1,7 @@
 part of iratus_game;
 
+// TODO : remove fen.movingAgain
+
 class _PieceInformations {
   int col = -1;
   String color = 'n';

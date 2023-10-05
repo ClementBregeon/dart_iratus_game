@@ -36,6 +36,15 @@ class Position {
     return other is Position && other.index == index;
   }
 
+  Position? add(List<int> move) {
+    try {
+      return Position.fromRowCol(board, row: row + move[0], col: col + move[1]);
+    } catch (e) {
+      // out of the board
+      return null;
+    }
+  }
+
   @override
   String toString() {
     return coord;

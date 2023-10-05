@@ -2,15 +2,19 @@ import 'package:iratus_game/iratus_game.dart';
 import 'package:test/test.dart';
 
 void main() {
-  String validMovesToString(Piece piece) {
-    return piece.validMoves.map((element) => element.coord).join(', ');
+  String legalMovesToString(Piece piece) {
+    return piece.board.allLegalMoves.where((m) => m.piece == piece).map((m) => m.end.coord).join(', ');
+  }
+
+  Iterable<MainMove> legalMoves(Piece piece) {
+    return piece.board.allLegalMoves.where((m) => m.piece == piece);
   }
 
   IratusGame game = IratusGame();
 
   test('From standart start, a dynamite can attach itself 16 pieces.', () {
     for (Piece piece in game.board.pieces) {
-      if (piece.id == 'y') expect(piece.validMoves.length == 16, true);
+      if (piece.id == 'y') expect(piece.identity.getValidMoves().length == 16, true);
     }
   });
 
@@ -26,7 +30,7 @@ void main() {
     game.move('e5');
 
     for (Piece piece in game.board.piecesColored['w']!) {
-      if (piece.id == 'y') expect(piece.validMoves.length == 15, true);
+      if (piece.id == 'y') expect(piece.identity.getValidMoves().length == 15, true);
     }
   });
 
@@ -63,9 +67,9 @@ void main() {
     game.move('Ke6');
     game.move('Ne5');
 
-    expect(game.board.king['b']!.validMoves.length == 2, true);
-    expect(game.board.king['b']!.validMoves.every((element) => element.coord != 'e5'), true);
-    expect(validMovesToString(game.board.king['b']!) == 'f6, e7', true);
+    expect(legalMoves(game.board.king['b']!).length == 2, true);
+    expect(legalMoves(game.board.king['b']!).every((element) => element.end.coord != 'e5'), true);
+    expect(legalMovesToString(game.board.king['b']!) == 'f6, e7', true);
   });
 
   test('A dynamited piece can\'t be captured if it creates a discovered check.', () {
@@ -77,9 +81,9 @@ void main() {
     game.move('Be2');
 
     Piece pawnF6 = game.board.get(Position.fromCoords(game.board, 'f6'))!;
-    expect(pawnF6.validMoves.length == 2, true);
-    expect(pawnF6.validMoves.every((element) => element.coord != 'e5'), true);
-    expect(validMovesToString(pawnF6) == 'f5, f4', true);
+    expect(legalMoves(pawnF6).length == 2, true);
+    expect(legalMoves(pawnF6).every((element) => element.end.coord != 'e5'), true);
+    expect(legalMovesToString(pawnF6) == 'f5, f4', true);
   });
 }
 

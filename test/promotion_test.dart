@@ -11,7 +11,7 @@ void main() {
 
   test('After d9, the game is waiting for the promotion input.', () {
     expect(game.board.waitingForInput, false);
-    expect(game.board.allLegalMoves.keys.join(', ') == 'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3', true);
+    expect(game.board.validNotations.join(', ') == 'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3', true);
 
     game.move('d9');
 

@@ -6,8 +6,8 @@ import 'package:iratus_game/src/game.dart';
 import 'package:test/test.dart';
 
 void main() {
-  String validMovesToString(Piece piece) {
-    return piece.validMoves.map((element) => element.coord).join(', ');
+  String legalMovesToString(Piece piece) {
+    return piece.board.allLegalMoves.where((m) => m.piece == piece).map((m) => m.end.coord).join(', ');
   }
 
   IratusGame game = IratusGame();
@@ -43,9 +43,8 @@ void main() {
     game.move('Rxa6');
 
     expect(wPhantom.id == 'p', true);
-    expect(validMovesToString(wPhantom) == 'a1, a2', true);
     expect(bPhantom.id == 'r', true);
-    expect(validMovesToString(bPhantom) == 'a8, a7, a6', true);
+    expect(legalMovesToString(bPhantom) == 'a8, a7, a6', true);
   });
 
   test('A phantom move is noted with the id of the piece followed by \'~\'.', () {
@@ -107,7 +106,7 @@ void main() {
     // In this starting fen, the king can eat the pawn but not go forward.
     game = IratusGame.fromFEN('k7/3r~4/2S(0)1S(1)3/2D(0)KD(1)3/2PpP3/8/8/8/8/8 w - - - 000000-0 0 10');
 
-    expect(validMovesToString(game.board.king['w']!) == 'd5', true);
+    expect(legalMovesToString(game.board.king['w']!) == 'd5', true);
     expect(game.board.validNotations.join(', ') == 'Kxd5', true);
   });
 
