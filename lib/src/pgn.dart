@@ -24,7 +24,8 @@ class PGN {
     tagPairs['Event'] = 'Casual game';
     tagPairs['Site'] = 'iratus.fr';
     tagPairs['Date'] = '${game.date.year}.${game.date.month}.${game.date.day}';
-    tagPairs['Time'] = '${game.date.hour}.${game.date.minute}.${game.date.second}';
+    tagPairs['Time'] =
+        '${game.date.hour}.${game.date.minute}.${game.date.second}';
     tagPairs['White'] = game.player['w']!.formattedName;
     tagPairs['Black'] = game.player['b']!.formattedName;
 
@@ -43,7 +44,8 @@ class PGN {
         } else if (game.winner == 3) {
           tagPairs['Result'] = '0-1';
         } else {
-          throw ArgumentError(game.winner, 'The game has a winner but it is not defined');
+          throw ArgumentError(
+              game.winner, 'The game has a winner but it is not defined');
         }
         break;
       case 4: // stalemate
@@ -67,9 +69,9 @@ class PGN {
 
     // moveText
     if (game.board.movesHistory.isNotEmpty) {
-      int turnNumber = game.board.startFEN.turnNumber; // TODO : 1. ... e5 instead of 1. e5 + test
+      int turnNumber = game.board.startFEN
+          .turnNumber; // TODO : 1. ... e5 instead of 1. e5 + test
       List<String> mtList = ['$turnNumber.'];
-      // Move? lastMove = game.board.movesHistory.isNotEmpty ? game.board.movesHistory.last : null;
       for (Move move in game.board.movesHistory) {
         mtList.add(move.notation);
         if (move.turnNumber > turnNumber && move != game.board.lastMove) {
@@ -85,7 +87,8 @@ class PGN {
       moveText = '';
     }
 
-    pgn = '${tagPairs.entries.map((entry) => '[${entry.key} "${entry.value}"]').join('\n')}\n\n$moveText';
+    pgn =
+        '${tagPairs.entries.map((entry) => '[${entry.key} "${entry.value}"]').join('\n')}\n\n$moveText';
   }
 
   @override

@@ -3,7 +3,10 @@ import 'package:test/test.dart';
 
 void main() {
   String legalMovesToString(Piece piece) {
-    return piece.board.allLegalMoves.where((m) => m.piece == piece).map((m) => m.end.coord).join(', ');
+    return piece.board.allLegalMoves
+        .where((m) => m.piece == piece)
+        .map((m) => m.end.coord)
+        .join(', ');
   }
 
   Iterable<MainMove> legalMoves(Piece piece) {
@@ -14,7 +17,8 @@ void main() {
 
   test('From standart start, a dynamite can attach itself 16 pieces.', () {
     for (Piece piece in game.board.pieces) {
-      if (piece.id == 'y') expect(piece.identity.getValidMoves().length == 16, true);
+      if (piece.id == 'y')
+        expect(piece.identity.getValidMoves().length == 16, true);
     }
   });
 
@@ -30,7 +34,8 @@ void main() {
     game.move('e5');
 
     for (Piece piece in game.board.piecesColored['w']!) {
-      if (piece.id == 'y') expect(piece.identity.getValidMoves().length == 15, true);
+      if (piece.id == 'y')
+        expect(piece.identity.getValidMoves().length == 15, true);
     }
   });
 
@@ -47,10 +52,14 @@ void main() {
   test('Undoing a dynamite blow works.', () {
     game.undo();
 
-    expect(game.board.get(Position.fromCoords(game.board, 'd4')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd4'))!.id == 'p', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e5')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e5'))!.id == 'p', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd4')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'd4'))!.id == 'p', true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'e5')) is Piece, true);
+    expect(
+        game.board.get(Position.fromCoords(game.board, 'e5'))!.id == 'p', true);
   });
 
   test('Redoing a dynamite blow works.', () {
@@ -68,11 +77,15 @@ void main() {
     game.move('Ne5');
 
     expect(legalMoves(game.board.king['b']!).length == 2, true);
-    expect(legalMoves(game.board.king['b']!).every((element) => element.end.coord != 'e5'), true);
+    expect(
+        legalMoves(game.board.king['b']!)
+            .every((element) => element.end.coord != 'e5'),
+        true);
     expect(legalMovesToString(game.board.king['b']!) == 'f6, e7', true);
   });
 
-  test('A dynamited piece can\'t be captured if it creates a discovered check.', () {
+  test('A dynamited piece can\'t be captured if it creates a discovered check.',
+      () {
     game.move('d5');
     game.move('Qe2');
     game.move('dxe4');
@@ -82,9 +95,8 @@ void main() {
 
     Piece pawnF6 = game.board.get(Position.fromCoords(game.board, 'f6'))!;
     expect(legalMoves(pawnF6).length == 2, true);
-    expect(legalMoves(pawnF6).every((element) => element.end.coord != 'e5'), true);
+    expect(
+        legalMoves(pawnF6).every((element) => element.end.coord != 'e5'), true);
     expect(legalMovesToString(pawnF6) == 'f5, f4', true);
   });
 }
-
-// TODO : an enemy can't go to the dynamite

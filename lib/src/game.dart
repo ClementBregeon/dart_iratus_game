@@ -281,4 +281,6 @@ class IratusGame extends Game {
   IratusGame.fromFEN(String fen) {
     board = IratusBoard(fen, this);
   }
+
+  // TODO : game.fromPGN();
 }
