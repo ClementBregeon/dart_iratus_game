@@ -84,11 +84,12 @@ class ConsoleView {
   }
 
   /// Starts the console dialogue with the players.
-  void start() {
+  void start() async {
     String? input;
     if (!_gameInitializedFromConstructor) {
       bool startedGame = false;
-      print('Enter a starting FEN or enter RETURN for a standart game :');
+      print(
+          'Enter a starting FEN or PGN file or enter RETURN for a standart game :');
       while (startedGame == false) {
         input = stdin.readLineSync();
 
@@ -112,7 +113,14 @@ class ConsoleView {
             break;
           default:
             try {
-              _game = IratusGame.fromFEN(input);
+              if (input.startsWith('pgn')) {
+                String pgnFilename = input.split(' ')[1];
+                File pgnFile = File(pgnFilename);
+                print(await pgnFile.readAsString());
+                _game = IratusGame.fromPGN(await pgnFile.readAsString());
+              } else {
+                _game = IratusGame.fromFEN(input);
+              }
               _board = _game.board;
               startedGame = true;
             } catch (e) {
@@ -187,3 +195,5 @@ class ConsoleView {
         '\nResult : ${_game.resultDoc[_game.result]}\nWinner : ${_game.winnerDoc[_game.winner]}\n\n${_game.getPGN()}');
   }
 }
+
+// [Event "Casual game"]\n[Site "iratus.fr"]\n[Date "2023.10.7"]\n[Time "15.2.27"]\n[White "Winston"]\n[Black "Bellucci"]\n[Result "*"]\n[Variant "Iratus"]\n\n1. e4 d6 2. e6 Qd7 3. exf7+ Kd8 4. fxg8 d5 5. gxf9=Q Cxf9-Cg9
