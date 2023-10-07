@@ -30,22 +30,15 @@ abstract class FEN {
 /// Works just like a chess FEN
 ///
 /// Rule reminder : a repetition occurs when the fen equalizers are the same
-/// fenEqualizer = pieces turn castleRights enPassant coordPieceMovingAgain
+/// fenEqualizer = pieces turn castleRights enPassant
 ///
 ///
 /// VALUES ORDER
 ///
-/// pieces turn castleRights enPassant coordPieceMovingAgain dynamitablesHasMoved counter50rule turnNumber
+/// pieces turn castleRights enPassant dynamitablesHasMoved counter50rule turnNumber
 ///
 ///
-/// NEW VALUES
-///
-/// coordPieceMovingAgain :
-///
-///   coordinate or "-"
-///   exemples : "a4" or "-"
-///
-///   If a PieceMovingTwice has moved once, this is the coordinates of this piece.
+/// NEW VALUE
 ///
 /// dynamitablesHasMoved :
 ///
@@ -71,8 +64,7 @@ class IratusFEN extends FEN {
   @override
   late final String fen;
   @override
-  late final String
-      fenEqualizer; // pieces turn castleRights enPassant coordPieceMovingAgain
+  late final String fenEqualizer; // pieces turn castleRights enPassant
   late final String pieces;
   late final String turn;
   late final String castleRights;
