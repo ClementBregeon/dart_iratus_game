@@ -180,4 +180,26 @@ void main() {
     expect(gamePgn.moveText == pgn.moveText, true);
     expect(gamePgn.tagPairs['Result'] == pgn.tagPairs['Result'], true);
   });
+
+  test('An IratusGame is correctly finished from PGN with checkmate.', () {
+    // Complex moves are checks, promotions and pieces moving twice
+    String pgnString = '''[Event "Casual game"]
+[Site "iratus.fr"]
+[Date "2023.10.7"]
+[Time "13.54.6"]
+[White "Wall-e"]
+[Black "Bumblebee"]
+[Result "0-1"]
+[Variant "Iratus"]
+
+1. f3 e5 2. g4 Qh4# 0-1''';
+    IratusPGN pgn = IratusPGN.fromString(pgnString);
+    IratusGame game = IratusGame.fromPGN(pgnString);
+    IratusPGN gamePgn = game.getPGN();
+
+    expect(gamePgn.tagPairs['Black'] == pgn.tagPairs['Black'], true);
+    expect(gamePgn.tagPairs['White'] == pgn.tagPairs['White'], true);
+    expect(gamePgn.moveText == pgn.moveText, true);
+    expect(gamePgn.tagPairs['Result'] == pgn.tagPairs['Result'], true);
+  });
 }
