@@ -21,11 +21,13 @@ void main() {
     expect(game.board.lastMove!.notation == 'd9', true);
     expect(game.board.waitingForInput, true);
     expect(oldTurn == game.board.turn, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'p', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'p',
+        true);
     expect(
         game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
   });
@@ -35,11 +37,13 @@ void main() {
 
     expect(game.board.waitingForInput, false);
     expect(oldTurn == game.board.turn, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'p', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id == 'p',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) == null,
+        true);
     expect(
         game.board.validNotations.join(', ') ==
             'd8, d9, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3',
@@ -59,11 +63,13 @@ void main() {
     expect(game.board.lastMove!.notation == 'd9', true);
     expect(game.board.waitingForInput, true);
     expect(oldTurn == game.board.turn, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'p', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'p',
+        true);
     expect(
         game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
   });
@@ -76,11 +82,13 @@ void main() {
     expect(game.board.lastMove!.notation == 'd9=Q', true);
     expect(game.board.waitingForInput, false);
     expect(oldTurn != game.board.turn, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'q', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'q',
+        true);
   });
 
   test('An undone promotion moves the pawn.', () {
@@ -88,11 +96,13 @@ void main() {
 
     expect(game.board.waitingForInput, false);
     expect(oldTurn == game.board.turn, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'p', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id == 'p',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) == null,
+        true);
   });
 
   test('A redone promotion doesn\'t wait for promotion input.', () {
@@ -101,11 +111,13 @@ void main() {
     expect(game.board.lastMove!.notation == 'd9=Q', true);
     expect(game.board.waitingForInput, false);
     expect(oldTurn != game.board.turn, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'q', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'q',
+        true);
   });
 
   test('A promotion with discovered check is correctly noted.', () {

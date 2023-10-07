@@ -64,21 +64,33 @@
       
 
 <span class="returntype">void</span>
-<span class="name ">undo</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="undo-param-move"><span class="type-annotation">Move</span> <span class="parameter-name">move</span></span></li>
-</ol>)
+<span class="name ">undo</span>(<wbr>)
 
       <div class="features"><span class="feature">inherited</span></div>
 
     </section>
     
+<section class="desc markdown">
+  <p>Undo the last move played</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void undo(Move move) {
-  for (final Command command in move.commands.reversed) {
-    move.undoCommand(command);
+  <pre class="language-dart"><code class="language-dart">void undo() {
+  if (movesHistory.isEmpty) {
+    return;
+  }
+
+  MainMove undoneMove = movesHistory.removeLast();
+
+  undoneMove.undoCommands();
+
+  if (!_duringCalcul) {
+    &#47;&#47; _backMovesHistory only stores real moves, not calcul moves
+    _backMovesHistory.add(undoneMove);
+    updateAllLegalMoves();
   }
 }</code></pre>
 </section>

@@ -53,7 +53,7 @@ class ConsoleView {
       String line = '${board.nbrows - 1 - row} │';
       for (int col = 0; col < board.nbcols; col++) {
         Piece? piece =
-            board.get(Position.fromRowCol(board, row: row, col: col));
+            board.getPiece(Position.fromRowCol(board, row: row, col: col));
         if (piece == null) {
           line += '   │';
         } else {
@@ -192,7 +192,7 @@ class ConsoleView {
     }
     printBoard(_board);
     print(
-        '\nResult : ${_game.resultDoc[_game.result]}\nWinner : ${_game.winnerDoc[_game.winner]}\n\n${_game.getPGN()}');
+        '\nResult : ${resultDoc[_game.result]}\nWinner : ${winnerDoc[_game.winner]}\n\n${_game.getPGN()}');
   }
 }
 

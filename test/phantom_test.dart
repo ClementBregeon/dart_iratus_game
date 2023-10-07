@@ -2,7 +2,6 @@
 // It is possible to have 0, 1 or more phantoms
 
 import 'package:iratus_game/iratus_game.dart';
-import 'package:iratus_game/src/game.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -15,8 +14,8 @@ void main() {
 
   IratusGame game = IratusGame();
   Board board = game.board;
-  Piece wPhantom = board.get(Position.fromCoords(board, 'a0'))!;
-  Piece bPhantom = board.get(Position.fromCoords(board, 'a9'))!;
+  Piece wPhantom = board.getPiece(Position.fromCoords(board, 'a0'))!;
+  Piece bPhantom = board.getPiece(Position.fromCoords(board, 'a9'))!;
 
   test('Phantomization works.', () {
     game.move('a4');
@@ -124,7 +123,7 @@ void main() {
     game =
         IratusGame.fromFEN('8/8/8/2p1s3/3P4/8/8/8/1K2f1k1/8 w - - 0-00 0 10');
 
-    bPhantom = game.board.get(Position.fromCoords(game.board, 'e1'))!;
+    bPhantom = game.board.getPiece(Position.fromCoords(game.board, 'e1'))!;
 
     game.move('dxc6');
     game.move('P~e0');

@@ -10,26 +10,32 @@ void main() {
 
     game.move('d8');
 
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e8')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e8'))!.id == 'p',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e8'))!.id == 'p', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd8')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd8'))!.id == 'p', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd8'))!.id == 'p',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) == null,
+        true);
     expect(game.board.lastMove!.enPassant != null, true);
     expect(game.board.lastMove!.enPassant!.coord == 'd7', true);
 
     game.move('exd7');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'e8')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd8')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'p', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id == 'p',
+        true);
     expect(game.board.lastMove!.enPassant == null, true);
   });
 
@@ -39,24 +45,30 @@ void main() {
     IratusGame game =
         IratusGame.fromFEN('8/3Pp3/8/8/8/2K2k2/8/8/8/8 b - d7 0-0 0 1');
 
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e8')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e8'))!.id == 'p',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e8'))!.id == 'p', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd8')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd8'))!.id == 'p', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd8'))!.id == 'p',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) == null,
+        true);
 
     game.move('exd7');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'e8')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd8')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'p', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id == 'p',
+        true);
   });
 
   test('En passant at coordinates given by FEN (the pawn just promoted)', () {
@@ -66,23 +78,29 @@ void main() {
     IratusGame game =
         IratusGame.fromFEN('3Qp3/8/8/8/8/2K2k2/8/8/8/8 b - d8 -0 0 1');
 
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e9')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e9')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e9'))!.id == 'p',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e9'))!.id == 'p', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd9')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd9'))!.id == 'q', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd8')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'q',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd8')) == null,
+        true);
 
     game.move('exd8');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'e9')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd9')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e9')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd8')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd8'))!.id == 'p', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd8'))!.id == 'p',
+        true);
   });
 }

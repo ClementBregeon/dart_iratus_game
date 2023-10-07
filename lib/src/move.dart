@@ -1,5 +1,6 @@
 part of iratus_game;
 
+/// A description of a piece move and all its consequences.
 abstract class Move {
   // Private fields
   int _capturesCounter = 0;
@@ -53,12 +54,12 @@ abstract class Move {
   final Position start;
   late final String turn;
   late int turnNumber;
-  late final Iterable<String> validInputs;
+  late final List<String> validInputs;
 
   Move(this.board, this.start, this.end)
       : antiking = List.filled(board.nbcols * board.nbrows, false),
-        piece = board.get(start)! {
-    board.currentMove = this;
+        piece = board.getPiece(start)! {
+    board._currentMove = this;
 
     _nextTurn = piece.enemyColor;
     turn = piece.color;
@@ -90,7 +91,7 @@ abstract class Move {
       turnNumber = lastMoveTurnNumber;
     }
 
-    final Piece? captured = board.get(end);
+    final Piece? captured = board.getPiece(end);
     if (captured != null && !cantCapture.contains(piece.id)) {
       executeCommand(Capture(captured, piece));
     }
@@ -337,7 +338,7 @@ abstract class Move {
     if (_waitingForPromotion) {
       validInputs = promotionValidNotations;
     } else if (_waitingForSecondMove) {
-      validInputs = _legalSecondMoves.keys;
+      validInputs = _legalSecondMoves.keys.toList();
     } else {
       validInputs = [];
     }
@@ -441,7 +442,7 @@ abstract class Move {
   }
 
   void redoCommands() {
-    board.currentMove = this;
+    board._currentMove = this;
     for (final command in _commands) {
       if (command is Extra) {
         command.move.redoCommands();
@@ -479,22 +480,23 @@ abstract class Move {
   }
 }
 
-/// Create a move.
-///
-/// Should only be called from Board.updateAllLegalMoves().
+/// A move played by the player, it can create extra moves.
 class MainMove extends Move {
   MainMove(super.board, super.start, super.end) {
-    board.mainCurrentMove = this;
+    board._mainCurrentMove = this;
     executeCommand(Main());
   }
 
   @override
   void redoCommands() {
-    board.mainCurrentMove = this;
+    board._mainCurrentMove = this;
     super.redoCommands();
   }
 }
 
+/// A move automatically played because of a MainMove.
+///
+/// Example : when the soldier moves, the dog's movement is an ExtraMove.
 class ExtraMove extends Move {
   ExtraMove(super.board, super.start, super.end) {
     executeCommand(Main());

@@ -12,6 +12,9 @@ List<Position> getPositions(
   return positions;
 }
 
+/// A piece on the board.
+///
+/// id is the type identifier. Ex : q means Queen.
 class Piece {
   // Class attributes
 
@@ -62,7 +65,7 @@ class Piece {
     }
     if (!ids.contains(id)) throw ArgumentError.value(id, 'Unknown piece id');
     _identity = identitiyConstructors[id]!(this);
-    board.addPiece(this);
+    board._addPiece(this);
   }
 
   /// Tells if a piece has already moved or not
@@ -93,7 +96,7 @@ class Piece {
   }
 
   void uncapture() {
-    board.piecesByPos[pos.index] = this;
+    board._piecesByPos[pos.index] = this;
     isCaptured = false;
   }
 }
@@ -108,7 +111,7 @@ abstract class PieceIdentity {
 
   /// return wether a piece can go to a square or not
   bool canGoTo(Position pos) {
-    Piece? piece = p.board.get(pos);
+    Piece? piece = p.board.getPiece(pos);
     if (piece == null) {
       return true;
     } else if (piece.id == 'y') {
@@ -124,7 +127,7 @@ abstract class PieceIdentity {
   List<Command> capture(Piece capturer) {
     List<Command> commands = [];
 
-    p.board.piecesByPos[p.pos.index] = null;
+    p.board._piecesByPos[p.pos.index] = null;
     p.isCaptured = true;
 
     if (p.dynamited && !capturer.isCaptured) {
@@ -134,7 +137,7 @@ abstract class PieceIdentity {
 
     if (p.board is IratusBoard) {
       for (final Piece alliedPhantom
-          in (p.board as IratusBoard).phantoms[p.color]!) {
+          in (p.board as IratusBoard)._phantoms[p.color]!) {
         if (!alliedPhantom.isCaptured) {
           commands.add(Transform(alliedPhantom, alliedPhantom.id, id));
         }
@@ -167,14 +170,14 @@ abstract class PieceIdentity {
     p._pos = pos;
 
     // if firstMove is null, it is set to board.currentMove
-    p.firstMove ??= p.board.currentMove;
+    p.firstMove ??= p.board._currentMove;
 
     if (p.isCaptured) {
       return commands;
     }
 
-    p.board.piecesByPos[oldPosIndex] = null;
-    p.board.piecesByPos[pos.index] = p;
+    p.board._piecesByPos[oldPosIndex] = null;
+    p.board._piecesByPos[pos.index] = p;
 
     return commands;
   }
@@ -223,7 +226,7 @@ abstract class RollingPiece extends PieceIdentity {
         if (canGoTo(pos!)) {
           validMoves.add(pos);
 
-          if (p.board.get(pos) != null) break; // capture
+          if (p.board.getPiece(pos) != null) break; // capture
           pos = pos.add(move);
           if (pos == null) break;
         } else {
@@ -247,7 +250,7 @@ abstract class RollingPiece extends PieceIdentity {
         antiking[pos!.index] = true;
 
         if (canGoTo(pos)) {
-          if (p.board.get(pos) != null) break; // capture
+          if (p.board.getPiece(pos) != null) break; // capture
           pos = pos.add(move);
           if (pos == null) break;
         } else {
@@ -277,10 +280,10 @@ abstract class PieceMovingTwice extends PieceIdentity {
 
       // a piece cannot move twice if it started moving because of another piece
       // ex : if pulled by the grapple, no second move
-      if (p.board.mainCurrentMove.piece != p) return false;
+      if (p.board._mainCurrentMove.piece != p) return false;
 
       // this is during the second move
-      if (p.board.currentMove is ExtraMove) return false;
+      if (p.board._currentMove is ExtraMove) return false;
 
       // this is during the first move
       return true;
@@ -311,7 +314,7 @@ abstract class PieceMovingTwice extends PieceIdentity {
       antiking[pos.index] = true;
       if (canGoTo(pos)) {
         // no second move when blown by dynamite
-        Piece? piece = p.board.get(pos);
+        Piece? piece = p.board.getPiece(pos);
         if (piece != null && piece.dynamited) continue;
 
         // antiking squares accessible at second move
@@ -439,7 +442,7 @@ class _Dynamite extends PieceIdentity {
   List<Command> goTo(Position pos) {
     List<Command> commands = [];
     commands.add(Capture(p, p));
-    commands.add(SetDynamite(p.board.get(pos)!));
+    commands.add(SetDynamite(p.board.getPiece(pos)!));
     return commands;
   }
 
@@ -498,7 +501,7 @@ class _Grapple extends RollingPiece {
 
   @override
   bool canGoTo(Position pos) {
-    Piece? piece = p.board.get(pos);
+    Piece? piece = p.board.getPiece(pos);
 
     // The only piece tha grapple can't move is the unequipped dynamite
     return piece == null ? true : piece.id != 'y';
@@ -506,7 +509,7 @@ class _Grapple extends RollingPiece {
 
   @override
   List<Command> goTo(Position pos) {
-    Piece? grappled = p.board.get(pos);
+    Piece? grappled = p.board.getPiece(pos);
 
     if (grappled == null) return super.goTo(pos);
 
@@ -562,12 +565,12 @@ class _King extends PieceIdentity {
         for (int dx in [-1, -2]) {
           Position pos =
               Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
-          if (p.board.get(pos) != null || posIsUnderCheck(pos)) {
+          if (p.board.getPiece(pos) != null || posIsUnderCheck(pos)) {
             canLongCastle = false;
             break;
           }
         }
-        if (p.board.get(
+        if (p.board.getPiece(
                 Position.fromRowCol(p.board, row: p.row, col: p.col - 3)) !=
             null) {
           canLongCastle = false;
@@ -584,7 +587,7 @@ class _King extends PieceIdentity {
         for (int dx in [1, 2]) {
           Position pos =
               Position.fromRowCol(p.board, row: p.row, col: p.col + dx);
-          if (p.board.get(pos) != null || posIsUnderCheck(pos)) {
+          if (p.board.getPiece(pos) != null || posIsUnderCheck(pos)) {
             canShortCastle = false;
             break;
           }
@@ -602,7 +605,7 @@ class _King extends PieceIdentity {
   @override
   List<Command> goTo(Position pos) {
     // If pulled by grapple, no castle
-    if (p.board.mainCurrentMove.piece != p) return super.goTo(pos);
+    if (p.board._mainCurrentMove.piece != p) return super.goTo(pos);
 
     bool hasMoved = p.hasMoved();
     Position oldPos = p.pos;
@@ -683,7 +686,7 @@ class _Pawn extends PieceIdentity {
     List<Position> validMoves = [];
 
     for (Position pos in getPositions(from: p.pos, to: moves)) {
-      Piece? blocker = p.board.get(pos);
+      Piece? blocker = p.board.getPiece(pos);
       if (blocker == null) {
         validMoves.add(pos);
       } else if (blocker.id == 'y' && !p.dynamited) {
@@ -695,7 +698,7 @@ class _Pawn extends PieceIdentity {
     }
 
     for (Position pos in getPositions(from: p.pos, to: attackingMoves)) {
-      Piece? attacked = p.board.get(pos);
+      Piece? attacked = p.board.getPiece(pos);
       if (attacked == null) {
         Position? enPassant;
         if (p.board.lastMove != null) {
@@ -721,11 +724,11 @@ class _Pawn extends PieceIdentity {
     List<Command> commands = super.goTo(pos);
 
     // If moved two squares, can be en-passant-ed
-    // If p.board.currentMove != p.board.mainCurrentMove, the pawn has been pulled by a grapple
-    // If p.board.currentMove.end != pos, the function is called from a undo()
+    // If p.board._currentMove != p.board._mainCurrentMove, the pawn has been pulled by a grapple
+    // If p.board._currentMove.end != pos, the function is called from a undo()
     if ((oldRow - p.row).abs() == 2 &&
-        p.board.currentMove == p.board.mainCurrentMove &&
-        p.board.currentMove.end == pos) {
+        p.board._currentMove == p.board._mainCurrentMove &&
+        p.board._currentMove.end == pos) {
       Position enPassantPos = Position.fromRowCol(p.board,
           row: p.row + (p.color == 'w' ? 1 : -1), col: p.col);
       commands.add(SetEnPassant(enPassantPos));
@@ -751,7 +754,7 @@ class _Pawn extends PieceIdentity {
         // happens when capturing en passant is the first move after a load from fen
         Position enemyPawnPos = Position.fromRowCol(p.board,
             row: enPassant.row + (p.color == 'w' ? 1 : -1), col: enPassant.col);
-        Piece? captured = p.board.get(enemyPawnPos);
+        Piece? captured = p.board.getPiece(enemyPawnPos);
         if (captured == null || captured.id != 'p') {
           // There is a very rare case, where the pawn moved two squares and promoted,
           // and an enemy pawn is on the first row (which is illegal in classic chess).
@@ -770,7 +773,7 @@ class _Pawn extends PieceIdentity {
 
   @override
   redo(pos) {
-    if (p.board.currentMove.notation.contains('=')) {
+    if (p.board._currentMove.notation.contains('=')) {
       // If the redone move has a promotion, skip call to Pawn.redo(), avoiding the promotion choice
       super.goTo(pos);
     } else {
@@ -865,7 +868,7 @@ class _Soldier extends RollingPiece {
 
   @override
   bool canGoTo(Position pos) {
-    Piece? piece = p.board.get(pos);
+    Piece? piece = p.board.getPiece(pos);
     if (piece == null) {
       return true;
     } else if (piece.id == 'y') {

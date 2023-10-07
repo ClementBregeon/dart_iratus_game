@@ -64,25 +64,32 @@
       
 
 <span class="returntype">void</span>
-<span class="name ">redo</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="redo-param-move"><span class="type-annotation">Move</span> <span class="parameter-name">move</span>, </span></li>
-<li><span class="parameter" id="redo-param-main">{<span class="type-annotation">dynamic</span> <span class="parameter-name">main</span> = <span class="default-value">true</span>}</span></li>
-</ol>)
+<span class="name ">redo</span>(<wbr>)
 
       <div class="features"><span class="feature">inherited</span></div>
 
     </section>
     
+<section class="desc markdown">
+  <p>Redo the last move undone</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void redo(Move move, {main = true}) {
-  currentMove = move;
-  if (main) {
-    mainCurrentMove = currentMove;
+  <pre class="language-dart"><code class="language-dart">void redo() {
+  if (_backMovesHistory.isEmpty) {
+    return;
   }
-  move.redoCommands();
+
+  MainMove lastUndoneMove = _backMovesHistory.removeLast();
+
+  lastUndoneMove.redoCommands();
+
+  movesHistory.add(lastUndoneMove);
+
+  updateAllLegalMoves();
 }</code></pre>
 </section>
 

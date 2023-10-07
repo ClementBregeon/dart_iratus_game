@@ -9,7 +9,7 @@ void main() {
         .join(', ');
   }
 
-  Iterable<MainMove> legalMoves(Piece piece) {
+  Iterable<Move> legalMoves(Piece piece) {
     return piece.board.allLegalMoves.where((m) => m.piece == piece);
   }
 
@@ -17,8 +17,9 @@ void main() {
 
   test('From standart start, a dynamite can attach itself 16 pieces.', () {
     for (Piece piece in game.board.pieces) {
-      if (piece.id == 'y')
+      if (piece.id == 'y') {
         expect(piece.identity.getValidMoves().length == 16, true);
+      }
     }
   });
 
@@ -34,8 +35,9 @@ void main() {
     game.move('e5');
 
     for (Piece piece in game.board.piecesColored['w']!) {
-      if (piece.id == 'y')
+      if (piece.id == 'y') {
         expect(piece.identity.getValidMoves().length == 15, true);
+      }
     }
   });
 
@@ -45,28 +47,34 @@ void main() {
     game.move('d4');
     game.move('exd4*');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'd4')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e5')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd4')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e5')) == null,
+        true);
   });
 
   test('Undoing a dynamite blow works.', () {
     game.undo();
 
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd4')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd4')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd4'))!.id == 'p',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e5')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd4'))!.id == 'p', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'e5')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'e5'))!.id == 'p', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e5'))!.id == 'p',
+        true);
   });
 
   test('Redoing a dynamite blow works.', () {
     game.redo();
 
-    expect(game.board.get(Position.fromCoords(game.board, 'd4')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e5')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd4')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e5')) == null,
+        true);
   });
 
   test('A king can\'t capture a dynamited piece.', () {
@@ -93,7 +101,7 @@ void main() {
     game.move('f6');
     game.move('Be2');
 
-    Piece pawnF6 = game.board.get(Position.fromCoords(game.board, 'f6'))!;
+    Piece pawnF6 = game.board.getPiece(Position.fromCoords(game.board, 'f6'))!;
     expect(legalMoves(pawnF6).length == 2, true);
     expect(
         legalMoves(pawnF6).every((element) => element.end.coord != 'e5'), true);

@@ -71,7 +71,7 @@
 <span class="returntype">FEN</span>
 <span class="name ">getFEN</span>(<wbr>)
 
-      
+      <div class="features"><span class="feature">override</span></div>
 
     </section>
     
@@ -85,7 +85,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">@override
 FEN getFEN() {
-  return IratusFEN.fromBoard(this, turn: _game.turn);
+  return IratusFEN.fromBoard(this);
 }</code></pre>
 </section>
 

@@ -4,20 +4,20 @@ import 'package:test/test.dart';
 void main() {
   IratusGame game = IratusGame();
 
-  Piece dogB0 = game.board.get(Position.fromCoords(game.board, 'b0'))!;
-  Piece soldierC0 = game.board.get(Position.fromCoords(game.board, 'c0'))!;
+  Piece dogB0 = game.board.getPiece(Position.fromCoords(game.board, 'b0'))!;
+  Piece soldierC0 = game.board.getPiece(Position.fromCoords(game.board, 'c0'))!;
 
-  Piece dogG0 = game.board.get(Position.fromCoords(game.board, 'g0'))!;
-  Piece soldierF0 = game.board.get(Position.fromCoords(game.board, 'f0'))!;
+  Piece dogG0 = game.board.getPiece(Position.fromCoords(game.board, 'g0'))!;
+  Piece soldierF0 = game.board.getPiece(Position.fromCoords(game.board, 'f0'))!;
 
-  Piece dogB9 = game.board.get(Position.fromCoords(game.board, 'b9'))!;
-  Piece soldierC9 = game.board.get(Position.fromCoords(game.board, 'c9'))!;
+  Piece dogB9 = game.board.getPiece(Position.fromCoords(game.board, 'b9'))!;
+  Piece soldierC9 = game.board.getPiece(Position.fromCoords(game.board, 'c9'))!;
 
-  Piece dogG9 = game.board.get(Position.fromCoords(game.board, 'g9'))!;
-  Piece soldierF9 = game.board.get(Position.fromCoords(game.board, 'f9'))!;
+  Piece dogG9 = game.board.getPiece(Position.fromCoords(game.board, 'g9'))!;
+  Piece soldierF9 = game.board.getPiece(Position.fromCoords(game.board, 'f9'))!;
 
-  Piece wPhantom = game.board.get(Position.fromCoords(game.board, 'a0'))!;
-  Piece bPhantom = game.board.get(Position.fromCoords(game.board, 'a9'))!;
+  Piece wPhantom = game.board.getPiece(Position.fromCoords(game.board, 'a0'))!;
+  Piece bPhantom = game.board.getPiece(Position.fromCoords(game.board, 'a9'))!;
 
   test('From standart start, dogs and soldiers are correctly linked.', () {
     expect(dogB0.linkedPiece == soldierC0, true);
@@ -32,30 +32,37 @@ void main() {
     game.move('h4');
     game.move('Sb8');
 
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'b8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'b8')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'b8'))!.id == 's',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'c9')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'b9')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'b8'))!.id == 's', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'c9')) == null, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'b9')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'b9'))!.id == 'd', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'b9'))!.id == 'd',
+        true);
   });
 
   test('When a soldier moves far away from the dog, the dog follows.', () {
     game.move('Sh2');
 
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'h2')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'h2')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'h2'))!.id == 's',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'f0')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'g0')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'g1')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'h2'))!.id == 's', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'f0')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'g0')) == null, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'g1')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'g1'))!.id == 'd', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'g1'))!.id == 'd',
+        true);
   });
 
   test('When a soldier dies, the dog enrages.', () {
@@ -65,14 +72,16 @@ void main() {
     game.move('Se5');
     game.move('Nxe5');
 
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e5')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e5')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e5'))!.id == 'n',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'f4')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e5'))!.id == 'n', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'f4')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'f4'))!.id == 'c', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'f4'))!.id == 'c',
+        true);
   });
 
   test('The phantom of the previous capture is a soldier.', () {
@@ -86,11 +95,13 @@ void main() {
     game.move('Ye+f9');
     game.move('Nxb6');
 
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'b6')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'b6')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'b6'))!.id == 'n', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'c5')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'b6'))!.id == 'n',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'c5')) == null,
+        true);
   });
 
   test('The phantom of the previous capture is an enraged dog.', () {
@@ -106,9 +117,12 @@ void main() {
     game.move('Sd7');
     game.move('Nxe8*');
 
-    expect(game.board.get(Position.fromCoords(game.board, 'e8')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd7')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'f6')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'f6')) == null,
+        true);
   });
 
   test('The phantom of the previous capture is an enraged dog.', () {
@@ -127,7 +141,6 @@ void main() {
     game.move('Gh0');
     game.move('Sg0=E');
 
-    print(game.board.lastMove!.notation);
     expect(game.board.lastMove!.notation == 'Sg0=E+', true);
   });
 }

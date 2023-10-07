@@ -1,14 +1,5 @@
 import 'game.dart';
 
-/// An object representating an Iratus game.
-///
-/// Date format : YYYY.MM.DD
-///
-/// Result possible values :
-///   - '1-0' :      white wins
-///   - '0-1' :      black wins
-///   - '1/2-1/2' :  drawn game
-///   - '*' :        game still in progress, game abandoned, or result otherwise unknown
 abstract class PGN {
   /// The string storing the game
   late final String pgn;
@@ -25,6 +16,15 @@ abstract class PGN {
   }
 }
 
+/// An object representating an Iratus game.
+///
+/// Date format : YYYY.MM.DD
+///
+/// Result possible values :
+///   - '1-0' :      white wins
+///   - '0-1' :      black wins
+///   - '1/2-1/2' :  drawn game
+///   - '*' :        game still in progress, game abandoned, or result otherwise unknown
 class IratusPGN extends PGN {
   IratusPGN(Game game) {
     // tags
@@ -80,7 +80,7 @@ class IratusPGN extends PGN {
       List<String> mtList = ['$turnNumber.'];
       if (game.board.movesHistory.isNotEmpty &&
           game.board.movesHistory[0].turn == 'b') {
-        mtList.add('...'); // TODO : test
+        mtList.add('...');
       }
       for (Move move in game.board.movesHistory) {
         mtList.add(move.notation);

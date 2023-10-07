@@ -73,8 +73,15 @@
     
 <section class="desc markdown">
   <p>Move a piece, following the move notation.</p>
-<p>The argument is a light notation : no check or mate symbol,
-and if it moves a piece moving twice, only 1 move at a time.</p>
+<p>The argument is a light notation :</p>
+<ul>
+<li>no check symbol.</li>
+<li>no mate symbol.</li>
+<li>no promotion notation.</li>
+<li>if it moves a piece moving twice, only 1 move at a time.</li>
+</ul>
+<p>We don't require check and mate symbol, in order to let the player evaluate the move by himself.
+The promotion and the second move of a piece moving twice are inputs given after a first move.</p>
 </section>
 
 
@@ -84,21 +91,14 @@ and if it moves a piece moving twice, only 1 move at a time.</p>
   <pre class="language-dart"><code class="language-dart">void move(String notation) {
   if (_result &gt; 0) throw ArgumentError(&#39;The game has already ended&#39;);
 
-  Move? calcMove = board.allValidMoves[notation];
-  if (calcMove == null) {
-    throw ArgumentError.value(notation, &#39;Unknown move&#39;);
+  board._move(notation);
+
+  if (board.lastMove!.waitingForInput) {
+    &#47;&#47; wait for promotion input or second move
+    return;
   }
 
-  Move currentMove = board.move(calcMove.start, calcMove.end, main: true);
-  movesHistory.add(currentMove);
-  board.lastMove = currentMove;
-  if (board.pawnToPromote == null) {
-    _turn = currentMove.nextTurn;
-    _fenHistory.add(board.getFEN());
-    _backMovesHistory.clear();
-    board.updateAllValidMoves();
-    _checkForEnd();
-  }
+  _checkForEnd();
 }</code></pre>
 </section>
 

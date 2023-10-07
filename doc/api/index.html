@@ -52,34 +52,39 @@
   <div id="dartdoc-main-content" class="main-content">
       
 <section class="desc markdown">
-  <!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
-
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages). 
--->
-<p>TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.</p>
-<h2 id="features">Features</h2>
-<p>TODO: List what your package can do. Maybe include images, gifs, or videos.</p>
+  <h1 id="iratus_game">iratus_game</h1>
+<p>iratus_game is a package designed to play the Iratus chess variant.</p>
+<p>It includes all the features necessary for classic chess such as FEN and PGN notations.</p>
 <h2 id="getting-started">Getting started</h2>
-<p>TODO: List prerequisites and provide or point to information on how to
-start using the package.</p>
-<h2 id="usage">Usage</h2>
-<p>TODO: Include short and useful examples for package users. Add longer examples
-to <code>/example</code> folder.</p>
-<pre class="language-dart"><code class="language-dart">const like = 'sample';
+<p>Easily start a game in the console :</p>
+<pre class="language-dart"><code class="language-dart">import 'package:iratus_game/iratus_game.dart';
+
+void main() {
+  ConsoleView cv = ConsoleView();
+  cv.start();
+}
+</code></pre>
+<p>Or create a randomized game :</p>
+<pre class="language-dart"><code class="language-dart">void main() {
+  IratusGame game = IratusGame();
+  while (game.result == 0) {
+    var moves = game.board.validNotations.toList();
+    moves.shuffle();
+    var move = moves[0];
+    game.move(move);
+    print('Played: $move');
+  }
+  ConsoleView.printBoard(game.board);
+  print(game.getPGN());
+}
 </code></pre>
 <h2 id="additional-information">Additional information</h2>
-<p>TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.</p>
+<ul>
+<li><a href="https://iratus.fr">Iratus Official Website</a></li>
+<li><a href="https://pub.dev/packages/iratus_game">iratus_game on pub.dev</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation">Wikipedia's Article on FEN Format</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Portable_Game_Notation">Wikipedia's Article on PGN Format</a></li>
+</ul>
 </section>
 
 
@@ -90,7 +95,7 @@ from the package authors, and more.</p>
   <span class="name"><a href="iratus_game/iratus_game-library.html">iratus_game</a></span> 
 
 </dt>
-<dd>Support for doing something awesome.
+<dd>
 </dd>
 
         </dl>

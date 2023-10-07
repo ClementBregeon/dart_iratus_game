@@ -61,8 +61,33 @@
 </h1></div>
 
     
+<section class="desc markdown">
+  <p>An object representating the board. It contains the pieces.</p>
+</section>
 
 
+    <section>
+      <dl class="dl-horizontal">
+        
+  <dt>Inheritance</dt>
+  <dd>
+    <ul class="gt-separated dark clazz-relationships">
+      <li><a href="https://api.dart.dev/stable/3.1.0/dart-core/Object-class.html">Object</a></li>
+        <li><a href="../iratus_game/Board-class.html">Board</a></li>
+      <li>IratusBoard</li>
+    </ul>
+  </dd>
+
+        
+        
+
+
+
+        
+
+
+      </dl>
+    </section>
 
     
   <section class="summary offset-anchor" id="constructors">
@@ -70,7 +95,7 @@
 
     <dl class="constructor-summary-list">
         <dt id="IratusBoard" class="callable">
-          <span class="name"><a href="../iratus_game/IratusBoard/IratusBoard.html">IratusBoard</a></span><span class="signature">(<span class="parameter" id="-param-fen"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span> <span class="parameter-name">fen</span>, </span><span class="parameter" id="-param-game"><span class="type-annotation">Game</span> <span class="parameter-name">game</span></span>)</span>
+          <span class="name"><a href="../iratus_game/IratusBoard/IratusBoard.html">IratusBoard</a></span><span class="signature">(<span class="parameter" id="-param-fen"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span> <span class="parameter-name">fen</span>, </span><span class="parameter" id="-param-game"><span class="type-annotation"><a href="../iratus_game/Game-class.html">Game</a></span> <span class="parameter-name">game</span></span>)</span>
         </dt>
         <dd>
           
@@ -78,40 +103,18 @@
     </dl>
   </section>
 
-    <section class="summary offset-anchor" id="instance-properties">
+    <section class="summary offset-anchor inherited" id="instance-properties">
       <h2>Properties</h2>
 
       <dl class="properties">
-        <dt id="allValidMoves" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/allValidMoves.html">allValidMoves</a></span>
-  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.1.0/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span>, <span class="type-parameter">Move</span>&gt;</span></span> 
+        <dt id="allLegalMoves" class="property inherited">
+  <span class="name"><a href="../iratus_game/Board/allLegalMoves.html">allLegalMoves</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../iratus_game/MainMove-class.html">MainMove</a></span>&gt;</span></span> 
 
 </dt>
 <dd class="inherited">
-  TODO
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="calculator" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/calculator.html">calculator</a></span>
-  <span class="signature">&#8596; CalculatorInterface?</span> 
-
-</dt>
-<dd class="inherited">
-  The board used to simulate moves, to check if the king is in check
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="currentMove" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/currentMove.html">currentMove</a></span>
-  <span class="signature">&#8596; Move</span> 
-
-</dt>
-<dd class="inherited">
-  The move currently being calculated
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
+  All the possible moves in the position
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
 
 </dd>
 
@@ -127,40 +130,40 @@
 </dd>
 
         <dt id="king" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/king.html">king</a></span>
-  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.1.0/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../iratus_game/Piece-class.html">Piece</a>?</span>&gt;</span></span> 
+  <span class="name"><a href="../iratus_game/Board/king.html">king</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="../iratus_game/Piece-class.html">Piece</a>?</span>&gt;</span></span> 
 
 </dt>
 <dd class="inherited">
   The kings, sorted by color
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
 
 </dd>
 
         <dt id="lastMove" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/lastMove.html">lastMove</a></span>
-  <span class="signature">&#8596; Move?</span> 
+  <span class="name"><a href="../iratus_game/Board/lastMove.html">lastMove</a></span>
+  <span class="signature">&#8594; <a href="../iratus_game/MainMove-class.html">MainMove</a>?</span> 
 
 </dt>
 <dd class="inherited">
-  The last mainMove played
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
+  The last MainMove played
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
 
 </dd>
 
-        <dt id="mainCurrentMove" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/mainCurrentMove.html">mainCurrentMove</a></span>
-  <span class="signature">&#8596; Move</span> 
+        <dt id="movesHistory" class="property inherited">
+  <span class="name"><a href="../iratus_game/Board/movesHistory.html">movesHistory</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../iratus_game/MainMove-class.html">MainMove</a></span>&gt;</span></span> 
 
 </dt>
 <dd class="inherited">
-  The currentMove or the move who created the currentMove
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
+  All the moves played during the game.
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
 
 </dd>
 
         <dt id="nbcols" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/nbcols.html">nbcols</a></span>
+  <span class="name"><a href="../iratus_game/Board/nbcols.html">nbcols</a></span>
   <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/int-class.html">int</a></span> 
 
 </dt>
@@ -171,7 +174,7 @@
 </dd>
 
         <dt id="nbrows" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/nbrows.html">nbrows</a></span>
+  <span class="name"><a href="../iratus_game/Board/nbrows.html">nbrows</a></span>
   <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/int-class.html">int</a></span> 
 
 </dt>
@@ -181,58 +184,25 @@
 
 </dd>
 
-        <dt id="pawnToPromote" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/pawnToPromote.html">pawnToPromote</a></span>
-  <span class="signature">&#8596; <a href="../iratus_game/Piece-class.html">Piece</a>?</span> 
-
-</dt>
-<dd class="inherited">
-  The pawn to promote, waiting for an input
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="phantoms" class="property">
-  <span class="name"><a href="../iratus_game/IratusBoard/phantoms.html">phantoms</a></span>
-  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.1.0/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../iratus_game/Piece-class.html">Piece</a></span>&gt;</span></span>&gt;</span></span> 
-
-</dt>
-<dd>
-  
-  <div class="features"><span class="feature">read / write</span></div>
-
-</dd>
-
         <dt id="pieces" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/pieces.html">pieces</a></span>
-  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../iratus_game/Piece-class.html">Piece</a></span>&gt;</span></span> 
+  <span class="name"><a href="../iratus_game/Board/pieces.html">pieces</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../iratus_game/Piece-class.html">Piece</a></span>&gt;</span></span> 
 
 </dt>
 <dd class="inherited">
   All the pieces, sorted by time of creation
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="piecesByPos" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/piecesByPos.html">piecesByPos</a></span>
-  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../iratus_game/Piece-class.html">Piece</a>?</span>&gt;</span></span> 
-
-</dt>
-<dd class="inherited">
-  All the pieces, the index correspond to piece.pos.index
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
 
 </dd>
 
         <dt id="piecesColored" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/piecesColored.html">piecesColored</a></span>
-  <span class="signature">&#8596; <a href="https://api.dart.dev/stable/3.1.0/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../iratus_game/Piece-class.html">Piece</a></span>&gt;</span></span>&gt;</span></span> 
+  <span class="name"><a href="../iratus_game/Board/piecesColored.html">piecesColored</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/Map-class.html">Map</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span>, <span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="../iratus_game/Piece-class.html">Piece</a></span>&gt;</span></span>&gt;</span></span> 
 
 </dt>
 <dd class="inherited">
   All the pieces, sorted by color
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
+  <div class="features"><span class="feature">final</span><span class="feature">inherited</span></div>
 
 </dd>
 
@@ -248,13 +218,46 @@
 </dd>
 
         <dt id="startFEN" class="property inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/startFEN.html">startFEN</a></span>
+  <span class="name"><a href="../iratus_game/Board/startFEN.html">startFEN</a></span>
   <span class="signature">&#8596; <a href="../iratus_game/IratusFEN-class.html">IratusFEN</a></span> 
 
 </dt>
 <dd class="inherited">
   The FEN of the starting position
-  <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
+  <div class="features"><span class="feature">late</span><span class="feature">final</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="turn" class="property inherited">
+  <span class="name"><a href="../iratus_game/Board/turn.html">turn</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span> 
+
+</dt>
+<dd class="inherited">
+  The color of the player who has to make the next move.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="validNotations" class="property inherited">
+  <span class="name"><a href="../iratus_game/Board/validNotations.html">validNotations</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/List-class.html">List</a><span class="signature">&lt;<wbr><span class="type-parameter"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span>&gt;</span></span> 
+
+</dt>
+<dd class="inherited">
+  The notations of the valid moves in the position.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
+
+</dd>
+
+        <dt id="waitingForInput" class="property inherited">
+  <span class="name"><a href="../iratus_game/Board/waitingForInput.html">waitingForInput</a></span>
+  <span class="signature">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/bool-class.html">bool</a></span> 
+
+</dt>
+<dd class="inherited">
+  Return true if the last move played needs an input.
+  <div class="features"><span class="feature">read-only</span><span class="feature">inherited</span></div>
 
 </dd>
 
@@ -267,45 +270,6 @@
       id="instance-methods">
     <h2>Methods</h2>
     <dl class="callables">
-        <dt id="addPiece" class="callable">
-  <span class="name"><a href="../iratus_game/IratusBoard/addPiece.html">addPiece</a></span><span class="signature">(<wbr><span class="parameter" id="addPiece-param-piece"><span class="type-annotation"><a href="../iratus_game/Piece-class.html">Piece</a></span> <span class="parameter-name">piece</span></span>)
-    <span class="returntype parameter">&#8594; void</span>
-  </span>
-  
-
-</dt>
-<dd>
-  
-  
-
-</dd>
-
-        <dt id="createPieces" class="callable">
-  <span class="name"><a href="../iratus_game/IratusBoard/createPieces.html">createPieces</a></span><span class="signature">(<wbr><span class="parameter" id="createPieces-param-fen"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span> <span class="parameter-name">fen</span></span>)
-    <span class="returntype parameter">&#8594; void</span>
-  </span>
-  
-
-</dt>
-<dd>
-  Called once, at board creation
-  
-
-</dd>
-
-        <dt id="get" class="callable inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/get.html">get</a></span><span class="signature">(<wbr><span class="parameter" id="get-param-pos"><span class="type-annotation"><a href="../iratus_game/Position-class.html">Position</a></span> <span class="parameter-name">pos</span></span>)
-    <span class="returntype parameter">&#8594; <a href="../iratus_game/Piece-class.html">Piece</a>?</span>
-  </span>
-  
-
-</dt>
-<dd class="inherited">
-  Get a piece from a position
-  <div class="features"><span class="feature">inherited</span></div>
-
-</dd>
-
         <dt id="getFEN" class="callable">
   <span class="name"><a href="../iratus_game/IratusBoard/getFEN.html">getFEN</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; FEN</span>
@@ -315,20 +279,19 @@
 </dt>
 <dd>
   return a fen of the current board
-  
+  <div class="features"><span class="feature">override</span></div>
 
 </dd>
 
-        <dt id="move" class="callable inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/move.html">move</a></span><span class="signature">(<wbr><span class="parameter" id="move-param-start"><span class="type-annotation"><a href="../iratus_game/Position-class.html">Position</a></span> <span class="parameter-name">start</span>, </span><span class="parameter" id="move-param-end"><span class="type-annotation"><a href="../iratus_game/Position-class.html">Position</a></span> <span class="parameter-name">end</span>, </span><span class="parameter" id="move-param-main">{<span class="type-annotation"><a href="https://api.dart.dev/stable/3.1.0/dart-core/bool-class.html">bool</a></span> <span class="parameter-name">main</span> = <span class="default-value">true</span>}</span>)
-    <span class="returntype parameter">&#8594; Move</span>
+        <dt id="getPiece" class="callable inherited">
+  <span class="name"><a href="../iratus_game/Board/getPiece.html">getPiece</a></span><span class="signature">(<wbr><span class="parameter" id="getPiece-param-pos"><span class="type-annotation"><a href="../iratus_game/Position-class.html">Position</a></span> <span class="parameter-name">pos</span></span>)
+    <span class="returntype parameter">&#8594; <a href="../iratus_game/Piece-class.html">Piece</a>?</span>
   </span>
   
 
 </dt>
 <dd class="inherited">
-  Move a piece from start to end
-if the movement is the result of another move, main is false
+  Get a piece from a position
   <div class="features"><span class="feature">inherited</span></div>
 
 </dd>
@@ -346,19 +309,6 @@ if the movement is the result of another move, main is false
 
 </dd>
 
-        <dt id="redo" class="callable inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/redo.html">redo</a></span><span class="signature">(<wbr><span class="parameter" id="redo-param-move"><span class="type-annotation">Move</span> <span class="parameter-name">move</span>, </span><span class="parameter" id="redo-param-main">{<span class="type-annotation">dynamic</span> <span class="parameter-name">main</span> = <span class="default-value">true</span>}</span>)
-    <span class="returntype parameter">&#8594; void</span>
-  </span>
-  
-
-</dt>
-<dd class="inherited">
-  
-  <div class="features"><span class="feature">inherited</span></div>
-
-</dd>
-
         <dt id="toString" class="callable inherited">
   <span class="name"><a href="https://api.dart.dev/stable/3.1.0/dart-core/Object/toString.html">toString</a></span><span class="signature">(<wbr>)
     <span class="returntype parameter">&#8594; <a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span>
@@ -369,32 +319,6 @@ if the movement is the result of another move, main is false
 <dd class="inherited">
   A string representation of this object.
   <div class="features"><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="undo" class="callable inherited">
-  <span class="name"><a href="../iratus_game/IratusBoard/undo.html">undo</a></span><span class="signature">(<wbr><span class="parameter" id="undo-param-move"><span class="type-annotation">Move</span> <span class="parameter-name">move</span></span>)
-    <span class="returntype parameter">&#8594; void</span>
-  </span>
-  
-
-</dt>
-<dd class="inherited">
-  
-  <div class="features"><span class="feature">inherited</span></div>
-
-</dd>
-
-        <dt id="updateAllValidMoves" class="callable">
-  <span class="name"><a href="../iratus_game/IratusBoard/updateAllValidMoves.html">updateAllValidMoves</a></span><span class="signature">(<wbr>)
-    <span class="returntype parameter">&#8594; void</span>
-  </span>
-  
-
-</dt>
-<dd>
-  
-  
 
 </dd>
 

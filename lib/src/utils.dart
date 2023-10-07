@@ -1,5 +1,4 @@
-import 'game.dart';
-import 'position.dart';
+part of iratus_game;
 
 typedef FunctionWithStringParameter = void Function(String);
 
@@ -14,32 +13,91 @@ final String cantCapture = 'gy';
 final String competitivePieces = 'bcefnqrsy';
 final String dynamitables = 'bdnps';
 final String promotionIds = 'bcenqr';
-List<String> promotionValidNotations = promotionIds.split('').map((char) => '=${char.toUpperCase()}').toList();
+List<String> promotionValidNotations =
+    promotionIds.split('').map((char) => '=${char.toUpperCase()}').toList();
 
-final Map<int, String> fileDict = {0: 'a', 1: 'b', 2: 'c', 3: 'd', 4: 'e', 5: 'f', 6: 'g', 7: 'h'};
-final Map<String, int> inversedFileDict = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7};
+final Map<int, String> fileDict = {
+  0: 'a',
+  1: 'b',
+  2: 'c',
+  3: 'd',
+  4: 'e',
+  5: 'f',
+  6: 'g',
+  7: 'h'
+};
+final Map<String, int> inversedFileDict = {
+  'a': 0,
+  'b': 1,
+  'c': 2,
+  'd': 3,
+  'e': 4,
+  'f': 5,
+  'g': 6,
+  'h': 7
+};
+
+/// A help to understand the result field.
+///
+/// ```dart
+/// String result = Game.resultDoc[game.result];
+/// print(result); // checkmate ?
+/// ```
+final List<String> resultDoc = [
+  'game in progress',
+  'checkmate',
+  'resignation',
+  'time out',
+  'stalemate',
+  'draw by mutual agreement',
+  'draw by repetition',
+  'draw by insufficient material',
+  'draw by 50-moves rule',
+  'game interrupted',
+];
+
+/// A help to understand the winner field.
+///
+/// ```dart
+/// String winner = Game.winnerDoc[game.winner];
+/// print(result); // white won ?
+/// ```
+final List<String> winnerDoc = [
+  'game in progress',
+  'draw',
+  'white won',
+  'black won',
+];
 
 bool dogIsTooFar(Position leashPos, Position dogPos) {
-  return (leashPos.row - dogPos.row).abs() > 1 || (leashPos.col - dogPos.col).abs() > 1;
+  return (leashPos.row - dogPos.row).abs() > 1 ||
+      (leashPos.col - dogPos.col).abs() > 1;
 }
 
 Position getNewDogPos(Position leashStart, Position leashEnd) {
   int deltaRow = normed(leashEnd.row - leashStart.row);
   int deltaCol = normed(leashEnd.col - leashStart.col);
-  return Position.fromRowCol(leashStart.board, row: leashEnd.row - deltaRow, col: leashEnd.col - deltaCol);
+  return Position.fromRowCol(leashStart.board,
+      row: leashEnd.row - deltaRow, col: leashEnd.col - deltaCol);
 }
 
 Piece? getRookAt(String side, Piece king) {
-  if (king.id != 'k') throw ArgumentError.value(king, 'The second argument of getRookAt must be a king');
+  if (king.id != 'k') {
+    throw ArgumentError.value(
+        king, 'The second argument of getRookAt must be a king');
+  }
   if (king.hasMoved()) return null;
 
   Piece? piece;
   if (side == 'left') {
-    piece = king.board.get(Position.fromRowCol(king.board, row: king.row, col: king.col - 4));
+    piece = king.board.getPiece(
+        Position.fromRowCol(king.board, row: king.row, col: king.col - 4));
   } else if (side == 'right') {
-    piece = king.board.get(Position.fromRowCol(king.board, row: king.row, col: king.col + 3));
+    piece = king.board.getPiece(
+        Position.fromRowCol(king.board, row: king.row, col: king.col + 3));
   } else {
-    throw ArgumentError.value(side, 'The argument of getRookAt() should be \'left\' or \'right\'.');
+    throw ArgumentError.value(
+        side, 'The argument of getRookAt() should be \'left\' or \'right\'.');
   }
 
   if (piece == null) return piece;
@@ -47,8 +105,10 @@ Piece? getRookAt(String side, Piece king) {
 }
 
 bool inCheck(Piece king, {List<bool>? antiking}) {
-  if (king.id != 'k') throw ArgumentError.value(king, 'The argument of inCheck must be a king');
-  antiking ??= king.board.antiking;
+  if (king.id != 'k') {
+    throw ArgumentError.value(king, 'The argument of inCheck must be a king');
+  }
+  antiking ??= king.board._antiking;
   return antiking[king.pos.index] || king.isCaptured;
 }
 
@@ -63,6 +123,6 @@ int normed(int x) {
 }
 
 bool posIsUnderCheck(Position pos, {List<bool>? antiking}) {
-  antiking ??= pos.board.antiking;
+  antiking ??= pos.board._antiking;
   return antiking[pos.index];
 }

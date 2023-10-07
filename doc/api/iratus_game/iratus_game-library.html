@@ -61,16 +61,20 @@
 </h1></div>
 
     
-<section class="desc markdown">
-  <p>Support for doing something awesome.</p>
-<p>More dartdocs go here.</p>
-</section>
 
 
     <section class="summary offset-anchor" id="classes">
       <h2>Classes</h2>
 
       <dl>
+        <dt id="Board">
+  <span class="name "><a href="../iratus_game/Board-class.html">Board</a></span> 
+
+</dt>
+<dd>
+  An abstract representation of chess boards.
+</dd>
+
         <dt id="ConsoleView">
   <span class="name "><a href="../iratus_game/ConsoleView-class.html">ConsoleView</a></span> 
 
@@ -79,12 +83,28 @@
   A bridge between the console input and an Iratus game.
 </dd>
 
+        <dt id="ExtraMove">
+  <span class="name "><a href="../iratus_game/ExtraMove-class.html">ExtraMove</a></span> 
+
+</dt>
+<dd>
+  A move automatically played because of a MainMove.
+</dd>
+
+        <dt id="Game">
+  <span class="name "><a href="../iratus_game/Game-class.html">Game</a></span> 
+
+</dt>
+<dd>
+  An abstract representation of chess games.
+</dd>
+
         <dt id="IratusBoard">
   <span class="name "><a href="../iratus_game/IratusBoard-class.html">IratusBoard</a></span> 
 
 </dt>
 <dd>
-  
+  An object representating the board. It contains the pieces.
 </dd>
 
         <dt id="IratusFEN">
@@ -103,12 +123,28 @@
   A game with the rules of Iratus.
 </dd>
 
-        <dt id="PGN">
-  <span class="name "><a href="../iratus_game/PGN-class.html">PGN</a></span> 
+        <dt id="IratusPGN">
+  <span class="name "><a href="../iratus_game/IratusPGN-class.html">IratusPGN</a></span> 
 
 </dt>
 <dd>
   An object representating an Iratus game.
+</dd>
+
+        <dt id="MainMove">
+  <span class="name "><a href="../iratus_game/MainMove-class.html">MainMove</a></span> 
+
+</dt>
+<dd>
+  A move played by the player, it can create extra moves.
+</dd>
+
+        <dt id="Move">
+  <span class="name "><a href="../iratus_game/Move-class.html">Move</a></span> 
+
+</dt>
+<dd>
+  A description of a piece move and all its consequences.
 </dd>
 
         <dt id="Piece">
@@ -116,7 +152,7 @@
 
 </dt>
 <dd>
-  
+  A piece on the board.
 </dd>
 
         <dt id="Player">
@@ -132,7 +168,7 @@
 
 </dt>
 <dd>
-  
+  A position on a board.
 </dd>
 
       </dl>

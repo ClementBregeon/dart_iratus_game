@@ -63,7 +63,7 @@
     <section class="multi-line-signature">
       
       <span class="name ">IratusFEN.fromString</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="fromString-param-fen"><span class="type-annotation"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span> <span class="parameter-name">fen</span>, </span></li>
-<li><span class="parameter" id="fromString-param-board"><span class="type-annotation">Board</span> <span class="parameter-name">board</span></span></li>
+<li><span class="parameter" id="fromString-param-board"><span class="type-annotation"><a href="../../iratus_game/Board-class.html">Board</a></span> <span class="parameter-name">board</span></span></li>
 </ol>)
     </section>
 
@@ -78,10 +78,10 @@
 
   List&lt;String&gt; parts = fen.split(&quot; &quot;);
 
-  if (parts.length != 8) {
+  if (parts.length != 7) {
     throw ArgumentError.value(
       fen,
-      &#39;Invalid FEN : An Iratus FEN should have 8 values (pieces, turn, casle rights, en passant, piece moving again, dynamitables has moved, counter for 50 moves rules, half turn number)&#39;,
+      &#39;Invalid FEN : An Iratus FEN should have 7 values (pieces, turn, casle rights, en passant, dynamitables has moved, counter for 50 moves rules, half turn number)&#39;,
     );
   }
 
@@ -89,12 +89,12 @@
   turn = parts[1];
   castleRights = parts[2];
   enPassant = parts[3] == &#39;-&#39; ? null : Position.fromCoords(board, parts[3]);
-  fenEqualizer = &#39;$pieces $turn $castleRights ${parts[3]} ${parts[4]}&#39;;
-  counter50rule = int.parse(parts[6]);
-  turnNumber = int.parse(parts[7]);
+  fenEqualizer = &#39;$pieces $turn $castleRights ${parts[3]}}&#39;;
+  counter50rule = int.parse(parts[5]);
+  turnNumber = int.parse(parts[6]);
 
   &#47;&#47; DYNAMITABLES HAS MOVED
-  List&lt;String&gt; splittedDynamitablesHasMoved = parts[5].split(&#39;-&#39;);
+  List&lt;String&gt; splittedDynamitablesHasMoved = parts[4].split(&#39;-&#39;);
   dynamitablesHasMoved = {
     &#39;w&#39;: splittedDynamitablesHasMoved[0],
     &#39;b&#39;: splittedDynamitablesHasMoved[1],
@@ -105,7 +105,8 @@
   String firstChar = fen[0].toLowerCase();
   if (!pieceIDs.contains(firstChar)) {
     if (!&quot;12345678&quot;.contains(firstChar)) {
-      throw ArgumentError.value(firstChar, &#39;Invalid FEN :\nA FEN must start with either a piece id or a number.&#39;);
+      throw ArgumentError.value(firstChar,
+          &#39;Invalid FEN :\nA FEN must start with either a piece id or a number.&#39;);
     }
   }
   String linkID = &#39;&#39;;
@@ -117,11 +118,13 @@
 
   void createPiece(_PieceInformations pieceInfos) {
     if (!ids.contains(pieceInfos.id)) {
-      throw ArgumentError.value(pieceInfos.id, &#39;Invalid FEN : Unknown piece id&#39;);
+      throw ArgumentError.value(
+          pieceInfos.id, &#39;Invalid FEN : Unknown piece id&#39;);
     }
 
     Piece piece;
-    Position pos = Position.fromRowCol(board, row: pieceInfos.row, col: pieceInfos.col);
+    Position pos =
+        Position.fromRowCol(board, row: pieceInfos.row, col: pieceInfos.col);
     if (pieceInfos.phantomized) {
       piece = Piece(board, pieceInfos.color, pos, &#39;f&#39;);
       piece.transform(pieceInfos.id);
@@ -134,14 +137,16 @@
     if (pieceInfos.linkID != null) {
       final waitingPiece = waitingForLink[pieceInfos.linkID];
       if (waitingPiece != null) {
-        waitingPiece.linkedPiece = piece;
-        piece.linkedPiece = waitingPiece;
+        waitingPiece._linkedPiece = piece;
+        piece._linkedPiece = waitingPiece;
       } else {
         waitingForLink[pieceInfos.linkID] = piece;
       }
     }
     if (dynamitables.contains(pieceInfos.id)) {
-      if (dynamitablesHasMoved[pieceInfos.color]![dhmIndexes[pieceInfos.color]!] == &#39;1&#39;) {
+      if (dynamitablesHasMoved[pieceInfos.color]![
+              dhmIndexes[pieceInfos.color]!] ==
+          &#39;1&#39;) {
         piece.setUnknownFirstMove();
       }
       dhmIndexes[pieceInfos.color] = dhmIndexes[pieceInfos.color]! + 1;
@@ -162,7 +167,8 @@
           continue;
         }
         if (!charIsNumber) {
-          throw ArgumentError.value(row, &#39;Invalid FEN :\nParentheses only accept numbers.&#39;);
+          throw ArgumentError.value(
+              row, &#39;Invalid FEN :\nParentheses only accept numbers.&#39;);
         }
         linkID += char;
         continue;
@@ -215,26 +221,17 @@
 
     Piece? k = board.king[castle == castle.toUpperCase() ? &#39;w&#39; : &#39;b&#39;];
     if (k == null) continue; &#47;&#47; an army without king
-    if (k.col != 4 || (k.color == &#39;w&#39; &amp;&amp; k.row != 8) || (k.color == &#39;b&#39; &amp;&amp; k.row != 1)) {
+    if (k.col != 4 ||
+        (k.color == &#39;w&#39; &amp;&amp; k.row != 8) ||
+        (k.color == &#39;b&#39; &amp;&amp; k.row != 1)) {
       k.setUnknownFirstMove();
       continue;
     }
-    Piece? rook = getRookAt(castle.toUpperCase() == &#39;K&#39; ? &#39;right&#39; : &#39;left&#39;, k);
+    Piece? rook =
+        getRookAt(castle.toUpperCase() == &#39;K&#39; ? &#39;right&#39; : &#39;left&#39;, k);
     if (rook != null) {
       rook.setUnknownFirstMove();
     }
-  }
-
-  &#47;&#47; PIECE MOVING AGAIN
-  String parts4 = parts[4];
-  if (parts4 != &quot;-&quot;) {
-    pieceMovingAgain = board.get(Position.fromCoords(board, parts4));
-    if (pieceMovingAgain == null) {
-      throw ArgumentError.value(parts4, &#39;Invalid FEN :\nNo piece at&#39;);
-    }
-    (pieceMovingAgain!.identity as PieceMovingTwice).stillHasToMove = true;
-  } else {
-    pieceMovingAgain = null;
   }
 }</code></pre>
 </section>

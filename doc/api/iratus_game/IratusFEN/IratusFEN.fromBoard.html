@@ -62,8 +62,7 @@
 
     <section class="multi-line-signature">
       
-      <span class="name ">IratusFEN.fromBoard</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="fromBoard-param-board"><span class="type-annotation">Board</span> <span class="parameter-name">board</span>, </span></li>
-<li><span class="parameter" id="fromBoard-param-turn">{<span>required</span> <span class="type-annotation"><a href="https://api.dart.dev/stable/3.1.0/dart-core/String-class.html">String</a></span> <span class="parameter-name">turn</span>}</span></li>
+      <span class="name ">IratusFEN.fromBoard</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="fromBoard-param-board"><span class="type-annotation"><a href="../../iratus_game/Board-class.html">Board</a></span> <span class="parameter-name">board</span></span></li>
 </ol>)
     </section>
 
@@ -73,19 +72,17 @@
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">IratusFEN.fromBoard(Board board, {required String turn}) {
-  pieceMovingAgain = null;
-
+  <pre class="language-dart"><code class="language-dart">IratusFEN.fromBoard(Board board) {
   String fenIP = &#39;&#39;; &#47;&#47; fen in progress
   dynamitablesHasMoved = {&#39;w&#39;: &#39;&#39;, &#39;b&#39;: &#39;&#39;};
-  String coordsPma = &#39;-&#39;;
   Map&lt;String, int&gt; linkedPieces = {&#39;i&#39;: 0};
 
   &#47;&#47; Pieces
   for (int row = 0; row &lt; 10; row++) {
     int space = 0;
     for (int col = 0; col &lt; 8; col++) {
-      Piece? piece = board.get(Position.fromRowCol(board, row: row, col: col));
+      Piece? piece =
+          board.getPiece(Position.fromRowCol(board, row: row, col: col));
 
       if (piece == null) {
         space += 1;
@@ -111,9 +108,9 @@
         fenIP += &#39;~&#39;;
       }
 
-      if (piece.linkedPiece != null &amp;&amp; !piece.linkedPiece!.isCaptured) {
+      if (piece._linkedPiece != null &amp;&amp; !piece._linkedPiece!.isCaptured) {
         String pieceCoord = piece.coord;
-        String linkedPieceCoord = piece.linkedPiece!.coord;
+        String linkedPieceCoord = piece._linkedPiece!.coord;
 
         if (linkedPieces.containsKey(linkedPieceCoord)) {
           linkedPieces[pieceCoord] = linkedPieces[linkedPieceCoord]!;
@@ -125,11 +122,9 @@
       }
 
       if (dynamitables.contains(piece.id)) {
-        dynamitablesHasMoved[piece.color] = dynamitablesHasMoved[piece.color]! + (piece.hasMoved() ? &quot;1&quot; : &quot;0&quot;);
-      }
-
-      if (piece.identity is PieceMovingTwice &amp;&amp; (piece.identity as PieceMovingTwice).stillHasToMove) {
-        coordsPma = piece.coord;
+        dynamitablesHasMoved[piece.color] =
+            dynamitablesHasMoved[piece.color]! +
+                (piece.hasMoved() ? &quot;1&quot; : &quot;0&quot;);
       }
     }
 
@@ -143,6 +138,7 @@
   }
 
   &#47;&#47; Turn
+  turn = board.turn;
   fenIP += &#39; $turn &#39;;
 
   &#47;&#47; Castle Rights
@@ -167,14 +163,18 @@
 
   &#47;&#47; En Passant
   Move? lastMove = board.lastMove;
-  if (lastMove == null || lastMove.enPassant == null) {
-    fenIP += &#39; -&#39;;
+  if (lastMove == null) {
+    enPassant = board.startFEN.enPassant;
   } else {
-    fenIP += &#39; ${lastMove.enPassant!.coord}&#39;;
+    enPassant = lastMove.enPassant;
   }
-
-  &#47;&#47; PieceMovingAgain
-  fenIP += &#39; $coordsPma&#39;;
+  &#47;&#47; The following is the equivalent of :
+  &#47;&#47; if (enPassant == null) {
+  &#47;&#47;   fenIP += &#39; -&#39;;
+  &#47;&#47; } else {
+  &#47;&#47;   fenIP += enPassant!.coord;
+  &#47;&#47; }
+  fenIP += &#39; ${enPassant?.coord ?? &#39;-&#39;}&#39;;
 
   &#47;&#47; Same position if same pieces, turn, castleRights &amp; enPassant
   fenEqualizer = fenIP;

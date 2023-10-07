@@ -79,18 +79,7 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void redo() {
-  if (_backMovesHistory.isEmpty) {
-    return;
-  }
-
-  Move lastUndoneMove = _backMovesHistory.removeLast();
-
-  board.redo(lastUndoneMove);
-  movesHistory.add(lastUndoneMove);
-  board.lastMove = lastUndoneMove;
-  _turn = lastUndoneMove.nextTurn;
-  board.updateAllValidMoves();
-  _fenHistory.add(board.getFEN());
+  board._redo();
 }</code></pre>
 </section>
 

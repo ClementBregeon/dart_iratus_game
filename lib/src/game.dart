@@ -2,12 +2,12 @@ library iratus_game;
 
 import 'pgn.dart';
 import 'position.dart';
-import 'utils.dart';
 
 part 'board.dart';
 part 'fen.dart';
 part 'move.dart';
 part 'piece.dart';
+part 'utils.dart';
 
 /// A chess player, regardless of the variant.
 class Player {
@@ -24,6 +24,7 @@ class Player {
   }
 }
 
+/// An abstract representation of chess games.
 abstract class Game {
   // Protected fields, with getters
   int _result = 0;
@@ -60,25 +61,6 @@ abstract class Game {
   ///   - 9 : game interrupted
   int get result => _result;
 
-  /// A help to understand the result field.
-  ///
-  /// ```dart
-  /// String result = Game.resultDoc[game.result];
-  /// print(result); // checkmate ?
-  /// ```
-  final List<String> resultDoc = [
-    'game in progress',
-    'checkmate',
-    'resignation',
-    'time out',
-    'stalemate',
-    'draw by mutual agreement',
-    'draw by repetition',
-    'draw by insufficient material',
-    'draw by 50-moves rule',
-    'game interrupted',
-  ];
-
   /// The winner of the game.
   ///
   /// Possible values :
@@ -87,19 +69,6 @@ abstract class Game {
   ///   - 2 : white won
   ///   - 2 : black won
   int get winner => _winner;
-
-  /// A help to understand the winner field.
-  ///
-  /// ```dart
-  /// String winner = Game.winnerDoc[game.winner];
-  /// print(result); // white won ?
-  /// ```
-  final List<String> winnerDoc = [
-    'game in progress',
-    'draw',
-    'white won',
-    'black won',
-  ];
 
   /// Update result & winner.
   void _checkForEnd() {
@@ -235,7 +204,7 @@ abstract class Game {
 
   /// Redo the last undone move.
   void redo() {
-    board.redo();
+    board._redo();
   }
 
   /// Redo all the undone moves.
@@ -245,14 +214,17 @@ abstract class Game {
     }
   }
 
+  /// The player designed by the color resigns.
   void resign(String color) {
+    if (_result > 0) throw ArgumentError('The game has already ended');
+
     _result = 2;
     _winner = color == 'w' ? 3 : 2;
   }
 
   /// Undo the last move played.
   void undo() {
-    board.undo();
+    board._undo();
   }
 
   /// Undo all the moves played.

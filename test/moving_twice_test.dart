@@ -12,10 +12,11 @@ void main() {
   test(
       'After a piece moving twice has moved, it is the only piece who still has valid moves.',
       () {
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'd7')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd7'))!.id == 'c', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id == 'c',
+        true);
     expect(
         game.board.validNotations.join(', ') ==
             'Ce7, Cc7, Cd6, Cd8, Kd4, Kb4, Kd5, Kc5, Kb5, Kd3, Kc3, Kb3',
@@ -75,7 +76,7 @@ void main() {
     game.move('Ce4');
 
     expect(game.board.lastMove!.notation == 'Ce5-Ce4+', true);
-    expect(game.getPGN().moveText == '1. Ce5-Ce4+', true);
+    expect(game.getPGN().moveText == '1. ... Ce5-Ce4+', true);
     expect(
         game.board.validNotations.join(', ') == 'Cd5, Kb4, Kc5, Kb5, Kc3, Kb3',
         true);
@@ -104,7 +105,7 @@ void main() {
     game.move('Cxd4*');
 
     expect(game.board.lastMove!.notation == 'Cxd4*', true);
-    expect(game.getPGN().moveText == '1. Ce5-Ce4+ 2. Cd5-Cd4+ Cxd4*', true);
+    expect(game.getPGN().moveText == '1. ... Ce5-Ce4+ 2. Cd5-Cd4+ Cxd4*', true);
     expect(oldTurn != game.board.turn, true);
     expect(
         game.board.validNotations.join(', ') ==

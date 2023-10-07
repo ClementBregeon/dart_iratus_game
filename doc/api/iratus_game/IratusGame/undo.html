@@ -79,19 +79,7 @@
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">void undo() {
-  if (_result &gt; 0) throw ArgumentError(&#39;Can\&#39;t undo a move because the game has ended&#39;);
-
-  if (movesHistory.isEmpty) {
-    return;
-  }
-
-  Move lastMove = movesHistory.removeLast();
-  _backMovesHistory.add(lastMove);
-  board.lastMove = movesHistory.isEmpty ? null : movesHistory.last;
-  _fenHistory.removeLast();
-  board.undo(lastMove);
-  _turn = lastMove.turn;
-  board.updateAllValidMoves();
+  board._undo();
 }</code></pre>
 </section>
 

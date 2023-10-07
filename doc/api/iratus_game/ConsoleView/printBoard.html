@@ -31,7 +31,7 @@
     <li><a href="../../index.html">iratus_game</a></li>
     <li><a href="../../iratus_game/iratus_game-library.html">iratus_game</a></li>
     <li><a href="../../iratus_game/ConsoleView-class.html">ConsoleView</a></li>
-    <li class="self-crumb">printBoard method</li>
+    <li class="self-crumb">printBoard static method</li>
   </ol>
   <div class="self-name">printBoard</div>
   <form class="search navbar-right" role="search">
@@ -57,25 +57,29 @@
       data-above-sidebar="iratus_game&#47;ConsoleView-class-sidebar.html"
       data-below-sidebar="">
       <div>
-<h1><span class="kind-method">printBoard</span> method 
+<h1><span class="kind-method">printBoard</span> static method 
 </h1></div>
 
     <section class="multi-line-signature">
       
 
 <span class="returntype">void</span>
-<span class="name ">printBoard</span>(<wbr>)
+<span class="name ">printBoard</span>(<wbr><ol class="parameter-list"><li><span class="parameter" id="printBoard-param-board"><span class="type-annotation"><a href="../../iratus_game/Board-class.html">Board</a></span> <span class="parameter-name">board</span></span></li>
+</ol>)
 
       
 
     </section>
     
+<section class="desc markdown">
+  <p>Print a representation of the board in the console</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void printBoard() {
+  <pre class="language-dart"><code class="language-dart">static void printBoard(Board board) {
   String italic(String str) {
     return &#39;\x1B[3m$str\x1B[0m&#39;;
   }
@@ -84,14 +88,16 @@
     return &#39;\x1B[4m$str\x1B[0m&#39;;
   }
 
-  String firstRowDelimiter = &#39;┍━━━┯━━━┯━━━┯━━━┯━━━┯━━━┯━━━┯━━━┑&#39;;
-  String rowDelimiter = &#39;┝━━━┿━━━┿━━━┿━━━┿━━━┿━━━┿━━━┿━━━┥&#39;;
-  String lastRowDelimiter = &#39;┕━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┙&#39;;
+  String firstRowDelimiter = &#39;  ┍━━━┯━━━┯━━━┯━━━┯━━━┯━━━┯━━━┯━━━┑&#39;;
+  String rowDelimiter = &#39;  ┝━━━┿━━━┿━━━┿━━━┿━━━┿━━━┿━━━┿━━━┥&#39;;
+  String lastRowDelimiter =
+      &#39;  ┕━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┙\n    a   b   c   d   e   f   g   h  &#39;;
   print(firstRowDelimiter);
   for (int row = 0; row &lt; board.nbrows; row++) {
-    String line = &#39;│&#39;;
+    String line = &#39;${board.nbrows - 1 - row} │&#39;;
     for (int col = 0; col &lt; board.nbcols; col++) {
-      Piece? piece = board.get(Position.fromRowCol(board, row: row, col: col));
+      Piece? piece =
+          board.getPiece(Position.fromRowCol(board, row: row, col: col));
       if (piece == null) {
         line += &#39;   │&#39;;
       } else {
@@ -132,7 +138,7 @@
     <li><a href="../../index.html">iratus_game</a></li>
     <li><a href="../../iratus_game/iratus_game-library.html">iratus_game</a></li>
     <li><a href="../../iratus_game/ConsoleView-class.html">ConsoleView</a></li>
-    <li class="self-crumb">printBoard method</li>
+    <li class="self-crumb">printBoard static method</li>
 </ol>
 
 

@@ -1,6 +1,10 @@
 import 'game.dart';
-import 'utils.dart';
 
+/// A position on a board.
+///
+/// Can be seen as an index, a row and col, or a coordinates string.
+///
+/// The values of the index is col * board.nbrows + row
 class Position {
   final Board board;
   final int col;
@@ -14,7 +18,8 @@ class Position {
   Position.fromCoords(this.board, this.coord)
       : col = inversedFileDict[coord[0]]!,
         row = board.nbrows - 1 - int.parse(coord[1]),
-        index = (inversedFileDict[coord[0]]! * board.nbrows) + (board.nbrows - 1 - int.parse(coord[1])) {
+        index = (inversedFileDict[coord[0]]! * board.nbrows) +
+            (board.nbrows - 1 - int.parse(coord[1])) {
     _checkValidity();
   }
 
@@ -25,7 +30,8 @@ class Position {
   }
 
   Position.fromIndex(this.board, this.index)
-      : coord = fileDict[index ~/ board.nbrows]! + (board.nbrows - (index % board.nbrows) - 1).toString(),
+      : coord = fileDict[index ~/ board.nbrows]! +
+            (board.nbrows - (index % board.nbrows) - 1).toString(),
         col = index ~/ board.nbrows,
         row = index % board.nbrows {
     _checkValidity();
@@ -51,7 +57,11 @@ class Position {
   }
 
   void _checkValidity() {
-    if (0 > row || 0 > col || row > board.nbrows || col > board.nbcols || coord.length != 2) {
+    if (0 > row ||
+        0 > col ||
+        row > board.nbrows ||
+        col > board.nbcols ||
+        coord.length != 2) {
       throw Exception('Wrong position');
     }
   }

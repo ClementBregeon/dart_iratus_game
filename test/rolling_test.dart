@@ -7,7 +7,7 @@ void main() {
   String fen = '8/8/8/8/8/K4k2/8/8/8/Q4n2 w - - -0 0 1';
   IratusGame game = IratusGame.fromFEN(fen);
 
-  Iterable<MainMove> legalMoves(Piece piece) {
+  Iterable<Move> legalMoves(Piece piece) {
     return piece.board.allLegalMoves.where((m) => m.piece == piece);
   }
 
@@ -36,7 +36,7 @@ void main() {
     game.move('Kb3');
 
     expect(
-        legalMoves(game.board.get(Position.fromCoords(game.board, 'e2'))!)
+        legalMoves(game.board.getPiece(Position.fromCoords(game.board, 'e2'))!)
             .isEmpty,
         true);
     expect(

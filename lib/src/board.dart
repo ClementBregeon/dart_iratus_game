@@ -1,11 +1,25 @@
 part of iratus_game;
 
+/// An abstract representation of chess boards.
 abstract class Board {
   /// All the notations of the possible moves in the position, extept inputs
   final List<String> _allLegalNotations = [];
 
+  /// A representation of all the squares where the king of the current player can go or not.
+  ///
+  /// ```dart
+  /// Piece currentKing = board.king[board.turn]!;
+  /// if (board._antiking[currentKing.pos.index] == true) {
+  ///   print('In check');
+  /// }
+  /// ```
+  late final List<bool> _antiking;
+
   /// All the undone moves.
   final List<MainMove> _backMovesHistory = [];
+
+  /// The move currently being calculated
+  late Move _currentMove;
 
   /// Used by calculators. True when calculating the valid moves.
   /// False when duplicating the original's moves.
@@ -14,30 +28,20 @@ abstract class Board {
   /// Without it, _backMovesHistory would be mest up by the calculs.
   bool _duringCalcul = false;
 
+  /// The move played by the player, it can create extra moves.
+  late MainMove _mainCurrentMove;
+
+  /// All the pieces, the index correspond to piece.pos.index
+  final List<Piece?> _piecesByPos;
+
   /// All the possible moves in the position
   final List<MainMove> allLegalMoves = [];
 
-  /// A representation of all the squares where the king of the current player can go or not.
-  ///
-  /// ```dart
-  /// Piece currentKing = board.king[board.turn]!;
-  /// if (board.antiking[currentKing.pos.index] == true) {
-  ///   print('In check');
-  /// }
-  /// ```
-  late final List<bool> antiking;
-
-  /// The move currently being calculated
-  late Move currentMove;
-
   /// The kings, sorted by color
-  Map<String, Piece?> king = {'w': null, 'b': null};
+  final Map<String, Piece?> king = {'w': null, 'b': null};
 
   /// The last MainMove played
   MainMove? get lastMove => movesHistory.lastOrNull;
-
-  /// The currentMove or the move who created the currentMove
-  late MainMove mainCurrentMove;
 
   /// All the moves played during the game.
   final List<MainMove> movesHistory = [];
@@ -49,23 +53,23 @@ abstract class Board {
   final int nbcols;
 
   /// All the pieces, sorted by time of creation
-  List<Piece> pieces = [];
-
-  /// All the pieces, the index correspond to piece.pos.index
-  List<Piece?> piecesByPos;
+  final List<Piece> pieces = [];
 
   /// All the pieces, sorted by color
-  Map<String, List<Piece>> piecesColored = {'w': [], 'b': []};
+  final Map<String, List<Piece>> piecesColored = {'w': [], 'b': []};
 
   /// The FEN of the starting position
-  late IratusFEN startFEN;
+  late final IratusFEN startFEN;
 
   /// The color of the player who has to make the next move.
   ///
   /// Can be 'w' or 'b'.
   String get turn => lastMove?.nextTurn ?? startFEN.turn;
 
-  Iterable<String> get validNotations =>
+  /// The notations of the valid moves in the position.
+  ///
+  /// To be given to the method move().
+  List<String> get validNotations =>
       waitingForInput ? lastMove!.validInputs : _allLegalNotations;
 
   /// Return true if the last move played needs an input.
@@ -75,15 +79,16 @@ abstract class Board {
   bool get waitingForInput => lastMove?.waitingForInput ?? false;
 
   Board(String fen, Game game, this.nbrows, this.nbcols)
-      : antiking = List.filled(nbcols * nbrows, false),
-        piecesByPos = List.filled(nbcols * nbrows, null) {
-    createPieces(fen);
-    updateAllLegalMoves();
+      : _antiking = List.filled(nbcols * nbrows, false),
+        _piecesByPos = List.filled(nbcols * nbrows, null) {
+    _createPieces(fen);
+    _updateAllLegalMoves();
   }
 
-  void addPiece(Piece piece) {
+  /// Add a piece in the board. To call only at board initialization.
+  void _addPiece(Piece piece) {
     pieces.add(piece);
-    piecesByPos[piece.pos.index] = piece;
+    _piecesByPos[piece.pos.index] = piece;
     piecesColored[piece.color]!.add(piece);
 
     if (piece.id == 'k') {
@@ -97,15 +102,7 @@ abstract class Board {
   /// Called once, at board creation
   ///
   /// In the implementation, initialize the pieces and calculator fields
-  void createPieces(String fen);
-
-  /// Get a piece from a position
-  Piece? get(Position pos) {
-    return piecesByPos[pos.index];
-  }
-
-  /// return a fen of the current board
-  FEN getFEN();
+  void _createPieces(String fen);
 
   /// Move a piece or complete an input request (like promotion)
   void _move(String notation) {
@@ -117,7 +114,7 @@ abstract class Board {
       lastMove!.input(notation);
 
       _backMovesHistory.clear();
-      updateAllLegalMoves();
+      _updateAllLegalMoves();
       return;
     }
 
@@ -133,12 +130,12 @@ abstract class Board {
 
     if (!move.waitingForInput) {
       _backMovesHistory.clear();
-      updateAllLegalMoves();
+      _updateAllLegalMoves();
     }
   }
 
   /// Redo the last move undone
-  void redo() {
+  void _redo() {
     if (_backMovesHistory.isEmpty) {
       return;
     }
@@ -149,11 +146,11 @@ abstract class Board {
 
     movesHistory.add(lastUndoneMove);
 
-    updateAllLegalMoves();
+    _updateAllLegalMoves();
   }
 
   /// Undo the last move played
-  void undo() {
+  void _undo() {
     if (movesHistory.isEmpty) {
       return;
     }
@@ -165,12 +162,12 @@ abstract class Board {
     if (!_duringCalcul) {
       // _backMovesHistory only stores real moves, not calcul moves
       _backMovesHistory.add(undoneMove);
-      updateAllLegalMoves();
+      _updateAllLegalMoves();
     }
   }
 
   /// Updates board.allLegalMoves
-  void updateAllLegalMoves() {
+  void _updateAllLegalMoves() {
     // Prevent changes to _backMovesHistory
     _duringCalcul = true;
 
@@ -183,7 +180,7 @@ abstract class Board {
     _allLegalNotations.clear();
 
     // Clear the antiking board.
-    antiking.fillRange(0, antiking.length, false);
+    _antiking.fillRange(0, _antiking.length, false);
 
     // Fill the antiking board.
     for (Piece enemy in enemies) {
@@ -191,11 +188,11 @@ abstract class Board {
       if (enemy.isCaptured) continue;
 
       // Update antiking
-      enemy.identity.updateAntiking(antiking);
+      enemy.identity.updateAntiking(_antiking);
 
       // A king can't capture a dynamited piece.
       if (enemy.dynamited) {
-        antiking[enemy.pos.index] = true;
+        _antiking[enemy.pos.index] = true;
       }
     }
 
@@ -235,23 +232,33 @@ abstract class Board {
     // Enables changes to calculator._backMovesHistory.
     _duringCalcul = false;
   }
+
+  /// Get a piece from a position
+  Piece? getPiece(Position pos) {
+    return _piecesByPos[pos.index];
+  }
+
+  /// return a fen of the current board
+  FEN getFEN();
 }
 
+/// An object representating the board. It contains the pieces.
 class IratusBoard extends Board {
-  Map<String, List<Piece>> phantoms = {'w': [], 'b': []};
+  /// The phantoms, sorted by color
+  final Map<String, List<Piece>> _phantoms = {'w': [], 'b': []};
 
   IratusBoard(String fen, Game game) : super(fen, game, 10, 8);
 
   @override
-  void addPiece(Piece piece) {
-    super.addPiece(piece);
+  void _addPiece(Piece piece) {
+    super._addPiece(piece);
     if (piece.phantomized) {
-      phantoms[piece.color]!.add(piece);
+      _phantoms[piece.color]!.add(piece);
     }
   }
 
   @override
-  void createPieces(String fen) {
+  void _createPieces(String fen) {
     startFEN = IratusFEN.fromString(fen, this);
   }
 

@@ -70,17 +70,62 @@
 
     </section>
     
+<section class="desc markdown">
+  <p>Starts the console dialogue with the players.</p>
+</section>
 
 
     
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">void start() {
-  print(&#39;Enter a starting FEN or enter RETURN for a game  :&#39;);
-  while (_game.result == 0) {
-    _printBoard();
+  <pre class="language-dart"><code class="language-dart">void start() async {
+  String? input;
+  if (!_gameInitializedFromConstructor) {
+    bool startedGame = false;
+    print(
+        &#39;Enter a starting FEN or PGN file or enter RETURN for a standart game :&#39;);
+    while (startedGame == false) {
+      input = stdin.readLineSync();
 
-    String? input;
+      switch (input) {
+        case null:
+          print(&#39;No input detected&#39;);
+          break;
+        case &#39;exit&#39;:
+          return;
+        case &#39;help&#39;:
+          print(&#39;Availible commands :&#39;);
+          for (String command in _inputFENcommandsDoc.keys) {
+            print(&#39;  $command: ${_inputFENcommandsDoc[command]}&#39;);
+          }
+          break;
+        case &#39;standart&#39;:
+        case &#39;&#39;:
+          _game = IratusGame();
+          _board = _game.board;
+          startedGame = true;
+          break;
+        default:
+          try {
+            if (input.startsWith(&#39;pgn&#39;)) {
+              String pgnFilename = input.split(&#39; &#39;)[1];
+              File pgnFile = File(pgnFilename);
+              print(await pgnFile.readAsString());
+              _game = IratusGame.fromPGN(await pgnFile.readAsString());
+            } else {
+              _game = IratusGame.fromFEN(input);
+            }
+            _board = _game.board;
+            startedGame = true;
+          } catch (e) {
+            print(e.toString());
+          }
+      }
+    }
+  }
+  while (_game.result == 0) {
+    printBoard(_board);
+
     bool played = false;
 
     while (played == false) {
@@ -92,9 +137,9 @@
           print(&#39;No input detected&#39;);
           break;
         case &#39;exit&#39;:
-          played = true;
-          _game.interrupt();
-          break;
+          return;
+        case &#39;fen&#39;:
+          print(_game.board.getFEN());
         case &#39;help&#39;:
           print(&#39;Availible commands :&#39;);
           for (String command in _commandsDoc.keys) {
@@ -103,28 +148,31 @@
           break;
         case &#39;ls&#39;:
           print(&#39;Availible moves :&#39;);
-          _printPossibleMoves();
+          printAllValidMoves(_board);
+          break;
+        case &#39;pgn&#39;:
+          print(_game.getPGN());
           break;
         case &#39;redo&#39;:
           _game.redo();
-          _printBoard();
+          printBoard(_board);
           break;
         case &#39;redoAll&#39;:
           _game.redoAll();
-          _printBoard();
+          printBoard(_board);
           break;
         case &#39;undo&#39;:
           _game.undo();
-          _printBoard();
+          printBoard(_board);
           break;
         case &#39;undoAll&#39;:
           _game.undoAll();
-          _printBoard();
+          printBoard(_board);
           break;
 
         default:
-          for (String validMoveNotation in _board.allValidMoves.keys) {
-            if (validMoveNotation == input) {
+          for (String valid in _board.validNotations) {
+            if (input == valid) {
               _game.move(input);
               played = true;
               break;
@@ -136,8 +184,10 @@
       }
     }
   }
-  _printBoard();
-  print(&#39;Result : ${_game.resultDoc[_game.result</code></pre>
+  printBoard(_board);
+  print(
+      &#39;\nResult : ${resultDoc[_game.result]}\nWinner : ${winnerDoc[_game.winner]}\n\n${_game.getPGN()}&#39;);
+}</code></pre>
 </section>
 
 

@@ -58,6 +58,7 @@ abstract class FEN {
 /// _ : after a dynamited piece
 /// (X) : after a linked piece, X is the link ID
 class IratusFEN extends FEN {
+  /// The fen representating the standart start position of Iratus.
   static final String start =
       'fd(0)s(0)yys(1)d(1)g/rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR/FD(2)S(2)YYS(3)D(3)G w QKqk - 0000000000000000-0000000000000000 0 1';
 
@@ -248,7 +249,7 @@ class IratusFEN extends FEN {
       int space = 0;
       for (int col = 0; col < 8; col++) {
         Piece? piece =
-            board.get(Position.fromRowCol(board, row: row, col: col));
+            board.getPiece(Position.fromRowCol(board, row: row, col: col));
 
         if (piece == null) {
           space += 1;
@@ -367,9 +368,9 @@ class IratusFEN extends FEN {
 }
 
 final pieceIDs = 'bcdefgknpqrsy';
-final ids = '$pieceIDs${pieceIDs.toUpperCase()}~_()0-9';
+final validChars = '$pieceIDs${pieceIDs.toUpperCase()}~_()0-9';
 final fenRegexPattern =
-    '^([$ids]+\\/){9}[$ids]+\\s[wb]\\s(-|[KQkq]+)\\s(-|[a-h][1-8])\\s(([01]+)?-([01]+)?)\\s\\d+\\s\\d+\$';
+    '^([$validChars]+\\/){9}[$validChars]+\\s[wb]\\s(-|[KQkq]+)\\s(-|[a-h][1-8])\\s(([01]+)?-([01]+)?)\\s\\d+\\s\\d+\$';
 final fenRegex = RegExp(fenRegexPattern);
 
 bool isValidFEN(String fen) {

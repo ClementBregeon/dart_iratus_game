@@ -60,22 +60,29 @@
 <h1><span class="kind-property">lastMove</span> property 
 </h1></div>
 
-        <section class="multi-line-signature">
-          
-          Move?
-          <span class="name ">lastMove</span>
-          <div class="features"><span class="feature">read / write</span><span class="feature">inherited</span></div>
 
-        </section>
         
-<section class="desc markdown">
-  <p>The last mainMove played</p>
+<section id="getter">
+
+<section class="multi-line-signature">
+  
+  <span class="returntype">MainMove?</span>
+  <span class="name ">lastMove</span>
+  <div class="features"><span class="feature">inherited</span></div>
+
 </section>
 
-        
+
+<section class="desc markdown">
+  <p>The last MainMove played</p>
+</section>
+
+
 <section class="summary source-code" id="source">
   <h2><span>Implementation</span></h2>
-  <pre class="language-dart"><code class="language-dart">Move? lastMove;</code></pre>
+  <pre class="language-dart"><code class="language-dart">MainMove? get lastMove =&gt; movesHistory.lastOrNull;</code></pre>
+</section>
+
 </section>
 
 

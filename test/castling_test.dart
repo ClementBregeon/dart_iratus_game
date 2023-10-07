@@ -25,16 +25,20 @@ void main() {
     game.move('Qd2');
 
     expect(game.board.validNotations.contains('0-0'), true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e8')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e8'))!.id == 'k',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'f8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'g8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'h8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e8'))!.id == 'k', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'f8')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'g8')) == null, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'h8')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'h8'))!.id == 'r', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'h8'))!.id == 'r',
+        true);
 
     game.move('0-0');
 
@@ -43,32 +47,40 @@ void main() {
         game.board.getFEN().fenEqualizer ==
             'fd(0)s(0)yys(1)d(1)g/rnbq1rk1/ppppppbp/5np1/8/3P1B2/2N5/PPPQPPPP/R3KBNR/FD(2)S(2)YYS(3)D(3)G w QK -',
         true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e8')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'f8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'f8')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'f8'))!.id == 'r',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'g8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'f8'))!.id == 'r', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'g8')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'g8'))!.id == 'k', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'h8')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'g8'))!.id == 'k',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'h8')) == null,
+        true);
   });
 
   test('Undoing short castle works.', () {
     game.undo();
 
     expect(game.board.validNotations.contains('0-0'), true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e8')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e8'))!.id == 'k',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'f8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'g8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'h8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'e8'))!.id == 'k', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'f8')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'g8')) == null, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'h8')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'h8'))!.id == 'r', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'h8'))!.id == 'r',
+        true);
   });
 
   test('Redoing short castle works.', () {
@@ -79,31 +91,40 @@ void main() {
         game.board.getFEN().fenEqualizer ==
             'fd(0)s(0)yys(1)d(1)g/rnbq1rk1/ppppppbp/5np1/8/3P1B2/2N5/PPPQPPPP/R3KBNR/FD(2)S(2)YYS(3)D(3)G w QK -',
         true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e8')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e8')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'f8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'f8')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'f8'))!.id == 'r',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'g8')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'f8'))!.id == 'r', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'g8')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'g8'))!.id == 'k', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'h8')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'g8'))!.id == 'k',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'h8')) == null,
+        true);
   });
 
   test('Long castle works.', () {
     expect(game.board.validNotations.contains('0-0-0'), true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'a1')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'a1')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'a1'))!.id == 'r',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'b1')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'c1')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd1')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e1')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'a1'))!.id == 'r', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'b1')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'c1')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd1')) == null, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'e1')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'e1'))!.id == 'k', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e1'))!.id == 'k',
+        true);
 
     game.move('0-0-0');
 
@@ -112,34 +133,44 @@ void main() {
         game.board.getFEN().fenEqualizer ==
             'fd(0)s(0)yys(1)d(1)g/rnbq1rk1/ppppppbp/5np1/8/3P1B2/2N5/PPPQPPPP/2KR1BNR/FD(2)S(2)YYS(3)D(3)G b - -',
         true);
-    expect(game.board.get(Position.fromCoords(game.board, 'a1')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'b1')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'a1')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'b1')) == null,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'c1'))!.id == 'k', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'c1'))!.id == 'k',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'c1')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'c1')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd1'))!.id == 'r', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd1')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e1')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd1'))!.id == 'r',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd1')) is Piece,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e1')) == null,
+        true);
   });
 
   test('Undoing Long castle works.', () {
     game.undo();
 
     expect(game.board.validNotations.contains('0-0-0'), true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'a1')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'a1')) is Piece, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'a1'))!.id == 'r',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'b1')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'c1')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd1')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e1')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'a1'))!.id == 'r', true);
-    expect(game.board.get(Position.fromCoords(game.board, 'b1')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'c1')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'd1')) == null, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'e1')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'e1'))!.id == 'k', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'e1'))!.id == 'k',
+        true);
   });
 
   test('Redoing Long castle works.', () {
@@ -150,17 +181,22 @@ void main() {
         game.board.getFEN().fenEqualizer ==
             'fd(0)s(0)yys(1)d(1)g/rnbq1rk1/ppppppbp/5np1/8/3P1B2/2N5/PPPQPPPP/2KR1BNR/FD(2)S(2)YYS(3)D(3)G b - -',
         true);
-    expect(game.board.get(Position.fromCoords(game.board, 'a1')) == null, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'b1')) == null, true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'a1')) == null,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'b1')) == null,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'c1'))!.id == 'k', true);
+        game.board.getPiece(Position.fromCoords(game.board, 'c1'))!.id == 'k',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'c1')) is Piece,
+        true);
     expect(
-        game.board.get(Position.fromCoords(game.board, 'c1')) is Piece, true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd1'))!.id == 'r', true);
-    expect(
-        game.board.get(Position.fromCoords(game.board, 'd1')) is Piece, true);
-    expect(game.board.get(Position.fromCoords(game.board, 'e1')) == null, true);
+        game.board.getPiece(Position.fromCoords(game.board, 'd1'))!.id == 'r',
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'd1')) is Piece,
+        true);
+    expect(game.board.getPiece(Position.fromCoords(game.board, 'e1')) == null,
+        true);
   });
 
   test('Castlings can be enabled by FEN.', () {
