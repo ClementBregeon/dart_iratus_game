@@ -202,9 +202,7 @@ abstract class Game {
   }
 
   /// Return a PGN object, representating the game.
-  PGN getPGN() {
-    return PGN(this);
-  }
+  PGN getPGN();
 
   /// Immediately interrupt the game, ending in a draw.
   void interrupt() {
@@ -282,5 +280,46 @@ class IratusGame extends Game {
     board = IratusBoard(fen, this);
   }
 
-  // TODO : game.fromPGN();
+  /// Initialize an Iratus game from the moves noted in a pgn string.
+  ///
+  /// For more details about the pgn notation for Iratus, see [IratusPGN].
+  IratusGame.fromPGN(String pgnString) {
+    PGN pgn = IratusPGN.fromString(pgnString);
+
+    // player names
+    String? whiteName = pgn.tagPairs['White'];
+    if (whiteName != null) player['w'] = Player('w', whiteName);
+    String? blackName = pgn.tagPairs['Black'];
+    if (blackName != null) player['b'] = Player('b', blackName);
+
+    // board initialization
+    String? startFen = pgn.tagPairs['FEN'];
+    board = IratusBoard(startFen ?? IratusFEN.start, this);
+
+    // moves
+    List<String> moves = pgn.moveText
+        .split(' ')
+        .where((e) => e.isNotEmpty && !'0123456789*.'.contains(e[0]))
+        .toList();
+
+    for (String moveNotation in moves) {
+      moveNotation = moveNotation.replaceAll(RegExp(r'[+#]$'), '');
+      if (moveNotation.contains('=')) {
+        List<String> splitted = moveNotation.split('=');
+        move(splitted[0]);
+        move('=${splitted[1]}');
+      } else if (moveNotation.contains('-')) {
+        List<String> splitted = moveNotation.split('-');
+        move(splitted[0]);
+        move(splitted[1]);
+      } else {
+        move(moveNotation);
+      }
+    }
+  }
+
+  @override
+  IratusPGN getPGN() {
+    return IratusPGN(this);
+  }
 }
