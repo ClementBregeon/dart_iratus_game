@@ -69,9 +69,12 @@ class PGN {
 
     // moveText
     if (game.board.movesHistory.isNotEmpty) {
-      int turnNumber = game.board.startFEN
-          .turnNumber; // TODO : 1. ... e5 instead of 1. e5 + test
+      int turnNumber = game.board.startFEN.turnNumber;
       List<String> mtList = ['$turnNumber.'];
+      if (game.board.movesHistory.isNotEmpty &&
+          game.board.movesHistory[0].turn == 'b') {
+        mtList.add('...'); // TODO : test
+      }
       for (Move move in game.board.movesHistory) {
         mtList.add(move.notation);
         if (move.turnNumber > turnNumber && move != game.board.lastMove) {

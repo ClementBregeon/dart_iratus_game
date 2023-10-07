@@ -11,6 +11,7 @@ class ConsoleView {
 
   static final Map<String, String> _commandsDoc = {
     'exit': 'exit the programm',
+    'fen': 'get the FEN of the position',
     'help': 'show commands',
     'ls': 'show all possible moves',
     'pgn': 'get the PGN of the game',
@@ -45,12 +46,14 @@ class ConsoleView {
 
     String firstRowDelimiter = '  ┍━━━┯━━━┯━━━┯━━━┯━━━┯━━━┯━━━┯━━━┑';
     String rowDelimiter = '  ┝━━━┿━━━┿━━━┿━━━┿━━━┿━━━┿━━━┿━━━┥';
-    String lastRowDelimiter = '  ┕━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┙\n    a   b   c   d   e   f   g   h  ';
+    String lastRowDelimiter =
+        '  ┕━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┷━━━┙\n    a   b   c   d   e   f   g   h  ';
     print(firstRowDelimiter);
     for (int row = 0; row < board.nbrows; row++) {
       String line = '${board.nbrows - 1 - row} │';
       for (int col = 0; col < board.nbcols; col++) {
-        Piece? piece = board.get(Position.fromRowCol(board, row: row, col: col));
+        Piece? piece =
+            board.get(Position.fromRowCol(board, row: row, col: col));
         if (piece == null) {
           line += '   │';
         } else {
@@ -133,6 +136,8 @@ class ConsoleView {
             break;
           case 'exit':
             return;
+          case 'fen':
+            print(_game.board.getFEN());
           case 'help':
             print('Availible commands :');
             for (String command in _commandsDoc.keys) {
