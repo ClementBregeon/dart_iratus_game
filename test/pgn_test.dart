@@ -1,5 +1,4 @@
 import 'package:iratus_game/iratus_game.dart';
-import 'package:iratus_game/src/game.dart';
 import 'package:test/test.dart';
 
 void main() {
