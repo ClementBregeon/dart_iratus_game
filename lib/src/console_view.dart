@@ -183,7 +183,7 @@ class ConsoleView {
       }
     }
     printBoard(_board);
-    print('Result : ${_game.resultDoc[_game.result]}');
-    print('Winner : ${_game.winnerDoc[_game.winner]}');
+    print(
+        '\nResult : ${_game.resultDoc[_game.result]}\nWinner : ${_game.winnerDoc[_game.winner]}\n\n${_game.getPGN()}');
   }
 }
