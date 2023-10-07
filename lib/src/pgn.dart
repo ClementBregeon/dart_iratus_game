@@ -9,7 +9,7 @@ import 'game.dart';
 ///   - '0-1' :      black wins
 ///   - '1/2-1/2' :  drawn game
 ///   - '*' :        game still in progress, game abandoned, or result otherwise unknown
-class PGN {
+abstract class PGN {
   /// The string storing the game
   late final String pgn;
 
@@ -19,7 +19,14 @@ class PGN {
   /// movetext describes the actual moves of the game
   late final String moveText;
 
-  PGN(Game game) {
+  @override
+  String toString() {
+    return pgn;
+  }
+}
+
+class IratusPGN extends PGN {
+  IratusPGN(Game game) {
     // tags
     tagPairs['Event'] = 'Casual game';
     tagPairs['Site'] = 'iratus.fr';
@@ -94,8 +101,24 @@ class PGN {
         '${tagPairs.entries.map((entry) => '[${entry.key} "${entry.value}"]').join('\n')}\n\n$moveText';
   }
 
-  @override
-  String toString() {
-    return pgn;
+  IratusPGN.fromString(String pgnString) {
+    // Split the pgnString into lines
+    final lines = pgnString.split('\n');
+
+    // Iterate through each line and parse tag pairs
+    for (final line in lines) {
+      final match = RegExp(r'\[(\w+) "(.*?)"\]').firstMatch(line);
+      if (match != null) {
+        final tag = match.group(1)!;
+        final value = match.group(2)!;
+        tagPairs[tag] = value;
+      }
+    }
+
+    // Join the remaining lines as move text
+    final moveTextLines = lines
+        .where((line) => line.trim().isNotEmpty && !line.startsWith('['))
+        .toList();
+    moveText = moveTextLines.join(' ');
   }
 }

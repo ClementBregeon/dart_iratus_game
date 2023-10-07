@@ -1,4 +1,5 @@
 import 'package:iratus_game/iratus_game.dart';
+import 'package:iratus_game/src/pgn.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -44,5 +45,29 @@ void main() {
 
     expect(pgn.moveText == '1. ... e5', true);
     expect(pgn.tagPairs['Result'] == '*', true);
+  });
+
+  test('A PGN is correctly created from String.', () {
+    // 6
+    IratusPGN pgn = IratusPGN.fromString('''[Event "Casual game"]
+[Site "iratus.fr"]
+[Date "2023.10.7"]
+[Time "13.54.6"]
+[White "Winston"]
+[Black "Bellucci"]
+[Result "0-1"]
+[Variant "Iratus"]
+
+1. f3 e5 2. g4 Qh4# 0-1''');
+
+    expect(pgn.tagPairs['Event'] == 'Casual game', true);
+    expect(pgn.tagPairs['Site'] == 'iratus.fr', true);
+    expect(pgn.tagPairs['Date'] == '2023.10.7', true);
+    expect(pgn.tagPairs['Time'] == '13.54.6', true);
+    expect(pgn.tagPairs['White'] == 'Winston', true);
+    expect(pgn.tagPairs['Black'] == 'Bellucci', true);
+    expect(pgn.tagPairs['Result'] == '0-1', true);
+    expect(pgn.tagPairs['Variant'] == 'Iratus', true);
+    expect(pgn.moveText == '1. f3 e5 2. g4 Qh4# 0-1', true);
   });
 }
