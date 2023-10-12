@@ -59,9 +59,9 @@ class ConsoleView {
         } else {
           String id;
           if (piece.color == 'w') {
-            id = piece.id.toUpperCase();
+            id = piece.id.char.toUpperCase();
           } else {
-            id = piece.id.toLowerCase();
+            id = piece.id.char.toLowerCase();
           }
           if (piece.phantomized) {
             id = italic(id);

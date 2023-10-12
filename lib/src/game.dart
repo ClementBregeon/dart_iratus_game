@@ -1,5 +1,6 @@
 library iratus_game;
 
+import 'models.dart';
 import 'pgn.dart';
 import 'position.dart';
 
@@ -84,14 +85,18 @@ abstract class Game {
 
       for (Piece piece in board.pieces) {
         if (!piece.isCaptured) {
-          if (piece.id == 'k') {
+          if (piece.id == Role.king) {
             continue;
           }
           remainingPieces[piece.color]!.add(piece);
         }
       }
 
-      String cantMateAlone = 'ben';
+      List<Role> cantMateAlone = [
+        Role.bishop,
+        Role.eliteSoldier,
+        Role.knight,
+      ];
 
       bool insufficient(List<Piece> set) {
         if (set.isEmpty) {

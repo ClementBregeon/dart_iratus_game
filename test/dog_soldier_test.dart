@@ -35,14 +35,16 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'b8')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'b8'))!.id == 's',
+        game.board.getPiece(Position.fromCoords(game.board, 'b8'))!.id ==
+            Role.soldier,
         true);
     expect(game.board.getPiece(Position.fromCoords(game.board, 'c9')) == null,
         true);
     expect(game.board.getPiece(Position.fromCoords(game.board, 'b9')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'b9'))!.id == 'd',
+        game.board.getPiece(Position.fromCoords(game.board, 'b9'))!.id ==
+            Role.dog,
         true);
   });
 
@@ -52,7 +54,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'h2')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'h2'))!.id == 's',
+        game.board.getPiece(Position.fromCoords(game.board, 'h2'))!.id ==
+            Role.soldier,
         true);
     expect(game.board.getPiece(Position.fromCoords(game.board, 'f0')) == null,
         true);
@@ -61,7 +64,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'g1')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'g1'))!.id == 'd',
+        game.board.getPiece(Position.fromCoords(game.board, 'g1'))!.id ==
+            Role.dog,
         true);
   });
 
@@ -75,17 +79,19 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'e5')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'e5'))!.id == 'n',
+        game.board.getPiece(Position.fromCoords(game.board, 'e5'))!.id ==
+            Role.knight,
         true);
     expect(game.board.getPiece(Position.fromCoords(game.board, 'f4')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'f4'))!.id == 'c',
+        game.board.getPiece(Position.fromCoords(game.board, 'f4'))!.id ==
+            Role.enragedDog,
         true);
   });
 
   test('The phantom of the previous capture is a soldier.', () {
-    expect(wPhantom.id == 's', true);
+    expect(wPhantom.id == Role.soldier, true);
   });
 
   test('When a dog dies, the soldier dies too.', () {
@@ -98,14 +104,15 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'b6')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'b6'))!.id == 'n',
+        game.board.getPiece(Position.fromCoords(game.board, 'b6'))!.id ==
+            Role.knight,
         true);
     expect(game.board.getPiece(Position.fromCoords(game.board, 'c5')) == null,
         true);
   });
 
   test('The phantom of the previous capture is an enraged dog.', () {
-    expect(bPhantom.id == 'c', true);
+    expect(bPhantom.id == Role.enragedDog, true);
   });
 
   test('When a dog dies, if the soldier is dynamited, the capturer dies too.',
@@ -126,8 +133,8 @@ void main() {
   });
 
   test('The phantom of the previous capture is an enraged dog.', () {
-    expect(bPhantom.id == 'c', true);
-    expect(wPhantom.id == 'n', true);
+    expect(bPhantom.id == Role.enragedDog, true);
+    expect(wPhantom.id == Role.knight, true);
   });
 
   test('When a soldier promotes, the promotion is shown on the notation.', () {

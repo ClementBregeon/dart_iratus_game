@@ -4,7 +4,7 @@ class _PieceInformations {
   int col = -1;
   String color = 'n';
   bool dynamited = false;
-  String id = '';
+  Role? id;
   int? linkID;
   bool phantomized = false;
   int row = -1;
@@ -13,7 +13,7 @@ class _PieceInformations {
     col = -1;
     color = 'n';
     dynamited = false;
-    id = '';
+    id = null;
     linkID = null;
     phantomized = false;
     row = -1;
@@ -121,19 +121,14 @@ class IratusFEN extends FEN {
     var dhmIndexes = {'w': 0, 'b': 0};
 
     void createPiece(_PieceInformations pieceInfos) {
-      if (!ids.contains(pieceInfos.id)) {
-        throw ArgumentError.value(
-            pieceInfos.id, 'Invalid FEN : Unknown piece id');
-      }
-
       Piece piece;
       Position pos =
           Position.fromRowCol(board, row: pieceInfos.row, col: pieceInfos.col);
       if (pieceInfos.phantomized) {
-        piece = Piece(board, pieceInfos.color, pos, 'f');
-        piece.transform(pieceInfos.id);
+        piece = Piece(board, pieceInfos.color, pos, Role.phantom);
+        piece.transform(pieceInfos.id!);
       } else {
-        piece = Piece(board, pieceInfos.color, pos, pieceInfos.id);
+        piece = Piece(board, pieceInfos.color, pos, pieceInfos.id!);
       }
       if (pieceInfos.dynamited) {
         piece.setDynamite(true);
@@ -202,14 +197,19 @@ class IratusFEN extends FEN {
         }
 
         // Piece creation
-        if (pieceInfos.id != '') {
+        if (pieceInfos.id != null) {
           createPiece(pieceInfos);
         }
 
         // Piece pre-creation
         pieceInfos.reset();
         final charLowerCase = char.toLowerCase(); // white ids are uppercase
-        pieceInfos.id = charLowerCase;
+        final id = Role.fromChar(charLowerCase);
+        if (id == null) {
+          throw ArgumentError.value(
+              pieceInfos.id, 'Invalid FEN : Unknown piece id');
+        }
+        pieceInfos.id = id;
         pieceInfos.color = char == charLowerCase ? "b" : "w";
         pieceInfos.row = irow;
         pieceInfos.col = icol;
@@ -262,16 +262,16 @@ class IratusFEN extends FEN {
         }
 
         if (piece.color == "b") {
-          fenIP += piece.id;
+          fenIP += piece.id.char;
         } else {
-          fenIP += piece.id.toUpperCase();
+          fenIP += piece.id.char.toUpperCase();
         }
 
         if (piece.dynamited) {
           fenIP += "_";
         }
 
-        if (piece.phantomized && piece.id != 'f') {
+        if (piece.phantomized && piece.id != Role.phantom) {
           fenIP += '~';
         }
 

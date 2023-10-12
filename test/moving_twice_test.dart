@@ -15,7 +15,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id == 'c',
+        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id ==
+            Role.enragedDog,
         true);
     expect(
         game.board.validNotations.join(', ') ==

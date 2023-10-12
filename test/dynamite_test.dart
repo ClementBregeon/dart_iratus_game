@@ -17,7 +17,7 @@ void main() {
 
   test('From standart start, a dynamite can attach itself 16 pieces.', () {
     for (Piece piece in game.board.pieces) {
-      if (piece.id == 'y') {
+      if (piece.id == Role.dynamite) {
         expect(piece.identity.getValidMoves().length == 16, true);
       }
     }
@@ -35,7 +35,7 @@ void main() {
     game.move('e5');
 
     for (Piece piece in game.board.piecesColored['w']!) {
-      if (piece.id == 'y') {
+      if (piece.id == Role.dynamite) {
         expect(piece.identity.getValidMoves().length == 15, true);
       }
     }
@@ -59,12 +59,14 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd4')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'd4'))!.id == 'p',
+        game.board.getPiece(Position.fromCoords(game.board, 'd4'))!.id ==
+            Role.pawn,
         true);
     expect(game.board.getPiece(Position.fromCoords(game.board, 'e5')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'e5'))!.id == 'p',
+        game.board.getPiece(Position.fromCoords(game.board, 'e5'))!.id ==
+            Role.pawn,
         true);
   });
 

@@ -54,16 +54,15 @@ class Piece {
 
   // Identity getters
   PieceIdentity get identity => _identity;
-  String get id => _identity.id;
+  Role get id => _identity.id;
   List<List<int>> get moves => _identity.moves;
 
-  Piece(this.board, this.color, this._pos, String id)
+  Piece(this.board, this.color, this._pos, Role id)
       : enemyColor = (color == "w") ? "b" : "w" {
     if (!colors.contains(color)) {
       throw ArgumentError.value(
           color, 'A piece color can only be \'w\' or \'b\'');
     }
-    if (!ids.contains(id)) throw ArgumentError.value(id, 'Unknown piece id');
     _identity = identitiyConstructors[id]!(this);
     board._addPiece(this);
   }
@@ -85,11 +84,11 @@ class Piece {
 
   @override
   String toString() {
-    return '${id.toUpperCase()}$coord';
+    return '${id.char.toUpperCase()}$coord';
   }
 
   /// Transform a piece into another
-  void transform(String pieceId) {
+  void transform(Role pieceId) {
     if (id == pieceId) return;
 
     _identity = identitiyConstructors[pieceId]!(this);
@@ -102,7 +101,7 @@ class Piece {
 }
 
 abstract class PieceIdentity {
-  abstract final String id;
+  abstract final Role id;
   abstract final List<List<int>> moves;
 
   final Piece p;
@@ -114,7 +113,7 @@ abstract class PieceIdentity {
     Piece? piece = p.board.getPiece(pos);
     if (piece == null) {
       return true;
-    } else if (piece.id == 'y') {
+    } else if (piece.id == Role.dynamite) {
       return piece.color == p.color &&
           dynamitables.contains(id) &&
           !p.dynamited;
@@ -331,7 +330,7 @@ abstract class PieceMovingTwice extends PieceIdentity {
 
 class _Bishop extends RollingPiece {
   @override
-  final String id = 'b';
+  final Role id = Role.bishop;
   @override
   final List<List<int>> moves = [
     [-1, 1],
@@ -345,7 +344,7 @@ class _Bishop extends RollingPiece {
 
 class _Dog extends PieceIdentity {
   @override
-  final String id = 'd';
+  final Role id = Role.dog;
   @override
   final List<List<int>> moves = [];
 
@@ -359,7 +358,7 @@ class _Dog extends PieceIdentity {
       // If the dog is captured while its soldier is alive, the phantom is an enraged dog instead of classic dog
       for (final Command command in commands) {
         if (command is Transform) {
-          command.newId = 'c'; // replace 'd' by 'c'
+          command.newId = Role.enragedDog; // replace Role.dog by Role.dog
           break;
         }
       }
@@ -396,7 +395,7 @@ class _Dog extends PieceIdentity {
 
 class _Dynamite extends PieceIdentity {
   @override
-  final String id = 'y';
+  final Role id = Role.dynamite;
   @override
   final List<List<int>> moves = [];
 
@@ -456,7 +455,7 @@ class _Dynamite extends PieceIdentity {
 
 class _EliteSoldier extends PieceMovingTwice {
   @override
-  final String id = 'e';
+  final Role id = Role.eliteSoldier;
   @override
   final List<List<int>> moves = [
     [-1, 1],
@@ -470,7 +469,7 @@ class _EliteSoldier extends PieceMovingTwice {
 
 class _EnragedDog extends PieceMovingTwice {
   @override
-  final String id = 'c';
+  final Role id = Role.enragedDog;
   @override
   final List<List<int>> moves = [
     [0, 1],
@@ -484,7 +483,7 @@ class _EnragedDog extends PieceMovingTwice {
 
 class _Grapple extends RollingPiece {
   @override
-  final String id = 'g';
+  final Role id = Role.grapple;
   @override
   final List<List<int>> moves = [
     [0, 1],
@@ -504,7 +503,7 @@ class _Grapple extends RollingPiece {
     Piece? piece = p.board.getPiece(pos);
 
     // The only piece tha grapple can't move is the unequipped dynamite
-    return piece == null ? true : piece.id != 'y';
+    return piece == null ? true : piece.id != Role.dynamite;
   }
 
   @override
@@ -517,7 +516,7 @@ class _Grapple extends RollingPiece {
       // ex : G:Nf6->d4
       // ex : G:Nf6->*     here, the piece on f6 was dynamited
       Notation(
-          'G:${grappled.id.toUpperCase()}${grappled.coord}->${grappled.dynamited ? '*' : p.pos.coord}'),
+          'G:${grappled.id.char.toUpperCase()}${grappled.coord}->${grappled.dynamited ? '*' : p.pos.coord}'),
       Capture(p, p),
       if (grappled.dynamited)
         Capture(grappled, p)
@@ -535,7 +534,7 @@ class _Grapple extends RollingPiece {
 
 class _King extends PieceIdentity {
   @override
-  final String id = 'k';
+  final Role id = Role.king;
   @override
   final List<List<int>> moves = [
     [0, 1],
@@ -633,7 +632,7 @@ class _King extends PieceIdentity {
 
 class _Knight extends PieceIdentity {
   @override
-  final String id = 'n';
+  final Role id = Role.knight;
   @override
   final List<List<int>> moves = [
     [2, 1],
@@ -651,7 +650,7 @@ class _Knight extends PieceIdentity {
 
 class _Pawn extends PieceIdentity {
   @override
-  final String id = 'p';
+  final Role id = Role.pawn;
   @override
   final List<List<int>> moves;
 
@@ -689,7 +688,7 @@ class _Pawn extends PieceIdentity {
       Piece? blocker = p.board.getPiece(pos);
       if (blocker == null) {
         validMoves.add(pos);
-      } else if (blocker.id == 'y' && !p.dynamited) {
+      } else if (blocker.id == Role.dynamite && !p.dynamited) {
         validMoves.add(pos);
         break;
       } else {
@@ -755,7 +754,7 @@ class _Pawn extends PieceIdentity {
         Position enemyPawnPos = Position.fromRowCol(p.board,
             row: enPassant.row + (p.color == 'w' ? 1 : -1), col: enPassant.col);
         Piece? captured = p.board.getPiece(enemyPawnPos);
-        if (captured == null || captured.id != 'p') {
+        if (captured == null || captured.id != Role.pawn) {
           // There is a very rare case, where the pawn moved two squares and promoted,
           // and an enemy pawn is on the first row (which is illegal in classic chess).
           // In this case, the enemy pawn can capture the promoted piece en passant.
@@ -793,7 +792,7 @@ class _Pawn extends PieceIdentity {
 
 class _Phantom extends PieceIdentity {
   @override
-  final String id = 'f';
+  final Role id = Role.phantom;
   @override
   final List<List<int>> moves = [];
 
@@ -816,7 +815,7 @@ class _Phantom extends PieceIdentity {
 
 class _Queen extends RollingPiece {
   @override
-  final String id = 'q';
+  final Role id = Role.queen;
   @override
   final List<List<int>> moves = [
     [0, 1],
@@ -834,7 +833,7 @@ class _Queen extends RollingPiece {
 
 class _Rook extends RollingPiece {
   @override
-  final String id = 'r';
+  final Role id = Role.rook;
   @override
   final List<List<int>> moves = [
     [0, 1],
@@ -848,7 +847,7 @@ class _Rook extends RollingPiece {
 
 class _Soldier extends RollingPiece {
   @override
-  final String id = 's';
+  final Role id = Role.soldier;
   @override
   final List<List<int>> moves;
   final int promotionRow;
@@ -871,13 +870,13 @@ class _Soldier extends RollingPiece {
     Piece? piece = p.board.getPiece(pos);
     if (piece == null) {
       return true;
-    } else if (piece.id == 'y') {
+    } else if (piece.id == Role.dynamite) {
       return piece.color == p.color &&
           dynamitables.contains(id) &&
           !p.dynamited;
     } else {
       return piece.color != p.color &&
-          piece.id == 'p'; // the soldier only captures pawns
+          piece.id == Role.pawn; // the soldier only captures pawns
     }
   }
 
@@ -890,7 +889,7 @@ class _Soldier extends RollingPiece {
 
     if (!p._linkedPiece!.isCaptured) {
       // If the dog is still alive when the soldier is captured
-      commands.add(Transform(p._linkedPiece!, 'd', 'c'));
+      commands.add(Transform(p._linkedPiece!, Role.dog, Role.enragedDog));
     } else {
       // Else, the soldier is captured because the dog just got captured
       // In this case, the dog is phantomized, not the soldier
@@ -908,7 +907,7 @@ class _Soldier extends RollingPiece {
     if (p._linkedPiece == null) {
       // If this is the phantom of the soldier
       if (p.row == promotionRow) {
-        commands.add(Transform(p, id, 'e'));
+        commands.add(Transform(p, id, Role.eliteSoldier));
         commands.add(NotationTransform(
             (String notation) => 'S${notation.substring(1)}=E'));
       }
@@ -916,8 +915,9 @@ class _Soldier extends RollingPiece {
     }
 
     if (p.row == promotionRow) {
-      commands.add(Transform(p, id, 'e'));
-      commands.add(Transform(p._linkedPiece!, p._linkedPiece!.id, 'c'));
+      commands.add(Transform(p, id, Role.eliteSoldier));
+      commands
+          .add(Transform(p._linkedPiece!, p._linkedPiece!.id, Role.enragedDog));
       commands.add(NotationTransform(
           (String notation) => 'S${notation.substring(1)}=E'));
     }
@@ -936,18 +936,18 @@ class _Soldier extends RollingPiece {
   }
 }
 
-Map<String, Function(Piece piece)> identitiyConstructors = {
-  'b': (Piece piece) => _Bishop(piece),
-  'c': (Piece piece) => _EnragedDog(piece),
-  'd': (Piece piece) => _Dog(piece),
-  'e': (Piece piece) => _EliteSoldier(piece),
-  'f': (Piece piece) => _Phantom(piece),
-  'g': (Piece piece) => _Grapple(piece),
-  'k': (Piece piece) => _King(piece),
-  'n': (Piece piece) => _Knight(piece),
-  'p': (Piece piece) => _Pawn(piece),
-  'q': (Piece piece) => _Queen(piece),
-  'r': (Piece piece) => _Rook(piece),
-  's': (Piece piece) => _Soldier(piece),
-  'y': (Piece piece) => _Dynamite(piece),
+Map<Role, Function(Piece piece)> identitiyConstructors = {
+  Role.bishop: (Piece piece) => _Bishop(piece),
+  Role.enragedDog: (Piece piece) => _EnragedDog(piece),
+  Role.dog: (Piece piece) => _Dog(piece),
+  Role.eliteSoldier: (Piece piece) => _EliteSoldier(piece),
+  Role.phantom: (Piece piece) => _Phantom(piece),
+  Role.grapple: (Piece piece) => _Grapple(piece),
+  Role.king: (Piece piece) => _King(piece),
+  Role.knight: (Piece piece) => _Knight(piece),
+  Role.pawn: (Piece piece) => _Pawn(piece),
+  Role.queen: (Piece piece) => _Queen(piece),
+  Role.rook: (Piece piece) => _Rook(piece),
+  Role.soldier: (Piece piece) => _Soldier(piece),
+  Role.dynamite: (Piece piece) => _Dynamite(piece),
 };

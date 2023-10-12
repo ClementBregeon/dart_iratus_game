@@ -3,18 +3,44 @@ part of iratus_game;
 typedef FunctionWithStringParameter = void Function(String);
 
 final String colors = 'bw';
-final String ids = 'bcdefgknpqrsy';
 
 /// Ids of pieces who can't capture other pieces.
-final String cantCapture = 'gy';
+final List<Role> cantCapture = [
+  Role.grapple,
+  Role.dynamite,
+];
 
 /// Ids of pieces that can access the same square, and therefore, sometimes,
 /// the notation needs clarification.
-final String competitivePieces = 'bcefnqrsy';
-final String dynamitables = 'bdnps';
-final String promotionIds = 'bcenqr';
+final List<Role> competitivePieces = [
+  Role.bishop,
+  Role.enragedDog,
+  Role.eliteSoldier,
+  Role.phantom,
+  Role.knight,
+  Role.queen,
+  Role.rook,
+  Role.soldier,
+  Role.dynamite,
+];
+final List<Role> dynamitables = [
+  Role.bishop,
+  Role.dog,
+  Role.knight,
+  Role.pawn,
+  Role.soldier,
+];
+final List<Role> promotionIds = [
+  Role.bishop,
+  Role.enragedDog,
+  Role.eliteSoldier,
+  Role.knight,
+  Role.queen,
+  Role.rook,
+];
+
 List<String> promotionValidNotations =
-    promotionIds.split('').map((char) => '=${char.toUpperCase()}').toList();
+    promotionIds.map((role) => '=${role.char.toUpperCase()}').toList();
 
 final Map<int, String> fileDict = {
   0: 'a',
@@ -82,7 +108,7 @@ Position getNewDogPos(Position leashStart, Position leashEnd) {
 }
 
 Piece? getRookAt(String side, Piece king) {
-  if (king.id != 'k') {
+  if (king.id != Role.king) {
     throw ArgumentError.value(
         king, 'The second argument of getRookAt must be a king');
   }
@@ -101,11 +127,11 @@ Piece? getRookAt(String side, Piece king) {
   }
 
   if (piece == null) return piece;
-  return piece.id == 'r' ? piece : null;
+  return piece.id == Role.rook ? piece : null;
 }
 
 bool inCheck(Piece king, {List<bool>? antiking}) {
-  if (king.id != 'k') {
+  if (king.id != Role.king) {
     throw ArgumentError.value(king, 'The argument of inCheck must be a king');
   }
   antiking ??= king.board._antiking;

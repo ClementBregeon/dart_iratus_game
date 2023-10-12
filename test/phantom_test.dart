@@ -22,20 +22,20 @@ void main() {
     game.move('b5');
     game.move('axb5');
 
-    expect(wPhantom.id == 'f', true);
-    expect(bPhantom.id == 'p', true);
+    expect(wPhantom.id == Role.phantom, true);
+    expect(bPhantom.id == Role.pawn, true);
   });
 
   test('Phantomization can be undone.', () {
     game.undo();
 
-    expect(bPhantom.id == 'f', true);
+    expect(bPhantom.id == Role.phantom, true);
   });
 
   test('Phantomization can be redone.', () {
     game.redo();
 
-    expect(bPhantom.id == 'p', true);
+    expect(bPhantom.id == Role.pawn, true);
   });
 
   test('Multiple phantomization works.', () {
@@ -44,8 +44,8 @@ void main() {
     game.move('Rxa6');
     game.move('Rxa6');
 
-    expect(wPhantom.id == 'p', true);
-    expect(bPhantom.id == 'r', true);
+    expect(wPhantom.id == Role.pawn, true);
+    expect(bPhantom.id == Role.rook, true);
     expect(legalMovesToString(bPhantom) == 'a8, a7, a6', true);
   });
 
@@ -130,7 +130,7 @@ void main() {
     game.move('=Q');
 
     expect(game.board.lastMove!.notation == 'P~e0=Q', true);
-    expect(bPhantom.id == 'q', true);
+    expect(bPhantom.id == Role.queen, true);
   });
 
   test('The promotion of a soldier\'s phantom works.', () {
@@ -140,6 +140,6 @@ void main() {
     game.move('S~d0=E');
 
     expect(game.board.lastMove!.notation == 'S~d0=E', true);
-    expect(bPhantom.id == 'e', true);
+    expect(bPhantom.id == Role.eliteSoldier, true);
   });
 }

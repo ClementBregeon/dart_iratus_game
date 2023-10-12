@@ -91,7 +91,7 @@ abstract class Board {
     _piecesByPos[piece.pos.index] = piece;
     piecesColored[piece.color]!.add(piece);
 
-    if (piece.id == 'k') {
+    if (piece.id == Role.king) {
       if (king[piece.color] != null) {
         throw AssertionError('An army can only have one king');
       }

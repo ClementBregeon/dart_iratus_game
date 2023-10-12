@@ -26,7 +26,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'p',
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id ==
+            Role.pawn,
         true);
     expect(
         game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
@@ -40,7 +41,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id == 'p',
+        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id ==
+            Role.pawn,
         true);
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) == null,
         true);
@@ -68,7 +70,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'p',
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id ==
+            Role.pawn,
         true);
     expect(
         game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
@@ -87,7 +90,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'q',
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id ==
+            Role.queen,
         true);
   });
 
@@ -99,7 +103,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd7')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id == 'p',
+        game.board.getPiece(Position.fromCoords(game.board, 'd7'))!.id ==
+            Role.pawn,
         true);
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) == null,
         true);
@@ -116,7 +121,8 @@ void main() {
     expect(game.board.getPiece(Position.fromCoords(game.board, 'd9')) is Piece,
         true);
     expect(
-        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id == 'q',
+        game.board.getPiece(Position.fromCoords(game.board, 'd9'))!.id ==
+            Role.queen,
         true);
   });
 

@@ -43,7 +43,7 @@ abstract class Move {
   /// ```
   late final List<bool> antiking;
   final Board board;
-  final Map<String, List<String>> capturedPieces = {
+  final Map<String, List<Role>> capturedPieces = {
     'w': [],
     'b': []
   }; // just for materialistic eval
@@ -96,7 +96,7 @@ abstract class Move {
       executeCommand(Capture(captured, piece));
     }
 
-    if (piece.id == 'p') {
+    if (piece.id == Role.pawn) {
       _counter50rule = 0;
     }
   }
@@ -112,12 +112,12 @@ abstract class Move {
     for (final command in _commands) {
       if (command is Capture) {
         final Piece capturedPiece = command.captured;
-        if (capturedPiece.id == 'y') {
+        if (capturedPiece.id == Role.dynamite) {
           continue;
         } // dynamite equipment
         capturedPieces[capturedPiece.color]!.add(capturedPiece.id);
         if (capturedPiece.dynamited) {
-          capturedPieces[capturedPiece.color]!.add('y');
+          capturedPieces[capturedPiece.color]!.add(Role.dynamite);
         }
       }
     }
@@ -249,8 +249,8 @@ abstract class Move {
 
     // piece name
     // A pawn's phantom move is written P~d4
-    if (piece.id != 'p' || piece.phantomized) {
-      nIP += piece.id.toUpperCase();
+    if (piece.id != Role.pawn || piece.phantomized) {
+      nIP += piece.id.char.toUpperCase();
     }
 
     // Phantom notation
@@ -260,11 +260,11 @@ abstract class Move {
 
     // Two pieces that can access the same square, and therefore, sometimes,
     // the notation needs clarification
-    String trueId(Piece piece) {
-      return piece.phantomized ? 'f' : piece.id;
+    Role trueId(Piece piece) {
+      return piece.phantomized ? Role.phantom : piece.id;
     }
 
-    final String pieceTrueId = trueId(piece);
+    final Role pieceTrueId = trueId(piece);
     if (competitivePieces.contains(pieceTrueId)) {
       final sameTypeAllies = <Piece>[];
       for (final ally in board.piecesColored[piece.color]!) {
@@ -312,7 +312,7 @@ abstract class Move {
 
     // captures
     if (_capturesCounter > 0) {
-      if (piece.id == 'p') {
+      if (piece.id == Role.pawn) {
         nIP += start.coord[0];
       }
       if (commands.any((element) => element is SetDynamite)) {
@@ -407,7 +407,8 @@ abstract class Move {
             'A promotion notation must be in the format \'=\' + id (upper case)');
       }
 
-      executeCommand(Transform(piece, 'p', notation[1].toLowerCase()));
+      executeCommand(Transform(
+          piece, Role.pawn, Role.fromChar(notation[1].toLowerCase())!));
       _notation += notation.toUpperCase();
 
       _waitingForPromotion = false;
@@ -554,8 +555,8 @@ class SetEnPassant extends Command {
 
 class Transform extends Command {
   Piece piece;
-  String oldId;
-  String newId;
+  Role oldId;
+  Role newId;
 
   Transform(this.piece, this.oldId, this.newId);
 }
