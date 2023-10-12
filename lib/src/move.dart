@@ -10,7 +10,7 @@ abstract class Move {
   late final FEN _fen;
   bool _isLocked = false;
   final Map<String, ExtraMove> _legalSecondMoves = {};
-  late String _nextTurn;
+  late Side _nextTurn;
   String _notation = '';
   bool _waitingForPromotion = false;
   bool _waitingForSecondMove = false;
@@ -22,7 +22,7 @@ abstract class Move {
   String get fen => _fen.fen;
   String get fenEqualizer => _fen.fenEqualizer;
   FEN get fenObject => _fen;
-  String get nextTurn => _nextTurn;
+  Side get nextTurn => _nextTurn;
   String get notation => _notation;
 
   /// Return true if the move is incomplete.
@@ -43,16 +43,16 @@ abstract class Move {
   /// ```
   late final List<bool> antiking;
   final Board board;
-  final Map<String, List<Role>> capturedPieces = {
-    'w': [],
-    'b': []
+  final Map<Side, List<Role>> capturedPieces = {
+    Side.white: [],
+    Side.black: []
   }; // just for materialistic eval
   final Position end;
   late final bool isLegal;
   final List<Function> notationTransformations = [];
   final Piece piece;
   final Position start;
-  late final String turn;
+  late final Side turn;
   late int turnNumber;
   late final List<String> validInputs;
 
@@ -61,10 +61,10 @@ abstract class Move {
         piece = board.getPiece(start)! {
     board._currentMove = this;
 
-    _nextTurn = piece.enemyColor;
+    _nextTurn = piece.color.opposite;
     turn = piece.color;
 
-    final String lastMoveTurn;
+    final Side lastMoveTurn;
     final int lastMoveCounter50rule;
     final int lastMoveTurnNumber;
     if (board.lastMove == null) {
@@ -80,7 +80,7 @@ abstract class Move {
 
     if (lastMoveTurn != turn) {
       _counter50rule = lastMoveCounter50rule + 1;
-      if (lastMoveTurn == "w") {
+      if (lastMoveTurn == Side.white) {
         turnNumber = lastMoveTurnNumber + 1;
       } else {
         turnNumber = lastMoveTurnNumber;
@@ -151,7 +151,7 @@ abstract class Move {
     }
 
     // We update the enemies antiking squares.
-    for (Piece enemy in board.piecesColored[piece.enemyColor]!) {
+    for (Piece enemy in board.piecesColored[piece.color.opposite]!) {
       // Captured pieces can't check.
       if (enemy.isCaptured) continue;
 
@@ -412,7 +412,7 @@ abstract class Move {
       _notation += notation.toUpperCase();
 
       _waitingForPromotion = false;
-      _nextTurn = piece.enemyColor;
+      _nextTurn = piece.color.opposite;
       lock();
     } else {
       if (!_waitingForSecondMove) {
@@ -429,7 +429,7 @@ abstract class Move {
       _notation = '$_notation-${secondMove._notation}';
 
       _waitingForSecondMove = false;
-      _nextTurn = piece.enemyColor;
+      _nextTurn = piece.color.opposite;
       lock();
 
       // _commands.removeWhere((command) => command is Extra && _legalSecondMoves.values.contains(command.move));

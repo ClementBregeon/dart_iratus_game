@@ -1,4 +1,4 @@
-import 'package:iratus_game/src/game.dart';
+import 'package:iratus_game/iratus_game.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -7,7 +7,7 @@ void main() {
 
   test('Game is properly initialized', () {
     expect(board.movesHistory.isEmpty, true);
-    expect(board.turn == 'w', true);
+    expect(board.turn == Side.white, true);
     expect(game.result == 0, true);
     expect(game.winner == 0, true);
   });
@@ -19,7 +19,7 @@ void main() {
   });
 
   test('Colors should work as intended', () {
-    expect(board.piecesColored['w']![0].color == 'w', true);
-    expect(board.piecesColored['b']![0].color == 'b', true);
+    expect(board.piecesColored[Side.white]![0].color == Side.white, true);
+    expect(board.piecesColored[Side.black]![0].color == Side.black, true);
   });
 }

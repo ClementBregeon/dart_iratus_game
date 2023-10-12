@@ -34,7 +34,7 @@ void main() {
     game.move('e4');
     game.move('e5');
 
-    for (Piece piece in game.board.piecesColored['w']!) {
+    for (Piece piece in game.board.piecesColored[Side.white]!) {
       if (piece.id == Role.dynamite) {
         expect(piece.identity.getValidMoves().length == 15, true);
       }
@@ -86,12 +86,12 @@ void main() {
     game.move('Ke6');
     game.move('Ne5');
 
-    expect(legalMoves(game.board.king['b']!).length == 2, true);
+    expect(legalMoves(game.board.king[Side.black]!).length == 2, true);
     expect(
-        legalMoves(game.board.king['b']!)
+        legalMoves(game.board.king[Side.black]!)
             .every((element) => element.end.coord != 'e5'),
         true);
-    expect(legalMovesToString(game.board.king['b']!) == 'f6, e7', true);
+    expect(legalMovesToString(game.board.king[Side.black]!) == 'f6, e7', true);
   });
 
   test('A dynamited piece can\'t be captured if it creates a discovered check.',

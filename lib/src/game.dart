@@ -12,17 +12,13 @@ part 'utils.dart';
 
 /// A chess player, regardless of the variant.
 class Player {
-  final String color;
+  final Side color;
   final String name;
 
   /// Return the name, formatted for PGN's player name tag.
   String get formattedName => name;
 
-  Player(this.color, this.name) {
-    if (!colors.contains(color)) {
-      throw ArgumentError.value(color, 'A Player color must be \'w\' or \'b\'');
-    }
-  }
+  Player(this.color, this.name);
 }
 
 /// An abstract representation of chess games.
@@ -40,11 +36,11 @@ abstract class Game {
   /// The players engaged in this game.
   ///
   /// ```dart
-  /// Player white = game.player['w'];
+  /// Player white = game.player[Side.white];
   /// ```
-  final Map<String, Player> player = {
-    'w': Player('w', 'Winston'),
-    'b': Player('b', 'Bellucci')
+  final Map<Side, Player> player = {
+    Side.white: Player(Side.white, 'Winston'),
+    Side.black: Player(Side.black, 'Bellucci')
   };
 
   /// The result of the game.
@@ -77,11 +73,11 @@ abstract class Game {
     if (_result > 0) throw ArgumentError('The game has already ended');
 
     void updateResult() {
-      if (board.king['w'] == null || board.king['b'] == null) {
+      if (board.king[Side.white] == null || board.king[Side.black] == null) {
         return; // can't stop a game if a king is missing
       }
 
-      Map<String, List<Piece>> remainingPieces = {'w': [], 'b': []};
+      Map<Side, List<Piece>> remainingPieces = {Side.white: [], Side.black: []};
 
       for (Piece piece in board.pieces) {
         if (!piece.isCaptured) {
@@ -111,8 +107,8 @@ abstract class Game {
         return false;
       }
 
-      if (insufficient(remainingPieces['w']!) &&
-          insufficient(remainingPieces['b']!)) {
+      if (insufficient(remainingPieces[Side.white]!) &&
+          insufficient(remainingPieces[Side.black]!)) {
         _result = 7; // draw by insufficient material
         _winner = 1; // draw
         return;
@@ -159,7 +155,7 @@ abstract class Game {
       Piece currentKing = board.king[board.turn]!;
       if (inCheck(currentKing)) {
         _result = 1; // checkmate
-        _winner = board.turn == 'b' ? 2 : 3; // ... won
+        _winner = board.turn == Side.black ? 2 : 3; // ... won
       } else {
         _result = 4; // stalemate
         _winner = 1; // draw
@@ -220,11 +216,11 @@ abstract class Game {
   }
 
   /// The player designed by the color resigns.
-  void resign(String color) {
+  void resign(Side color) {
     if (_result > 0) throw ArgumentError('The game has already ended');
 
     _result = 2;
-    _winner = color == 'w' ? 3 : 2;
+    _winner = color == Side.white ? 3 : 2;
   }
 
   /// Undo the last move played.
@@ -265,9 +261,9 @@ class IratusGame extends Game {
 
     // player names
     String? whiteName = pgn.tagPairs['White'];
-    if (whiteName != null) player['w'] = Player('w', whiteName);
+    if (whiteName != null) player[Side.white] = Player(Side.white, whiteName);
     String? blackName = pgn.tagPairs['Black'];
-    if (blackName != null) player['b'] = Player('b', blackName);
+    if (blackName != null) player[Side.black] = Player(Side.black, blackName);
 
     // board initialization
     String? startFen = pgn.tagPairs['FEN'];

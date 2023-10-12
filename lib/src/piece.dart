@@ -23,8 +23,7 @@ class Piece {
 
   // Piece
   final Board board;
-  final String color;
-  final String enemyColor;
+  final Side color;
   late PieceIdentity _identity;
 
   /// An ally piece. Designed for dog-soldier link.
@@ -57,12 +56,7 @@ class Piece {
   Role get id => _identity.id;
   List<List<int>> get moves => _identity.moves;
 
-  Piece(this.board, this.color, this._pos, Role id)
-      : enemyColor = (color == "w") ? "b" : "w" {
-    if (!colors.contains(color)) {
-      throw ArgumentError.value(
-          color, 'A piece color can only be \'w\' or \'b\'');
-    }
+  Piece(this.board, this.color, this._pos, Role id) {
     _identity = identitiyConstructors[id]!(this);
     board._addPiece(this);
   }
@@ -658,8 +652,8 @@ class _Pawn extends PieceIdentity {
   final List<List<int>> attackingMoves;
 
   _Pawn(super.container)
-      : promotionRow = container.color == 'w' ? 0 : 9,
-        moves = container.color == 'w'
+      : promotionRow = container.color == Side.white ? 0 : 9,
+        moves = container.color == Side.white
             ? [
                 [-1, 0],
                 [-2, 0]
@@ -668,7 +662,7 @@ class _Pawn extends PieceIdentity {
                 [1, 0],
                 [2, 0]
               ],
-        attackingMoves = container.color == 'w'
+        attackingMoves = container.color == Side.white
             ? [
                 [-1, 1],
                 [-1, -1]
@@ -729,7 +723,7 @@ class _Pawn extends PieceIdentity {
         p.board._currentMove == p.board._mainCurrentMove &&
         p.board._currentMove.end == pos) {
       Position enPassantPos = Position.fromRowCol(p.board,
-          row: p.row + (p.color == 'w' ? 1 : -1), col: p.col);
+          row: p.row + (p.color == Side.white ? 1 : -1), col: p.col);
       commands.add(SetEnPassant(enPassantPos));
     }
 
@@ -752,7 +746,8 @@ class _Pawn extends PieceIdentity {
       } else {
         // happens when capturing en passant is the first move after a load from fen
         Position enemyPawnPos = Position.fromRowCol(p.board,
-            row: enPassant.row + (p.color == 'w' ? 1 : -1), col: enPassant.col);
+            row: enPassant.row + (p.color == Side.white ? 1 : -1),
+            col: enPassant.col);
         Piece? captured = p.board.getPiece(enemyPawnPos);
         if (captured == null || captured.id != Role.pawn) {
           // There is a very rare case, where the pawn moved two squares and promoted,
@@ -853,8 +848,8 @@ class _Soldier extends RollingPiece {
   final int promotionRow;
 
   _Soldier(Piece container)
-      : promotionRow = container.color == 'w' ? 0 : 9,
-        moves = container.color == 'w'
+      : promotionRow = container.color == Side.white ? 0 : 9,
+        moves = container.color == Side.white
             ? [
                 [-1, 1],
                 [-1, -1]

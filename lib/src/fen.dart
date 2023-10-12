@@ -2,7 +2,7 @@ part of iratus_game;
 
 class _PieceInformations {
   int col = -1;
-  String color = 'n';
+  Side? color;
   bool dynamited = false;
   Role? id;
   int? linkID;
@@ -11,7 +11,7 @@ class _PieceInformations {
 
   reset() {
     col = -1;
-    color = 'n';
+    color = null;
     dynamited = false;
     id = null;
     linkID = null;
@@ -67,13 +67,13 @@ class IratusFEN extends FEN {
   @override
   late final String fenEqualizer; // pieces turn castleRights enPassant
   late final String pieces;
-  late final String turn;
+  late final Side turn;
   late final String castleRights;
 
   /// The position where a pawn can go to capture an enemy pawn who just moved 2 squares.
   late final Position? enPassant;
 
-  late final Map<String, String> dynamitablesHasMoved;
+  late final Map<Side, String> dynamitablesHasMoved;
   late final int counter50rule;
   late final int turnNumber;
 
@@ -90,7 +90,7 @@ class IratusFEN extends FEN {
     }
 
     pieces = parts[0];
-    turn = parts[1];
+    turn = parts[1] == 'w' ? Side.white : Side.black;
     castleRights = parts[2];
     enPassant = parts[3] == '-' ? null : Position.fromCoords(board, parts[3]);
     fenEqualizer = '$pieces $turn $castleRights ${parts[3]}}';
@@ -100,8 +100,8 @@ class IratusFEN extends FEN {
     // DYNAMITABLES HAS MOVED
     List<String> splittedDynamitablesHasMoved = parts[4].split('-');
     dynamitablesHasMoved = {
-      'w': splittedDynamitablesHasMoved[0],
-      'b': splittedDynamitablesHasMoved[1],
+      Side.white: splittedDynamitablesHasMoved[0],
+      Side.black: splittedDynamitablesHasMoved[1],
     };
 
     // PIECES
@@ -118,17 +118,17 @@ class IratusFEN extends FEN {
     var irow = 0;
     // This var is the bridge between the dynamitablesHasMoved notation
     // and the dynamitables pieces on the board
-    var dhmIndexes = {'w': 0, 'b': 0};
+    var dhmIndexes = {Side.white: 0, Side.black: 0};
 
     void createPiece(_PieceInformations pieceInfos) {
       Piece piece;
       Position pos =
           Position.fromRowCol(board, row: pieceInfos.row, col: pieceInfos.col);
       if (pieceInfos.phantomized) {
-        piece = Piece(board, pieceInfos.color, pos, Role.phantom);
+        piece = Piece(board, pieceInfos.color!, pos, Role.phantom);
         piece.transform(pieceInfos.id!);
       } else {
-        piece = Piece(board, pieceInfos.color, pos, pieceInfos.id!);
+        piece = Piece(board, pieceInfos.color!, pos, pieceInfos.id!);
       }
       if (pieceInfos.dynamited) {
         piece.setDynamite(true);
@@ -148,7 +148,7 @@ class IratusFEN extends FEN {
             '1') {
           piece.setUnknownFirstMove();
         }
-        dhmIndexes[pieceInfos.color] = dhmIndexes[pieceInfos.color]! + 1;
+        dhmIndexes[pieceInfos.color!] = dhmIndexes[pieceInfos.color]! + 1;
       }
     }
 
@@ -210,7 +210,7 @@ class IratusFEN extends FEN {
               pieceInfos.id, 'Invalid FEN : Unknown piece id');
         }
         pieceInfos.id = id;
-        pieceInfos.color = char == charLowerCase ? "b" : "w";
+        pieceInfos.color = char == charLowerCase ? Side.black : Side.white;
         pieceInfos.row = irow;
         pieceInfos.col = icol;
         icol++;
@@ -223,11 +223,12 @@ class IratusFEN extends FEN {
     for (final String castle in 'qkQK'.split('')) {
       if (castleRights.contains(castle)) continue;
 
-      Piece? k = board.king[castle == castle.toUpperCase() ? 'w' : 'b'];
+      Piece? k =
+          board.king[castle == castle.toUpperCase() ? Side.white : Side.black];
       if (k == null) continue; // an army without king
       if (k.col != 4 ||
-          (k.color == 'w' && k.row != 8) ||
-          (k.color == 'b' && k.row != 1)) {
+          (k.color == Side.white && k.row != 8) ||
+          (k.color == Side.black && k.row != 1)) {
         k.setUnknownFirstMove();
         continue;
       }
@@ -241,7 +242,7 @@ class IratusFEN extends FEN {
 
   IratusFEN.fromBoard(Board board) {
     String fenIP = ''; // fen in progress
-    dynamitablesHasMoved = {'w': '', 'b': ''};
+    dynamitablesHasMoved = {Side.white: '', Side.black: ''};
     Map<String, int> linkedPieces = {'i': 0};
 
     // Pieces
@@ -261,7 +262,7 @@ class IratusFEN extends FEN {
           space = 0;
         }
 
-        if (piece.color == "b") {
+        if (piece.color == Side.black) {
           fenIP += piece.id.char;
         } else {
           fenIP += piece.id.char.toUpperCase();
@@ -306,11 +307,11 @@ class IratusFEN extends FEN {
 
     // Turn
     turn = board.turn;
-    fenIP += ' $turn ';
+    fenIP += ' ${turn == Side.white ? 'w' : 'b'} ';
 
     // Castle Rights
     String allCastleRights = '';
-    for (String color in ['w', 'b']) {
+    for (Side color in Side.values) {
       Piece king = board.king[color]!;
       String castleRights = "";
       Piece? leftRook = getRookAt('left', king);
@@ -321,7 +322,7 @@ class IratusFEN extends FEN {
       if (rightRook != null && !rightRook.hasMoved() && !king.hasMoved()) {
         castleRights += 'k';
       }
-      if (color == 'w') {
+      if (color == Side.white) {
         castleRights = castleRights.toUpperCase();
       }
       allCastleRights += castleRights;
@@ -347,7 +348,8 @@ class IratusFEN extends FEN {
     fenEqualizer = fenIP;
 
     // Dynamitables has moved
-    fenIP += ' ${dynamitablesHasMoved['w']}-${dynamitablesHasMoved['b']}';
+    fenIP +=
+        ' ${dynamitablesHasMoved[Side.white]}-${dynamitablesHasMoved[Side.black]}';
 
     // 50 moves rule & Turn number
     if (lastMove != null) {

@@ -38,7 +38,7 @@ abstract class Board {
   final List<MainMove> allLegalMoves = [];
 
   /// The kings, sorted by color
-  final Map<String, Piece?> king = {'w': null, 'b': null};
+  final Map<Side, Piece?> king = {Side.white: null, Side.black: null};
 
   /// The last MainMove played
   MainMove? get lastMove => movesHistory.lastOrNull;
@@ -56,15 +56,15 @@ abstract class Board {
   final List<Piece> pieces = [];
 
   /// All the pieces, sorted by color
-  final Map<String, List<Piece>> piecesColored = {'w': [], 'b': []};
+  final Map<Side, List<Piece>> piecesColored = {Side.white: [], Side.black: []};
 
   /// The FEN of the starting position
   late final IratusFEN startFEN;
 
   /// The color of the player who has to make the next move.
   ///
-  /// Can be 'w' or 'b'.
-  String get turn => lastMove?.nextTurn ?? startFEN.turn;
+  /// Can be Side.white or Side.black.
+  Side get turn => lastMove?.nextTurn ?? startFEN.turn;
 
   /// The notations of the valid moves in the position.
   ///
@@ -172,7 +172,7 @@ abstract class Board {
     _duringCalcul = true;
 
     List<Piece> allies = piecesColored[turn]!;
-    List<Piece> enemies = piecesColored[turn == 'w' ? 'b' : 'w']!;
+    List<Piece> enemies = piecesColored[turn.opposite]!;
 
     // This is the field to update.
     allLegalMoves.clear();
@@ -245,7 +245,7 @@ abstract class Board {
 /// An object representating the board. It contains the pieces.
 class IratusBoard extends Board {
   /// The phantoms, sorted by color
-  final Map<String, List<Piece>> _phantoms = {'w': [], 'b': []};
+  final Map<Side, List<Piece>> _phantoms = {Side.white: [], Side.black: []};
 
   IratusBoard(String fen, Game game) : super(fen, game, 10, 8);
 

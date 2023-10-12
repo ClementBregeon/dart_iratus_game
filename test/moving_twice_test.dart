@@ -7,7 +7,7 @@ void main() {
   String fen = '8/8/3C4/8/8/2K2k2/8/8/8/8 w - - 1- 0 1';
 
   IratusGame game = IratusGame.fromFEN(fen);
-  String oldTurn = game.board.turn;
+  Side oldTurn = game.board.turn;
 
   test(
       'After a piece moving twice has moved, it is the only piece who still has valid moves.',

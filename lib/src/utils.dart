@@ -2,8 +2,6 @@ part of iratus_game;
 
 typedef FunctionWithStringParameter = void Function(String);
 
-final String colors = 'bw';
-
 /// Ids of pieces who can't capture other pieces.
 final List<Role> cantCapture = [
   Role.grapple,

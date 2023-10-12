@@ -1,4 +1,5 @@
 import 'game.dart';
+import 'models.dart';
 
 abstract class PGN {
   /// The string storing the game
@@ -33,8 +34,8 @@ class IratusPGN extends PGN {
     tagPairs['Date'] = '${game.date.year}.${game.date.month}.${game.date.day}';
     tagPairs['Time'] =
         '${game.date.hour}.${game.date.minute}.${game.date.second}';
-    tagPairs['White'] = game.player['w']!.formattedName;
-    tagPairs['Black'] = game.player['b']!.formattedName;
+    tagPairs['White'] = game.player[Side.white]!.formattedName;
+    tagPairs['Black'] = game.player[Side.black]!.formattedName;
 
     // Result
     switch (game.result) {
@@ -79,7 +80,7 @@ class IratusPGN extends PGN {
       int turnNumber = game.board.startFEN.turnNumber;
       List<String> mtList = ['$turnNumber.'];
       if (game.board.movesHistory.isNotEmpty &&
-          game.board.movesHistory[0].turn == 'b') {
+          game.board.movesHistory[0].turn == Side.black) {
         mtList.add('...');
       }
       for (Move move in game.board.movesHistory) {

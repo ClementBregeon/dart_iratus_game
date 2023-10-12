@@ -223,14 +223,14 @@ void main() {
     expect(game.board.validNotations.contains('0-0-0'), true);
     // g1 & g8 are short castles, c1 & c8 are long castles
     expect(
-        legalMovesToString(game.board.king['w']!) ==
+        legalMovesToString(game.board.king[Side.white]!) ==
             'f1, d1, f2, e2, d2, f0, e0, d0, c1, g1',
         true);
 
     game.move('Kd0');
 
     expect(
-        legalMovesToString(game.board.king['b']!) ==
+        legalMovesToString(game.board.king[Side.black]!) ==
             'f8, d8, f9, e9, d9, f7, e7, d7, c8, g8',
         true);
   });
@@ -243,14 +243,14 @@ void main() {
     expect(!game.board.validNotations.contains('0-0-0'), true);
     // g1 & g8 are short castles, c1 & c8 are long castles
     expect(
-        legalMovesToString(game.board.king['w']!) ==
+        legalMovesToString(game.board.king[Side.white]!) ==
             'f1, d1, f2, e2, d2, f0, e0, d0',
         true);
 
     game.move('Ke0');
 
     expect(
-        legalMovesToString(game.board.king['b']!) ==
+        legalMovesToString(game.board.king[Side.black]!) ==
             'f8, d8, f9, e9, d9, f7, e7, d7',
         true);
   });
@@ -263,7 +263,7 @@ void main() {
     expect(game.board.validNotations.contains('0-0'), true);
     // g1 is short castle
     expect(
-        legalMovesToString(game.board.king['w']!) ==
+        legalMovesToString(game.board.king[Side.white]!) ==
             'f1, f2, e2, d2, f0, d0, g1',
         true);
 
@@ -272,7 +272,7 @@ void main() {
     expect(game.board.validNotations.contains('0-0'), true);
     // g1 is short castle
     expect(
-        legalMovesToString(game.board.king['b']!) ==
+        legalMovesToString(game.board.king[Side.black]!) ==
             'f8, f9, d9, f7, e7, d7, g8',
         true);
 
@@ -281,7 +281,7 @@ void main() {
     expect(game.board.validNotations.contains('0-0-0'), true);
     // c1 is long castle
     expect(
-        legalMovesToString(game.board.king['w']!) ==
+        legalMovesToString(game.board.king[Side.white]!) ==
             'd1, f2, e2, d2, f0, d0, c1',
         true);
 
@@ -290,7 +290,7 @@ void main() {
     expect(game.board.validNotations.contains('0-0-0'), true);
     // c8 is long castle
     expect(
-        legalMovesToString(game.board.king['b']!) ==
+        legalMovesToString(game.board.king[Side.black]!) ==
             'd8, f9, d9, f7, e7, d7, c8',
         true);
   });
@@ -301,7 +301,8 @@ void main() {
 
     expect(game.board.lastMove!.notation == 'Qe3+', true);
     expect(
-        legalMovesToString(game.board.king['b']!) == 'f8, d8, f9, d9, f7, d7',
+        legalMovesToString(game.board.king[Side.black]!) ==
+            'f8, d8, f9, d9, f7, d7',
         true);
   });
 }

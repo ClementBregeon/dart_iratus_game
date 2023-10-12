@@ -77,3 +77,10 @@ enum Role {
     }
   }
 }
+
+enum Side {
+  white,
+  black;
+
+  Side get opposite => this == Side.white ? Side.black : Side.white;
+}

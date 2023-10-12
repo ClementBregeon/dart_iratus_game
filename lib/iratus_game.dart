@@ -13,6 +13,6 @@ export 'src/game.dart'
         Move,
         Piece,
         Player;
-export 'src/models.dart' show Role;
+export 'src/models.dart' show Role, Side;
 export 'src/pgn.dart' show IratusPGN;
 export 'src/position.dart' show Position;

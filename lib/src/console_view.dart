@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'game.dart';
+import 'models.dart';
 import 'position.dart';
 
 /// A bridge between the console input and an Iratus game.
@@ -58,7 +59,7 @@ class ConsoleView {
           line += '   │';
         } else {
           String id;
-          if (piece.color == 'w') {
+          if (piece.color == Side.white) {
             id = piece.id.char.toUpperCase();
           } else {
             id = piece.id.char.toLowerCase();

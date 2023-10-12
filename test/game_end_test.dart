@@ -15,12 +15,12 @@ void main() {
 
   test('Resignation.', () {
     IratusGame game = IratusGame();
-    game.resign('w');
+    game.resign(Side.white);
     expect(game.result == 2, true);
     expect(game.winner == 3, true);
 
     IratusGame game2 = IratusGame();
-    game2.resign('b');
+    game2.resign(Side.black);
     expect(game.result == 2, true);
     expect(game2.winner == 2, true);
   });
