@@ -7,7 +7,7 @@ void main() {
   String fen = '8/8/3P4/8/8/2K2k2/8/8/8/8 w - - 1- 0 1';
 
   IratusGame game = IratusGame.fromFEN(fen);
-  String oldTurn = game.board.turn;
+  Side oldTurn = game.board.turn;
 
   test('After d9, the game is waiting for the promotion input.', () {
     expect(game.board.waitingForInput, false);

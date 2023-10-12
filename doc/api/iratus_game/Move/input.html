@@ -86,11 +86,12 @@
           &#39;A promotion notation must be in the format \&#39;=\&#39; + id (upper case)&#39;);
     }
 
-    executeCommand(Transform(piece, &#39;p&#39;, notation[1].toLowerCase()));
+    executeCommand(Transform(
+        piece, Role.pawn, Role.fromChar(notation[1].toLowerCase())!));
     _notation += notation.toUpperCase();
 
     _waitingForPromotion = false;
-    _nextTurn = piece.enemyColor;
+    _nextTurn = piece.color.opposite;
     lock();
   } else {
     if (!_waitingForSecondMove) {
@@ -107,7 +108,7 @@
     _notation = &#39;$_notation-${secondMove._notation}&#39;;
 
     _waitingForSecondMove = false;
-    _nextTurn = piece.enemyColor;
+    _nextTurn = piece.color.opposite;
     lock();
 
     &#47;&#47; _commands.removeWhere((command) =&gt; command is Extra &amp;&amp; _legalSecondMoves.values.contains(command.move));
@@ -145,7 +146,7 @@
 <footer>
   <span class="no-break">
     iratus_game
-      1.0.0
+      1.1.0
   </span>
 
   

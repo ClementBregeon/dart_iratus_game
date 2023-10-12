@@ -102,10 +102,10 @@
         line += &#39;   │&#39;;
       } else {
         String id;
-        if (piece.color == &#39;w&#39;) {
-          id = piece.id.toUpperCase();
+        if (piece.color == Side.white) {
+          id = piece.id.char.toUpperCase();
         } else {
-          id = piece.id.toLowerCase();
+          id = piece.id.char.toLowerCase();
         }
         if (piece.phantomized) {
           id = italic(id);
@@ -153,7 +153,7 @@
 <footer>
   <span class="no-break">
     iratus_game
-      1.0.0
+      1.1.0
   </span>
 
   

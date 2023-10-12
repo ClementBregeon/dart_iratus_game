@@ -81,9 +81,9 @@
 
   &#47;&#47; player names
   String? whiteName = pgn.tagPairs[&#39;White&#39;];
-  if (whiteName != null) player[&#39;w&#39;] = Player(&#39;w&#39;, whiteName);
+  if (whiteName != null) player[Side.white] = Player(Side.white, whiteName);
   String? blackName = pgn.tagPairs[&#39;Black&#39;];
-  if (blackName != null) player[&#39;b&#39;] = Player(&#39;b&#39;, blackName);
+  if (blackName != null) player[Side.black] = Player(Side.black, blackName);
 
   &#47;&#47; board initialization
   String? startFen = pgn.tagPairs[&#39;FEN&#39;];
@@ -142,7 +142,7 @@
 <footer>
   <span class="no-break">
     iratus_game
-      1.0.0
+      1.1.0
   </span>
 
   

@@ -74,7 +74,7 @@
   <h2><span>Implementation</span></h2>
   <pre class="language-dart"><code class="language-dart">IratusFEN.fromBoard(Board board) {
   String fenIP = &#39;&#39;; &#47;&#47; fen in progress
-  dynamitablesHasMoved = {&#39;w&#39;: &#39;&#39;, &#39;b&#39;: &#39;&#39;};
+  dynamitablesHasMoved = {Side.white: &#39;&#39;, Side.black: &#39;&#39;};
   Map&lt;String, int&gt; linkedPieces = {&#39;i&#39;: 0};
 
   &#47;&#47; Pieces
@@ -94,17 +94,17 @@
         space = 0;
       }
 
-      if (piece.color == &quot;b&quot;) {
-        fenIP += piece.id;
+      if (piece.color == Side.black) {
+        fenIP += piece.id.char;
       } else {
-        fenIP += piece.id.toUpperCase();
+        fenIP += piece.id.char.toUpperCase();
       }
 
       if (piece.dynamited) {
         fenIP += &quot;_&quot;;
       }
 
-      if (piece.phantomized &amp;&amp; piece.id != &#39;f&#39;) {
+      if (piece.phantomized &amp;&amp; piece.id != Role.phantom) {
         fenIP += &#39;~&#39;;
       }
 
@@ -139,11 +139,11 @@
 
   &#47;&#47; Turn
   turn = board.turn;
-  fenIP += &#39; $turn &#39;;
+  fenIP += &#39; ${turn == Side.white ? &#39;w&#39; : &#39;b&#39;} &#39;;
 
   &#47;&#47; Castle Rights
   String allCastleRights = &#39;&#39;;
-  for (String color in [&#39;w&#39;, &#39;b&#39;]) {
+  for (Side color in Side.values) {
     Piece king = board.king[color]!;
     String castleRights = &quot;&quot;;
     Piece? leftRook = getRookAt(&#39;left&#39;, king);
@@ -154,7 +154,7 @@
     if (rightRook != null &amp;&amp; !rightRook.hasMoved() &amp;&amp; !king.hasMoved()) {
       castleRights += &#39;k&#39;;
     }
-    if (color == &#39;w&#39;) {
+    if (color == Side.white) {
       castleRights = castleRights.toUpperCase();
     }
     allCastleRights += castleRights;
@@ -180,7 +180,8 @@
   fenEqualizer = fenIP;
 
   &#47;&#47; Dynamitables has moved
-  fenIP += &#39; ${dynamitablesHasMoved[&#39;w&#39;]}-${dynamitablesHasMoved[&#39;b&#39;]}&#39;;
+  fenIP +=
+      &#39; ${dynamitablesHasMoved[Side.white]}-${dynamitablesHasMoved[Side.black]}&#39;;
 
   &#47;&#47; 50 moves rule &amp; Turn number
   if (lastMove != null) {
@@ -225,7 +226,7 @@
 <footer>
   <span class="no-break">
     iratus_game
-      1.0.0
+      1.1.0
   </span>
 
   

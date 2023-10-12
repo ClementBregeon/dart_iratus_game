@@ -86,7 +86,7 @@
   }
 
   pieces = parts[0];
-  turn = parts[1];
+  turn = parts[1] == &#39;w&#39; ? Side.white : Side.black;
   castleRights = parts[2];
   enPassant = parts[3] == &#39;-&#39; ? null : Position.fromCoords(board, parts[3]);
   fenEqualizer = &#39;$pieces $turn $castleRights ${parts[3]}}&#39;;
@@ -96,8 +96,8 @@
   &#47;&#47; DYNAMITABLES HAS MOVED
   List&lt;String&gt; splittedDynamitablesHasMoved = parts[4].split(&#39;-&#39;);
   dynamitablesHasMoved = {
-    &#39;w&#39;: splittedDynamitablesHasMoved[0],
-    &#39;b&#39;: splittedDynamitablesHasMoved[1],
+    Side.white: splittedDynamitablesHasMoved[0],
+    Side.black: splittedDynamitablesHasMoved[1],
   };
 
   &#47;&#47; PIECES
@@ -114,22 +114,17 @@
   var irow = 0;
   &#47;&#47; This var is the bridge between the dynamitablesHasMoved notation
   &#47;&#47; and the dynamitables pieces on the board
-  var dhmIndexes = {&#39;w&#39;: 0, &#39;b&#39;: 0};
+  var dhmIndexes = {Side.white: 0, Side.black: 0};
 
   void createPiece(_PieceInformations pieceInfos) {
-    if (!ids.contains(pieceInfos.id)) {
-      throw ArgumentError.value(
-          pieceInfos.id, &#39;Invalid FEN : Unknown piece id&#39;);
-    }
-
     Piece piece;
     Position pos =
         Position.fromRowCol(board, row: pieceInfos.row, col: pieceInfos.col);
     if (pieceInfos.phantomized) {
-      piece = Piece(board, pieceInfos.color, pos, &#39;f&#39;);
-      piece.transform(pieceInfos.id);
+      piece = Piece(board, pieceInfos.color!, pos, Role.phantom);
+      piece.transform(pieceInfos.id!);
     } else {
-      piece = Piece(board, pieceInfos.color, pos, pieceInfos.id);
+      piece = Piece(board, pieceInfos.color!, pos, pieceInfos.id!);
     }
     if (pieceInfos.dynamited) {
       piece.setDynamite(true);
@@ -149,7 +144,7 @@
           &#39;1&#39;) {
         piece.setUnknownFirstMove();
       }
-      dhmIndexes[pieceInfos.color] = dhmIndexes[pieceInfos.color]! + 1;
+      dhmIndexes[pieceInfos.color!] = dhmIndexes[pieceInfos.color]! + 1;
     }
   }
 
@@ -198,15 +193,20 @@
       }
 
       &#47;&#47; Piece creation
-      if (pieceInfos.id != &#39;&#39;) {
+      if (pieceInfos.id != null) {
         createPiece(pieceInfos);
       }
 
       &#47;&#47; Piece pre-creation
       pieceInfos.reset();
       final charLowerCase = char.toLowerCase(); &#47;&#47; white ids are uppercase
-      pieceInfos.id = charLowerCase;
-      pieceInfos.color = char == charLowerCase ? &quot;b&quot; : &quot;w&quot;;
+      final id = Role.fromChar(charLowerCase);
+      if (id == null) {
+        throw ArgumentError.value(
+            pieceInfos.id, &#39;Invalid FEN : Unknown piece id&#39;);
+      }
+      pieceInfos.id = id;
+      pieceInfos.color = char == charLowerCase ? Side.black : Side.white;
       pieceInfos.row = irow;
       pieceInfos.col = icol;
       icol++;
@@ -219,11 +219,12 @@
   for (final String castle in &#39;qkQK&#39;.split(&#39;&#39;)) {
     if (castleRights.contains(castle)) continue;
 
-    Piece? k = board.king[castle == castle.toUpperCase() ? &#39;w&#39; : &#39;b&#39;];
+    Piece? k =
+        board.king[castle == castle.toUpperCase() ? Side.white : Side.black];
     if (k == null) continue; &#47;&#47; an army without king
     if (k.col != 4 ||
-        (k.color == &#39;w&#39; &amp;&amp; k.row != 8) ||
-        (k.color == &#39;b&#39; &amp;&amp; k.row != 1)) {
+        (k.color == Side.white &amp;&amp; k.row != 8) ||
+        (k.color == Side.black &amp;&amp; k.row != 1)) {
       k.setUnknownFirstMove();
       continue;
     }
@@ -266,7 +267,7 @@
 <footer>
   <span class="no-break">
     iratus_game
-      1.0.0
+      1.1.0
   </span>
 
   
