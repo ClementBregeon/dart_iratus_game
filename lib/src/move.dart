@@ -12,8 +12,6 @@ abstract class Move {
   final Map<String, ExtraMove> _legalSecondMoves = {};
   late Side _nextTurn;
   String _notation = '';
-  bool _waitingForPromotion = false;
-  bool _waitingForSecondMove = false;
 
   // Getters
   List<Command> get commands => _commands;
@@ -30,7 +28,9 @@ abstract class Move {
   /// 2 cases :
   ///   - when a pawn reaches the end of the board, we wait for a promotion id.
   ///   - when a piece moving twice makes a first move, we wait for the second move.
-  bool get waitingForInput => _waitingForPromotion || _waitingForSecondMove;
+  bool get waitingForInput => waitingForPromotion || waitingForSecondMove;
+  bool waitingForPromotion = false;
+  bool waitingForSecondMove = false;
 
   // Final fields
   /// A representation of all the squares where the king of the current player can go or not.
@@ -128,7 +128,7 @@ abstract class Move {
     // A promotion changes neither the position of pieces nor the valid moves of enemies.
     // Therefore, we do not take it into account.
 
-    if (_waitingForSecondMove) {
+    if (waitingForSecondMove) {
       // If the move is waiting for a second move, we need to simulate every possible input.
 
       // First, we iterate through the valid second moves.
@@ -335,9 +335,9 @@ abstract class Move {
   }
 
   void _initValidInputs() {
-    if (_waitingForPromotion) {
+    if (waitingForPromotion) {
       validInputs = promotionValidNotations;
-    } else if (_waitingForSecondMove) {
+    } else if (waitingForSecondMove) {
       validInputs = _legalSecondMoves.keys.toList();
     } else {
       validInputs = [];
@@ -377,14 +377,14 @@ abstract class Move {
     } else if (command is NotationTransform) {
       notationTransformations.add(command.transform);
     } else if (command is RequirePromotion) {
-      _waitingForPromotion = true;
+      waitingForPromotion = true;
       _nextTurn = piece.color;
     } else if (command is RequireAnotherMove) {
       if (this is! MainMove) {
         throw Exception(
             'A piece cannot move twice if it started moving because of another piece.');
       }
-      _waitingForSecondMove = true;
+      waitingForSecondMove = true;
       _nextTurn = piece.color;
     } else if (command is SetDynamite) {
       _commands.add(command);
@@ -401,7 +401,7 @@ abstract class Move {
 
   /// Called when the move for waitingForInput
   void input(String notation) {
-    if (_waitingForPromotion) {
+    if (waitingForPromotion) {
       if (!promotionValidNotations.contains(notation)) {
         throw ArgumentError.value(notation,
             'A promotion notation must be in the format \'=\' + id (upper case)');
@@ -411,11 +411,11 @@ abstract class Move {
           piece, Role.pawn, Role.fromChar(notation[1].toLowerCase())!));
       _notation += notation.toUpperCase();
 
-      _waitingForPromotion = false;
+      waitingForPromotion = false;
       _nextTurn = piece.color.opposite;
       lock();
     } else {
-      if (!_waitingForSecondMove) {
+      if (!waitingForSecondMove) {
         throw Exception(
             'Can\'t call the input method if the move is not waiting for input.');
       }
@@ -428,7 +428,7 @@ abstract class Move {
 
       _notation = '$_notation-${secondMove._notation}';
 
-      _waitingForSecondMove = false;
+      waitingForSecondMove = false;
       _nextTurn = piece.color.opposite;
       lock();
 
