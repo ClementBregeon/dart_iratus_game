@@ -29,12 +29,12 @@ final List<Role> dynamitables = [
   Role.soldier,
 ];
 final List<Role> promotionIds = [
+  Role.queen,
+  Role.knight,
   Role.bishop,
+  Role.rook,
   Role.enragedDog,
   Role.eliteSoldier,
-  Role.knight,
-  Role.queen,
-  Role.rook,
 ];
 
 List<String> promotionValidNotations =

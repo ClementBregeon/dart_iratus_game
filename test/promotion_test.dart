@@ -30,7 +30,7 @@ void main() {
             Role.pawn,
         true);
     expect(
-        game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
+        game.board.validNotations.join(', ') == '=Q, =N, =B, =R, =C, =E', true);
   });
 
   test('Undoing a pawn move before its promotion.', () {
@@ -74,7 +74,7 @@ void main() {
             Role.pawn,
         true);
     expect(
-        game.board.validNotations.join(', ') == '=B, =C, =E, =N, =Q, =R', true);
+        game.board.validNotations.join(', ') == '=Q, =N, =B, =R, =C, =E', true);
   });
 
   test('Promoting to a queen.', () {
