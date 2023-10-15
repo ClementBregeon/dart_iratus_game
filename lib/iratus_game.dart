@@ -12,7 +12,9 @@ export 'src/game.dart'
         MainMove,
         Move,
         Piece,
-        Player;
+        Player,
+        inCheck,
+        promotionIds;
 export 'src/models.dart' show Role, Side;
 export 'src/pgn.dart' show IratusPGN;
 export 'src/position.dart' show Position;
