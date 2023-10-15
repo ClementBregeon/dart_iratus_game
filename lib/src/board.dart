@@ -2,6 +2,9 @@ part of iratus_game;
 
 /// An abstract representation of chess boards.
 abstract class Board {
+  /// All the possible main moves in the position
+  final List<MainMove> _allLegalMoves = [];
+
   /// All the notations of the possible moves in the position, extept inputs
   final List<String> _allLegalNotations = [];
 
@@ -34,9 +37,6 @@ abstract class Board {
   /// All the pieces, the index correspond to piece.pos.index
   final List<Piece?> _piecesByPos;
 
-  /// All the possible moves in the position
-  final List<MainMove> allLegalMoves = [];
-
   /// The kings, sorted by color
   final Map<Side, Piece?> king = {Side.white: null, Side.black: null};
 
@@ -60,6 +60,11 @@ abstract class Board {
 
   /// The FEN of the starting position
   late final IratusFEN startFEN;
+
+  /// All the possible moves in the position
+  List<Move> get allLegalMoves => (lastMove?.waitingForSecondMove ?? false
+      ? lastMove!._legalSecondMoves.values.toList()
+      : _allLegalMoves);
 
   /// The color of the player who has to make the next move.
   ///
@@ -121,7 +126,7 @@ abstract class Board {
     if (!_allLegalNotations.contains(notation)) {
       throw ArgumentError.value(notation, 'Unknown move');
     }
-    MainMove move = allLegalMoves[_allLegalNotations.indexOf(notation)];
+    MainMove move = _allLegalMoves[_allLegalNotations.indexOf(notation)];
 
     // The move has already been played after the last move, during check calculation
     move.redoCommands();
@@ -175,7 +180,7 @@ abstract class Board {
     List<Piece> enemies = piecesColored[turn.opposite]!;
 
     // This is the field to update.
-    allLegalMoves.clear();
+    _allLegalMoves.clear();
     // This also need to be cleared, duh
     _allLegalNotations.clear();
 
@@ -214,7 +219,7 @@ abstract class Board {
         MainMove move = MainMove(this, start, end);
         if (move.isLegal) {
           // We validate the move.
-          allLegalMoves.add(move);
+          _allLegalMoves.add(move);
         }
         // We remove the simulation
         move.undoCommands();
@@ -224,7 +229,7 @@ abstract class Board {
     // Notations
     // Because two (or more) identical pieces can move to the same square,
     // we only know how to write the notation after we gathered all the legal moves.
-    for (MainMove move in allLegalMoves) {
+    for (MainMove move in _allLegalMoves) {
       move._initNotation();
       _allLegalNotations.add(move.notation);
     }
