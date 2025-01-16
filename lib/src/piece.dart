@@ -322,6 +322,69 @@ abstract class PieceMovingTwice extends PieceIdentity {
   }
 }
 
+abstract class PieceMovingMultipleTimes extends PieceIdentity {
+  final int numberOfMoves; // Nombre de déplacements autorisés
+  int remainingMoves; // Nombre de déplacements restants
+
+  PieceMovingMultipleTimes(super.p, this.numberOfMoves) : remainingMoves = numberOfMoves;
+
+  @override
+  List<Command> goTo(Position pos) {
+    List<Command> commands = super.goTo(pos);
+
+    bool hasToMoveAgain() {
+      // Si la pièce est capturée, elle ne peut pas se déplacer
+      if (p.isCaptured) return false;
+
+      // Si la pièce n'est pas la pièce principale du mouvement
+      if (p.board._mainCurrentMove.piece != p) return false;
+
+      // Vérifie s'il reste encore des déplacements disponibles
+      if (remainingMoves <= 0) return false;
+
+      // Vérifie s'il s'agit d'un second mouvement ou plus
+      if (p.board._currentMove is ExtraMove) return false;
+
+      return true;
+    }
+
+    if (hasToMoveAgain()) {
+      commands.add(RequireAnotherMove());
+      remainingMoves--; // Décrémenter le nombre de déplacements restants
+    }
+
+    return commands;
+  }
+
+  @override
+  void undo(Move move) {
+    super.goTo(move.start);
+
+    if (p.firstMove == move) {
+      p.firstMove = null;
+    }
+  }
+
+  @override
+  void updateAntiking(List<bool> antiking) {
+    if (p.isCaptured) return;
+
+    for (Position pos in getPositions(from: p.pos, to: moves)) {
+      antiking[pos.index] = true;
+
+      if (canGoTo(pos)) {
+        Piece? piece = p.board.getPiece(pos);
+        if (piece != null && piece.dynamited) continue;
+
+        for (Position pos2 in getPositions(from: pos, to: moves)) {
+          if (pos2 == pos) continue;
+          antiking[pos2.index] = true;
+        }
+      }
+    }
+  }
+}
+
 class _Bishop extends RollingPiece {
   @override
   final Role id = Role.bishop;
@@ -931,6 +994,23 @@ class _Soldier extends RollingPiece {
   }
 }
 
+class _Troll extends PieceMovingMultipleTimes { 
+  @override
+  final Role id = Role.troll; 
+
+  @override
+  final List<List<int>> moves = [
+    [-1, 0],
+    [0, -1],
+    [0, 1],
+    [1, 0],
+  ];
+
+  // Constructeur du Troll avec un nombre de déplacements autorisés (par exemple 4)
+  _Troll(super.container) : super(super.container, 4); // Le troll peut se déplacer 4 fois
+}
+
+
 Map<Role, Function(Piece piece)> identitiyConstructors = {
   Role.bishop: (Piece piece) => _Bishop(piece),
   Role.enragedDog: (Piece piece) => _EnragedDog(piece),
@@ -945,4 +1025,5 @@ Map<Role, Function(Piece piece)> identitiyConstructors = {
   Role.rook: (Piece piece) => _Rook(piece),
   Role.soldier: (Piece piece) => _Soldier(piece),
   Role.dynamite: (Piece piece) => _Dynamite(piece),
+  Role.troll: (Piece piece) => _Troll(piece),
 };

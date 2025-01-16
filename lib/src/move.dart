@@ -12,6 +12,7 @@ abstract class Move {
   final Map<String, ExtraMove> _legalSecondMoves = {};
   late Side _nextTurn;
   String _notation = '';
+  final List<Position> _remainingMoves = [];
 
   // Getters
   List<Command> get commands => _commands;
@@ -124,7 +125,7 @@ abstract class Move {
   }
 
   /// Defines whether this move is legal or not.
-  void _initIsLegal() {
+  void _initIsLegal(int iteration) {
     // A promotion changes neither the position of pieces nor the valid moves of enemies.
     // Therefore, we do not take it into account.
 
@@ -147,7 +148,34 @@ abstract class Move {
       }
       // If one input doesn't leave the king in check, the first move is legal.
       isLegal = _legalSecondMoves.isNotEmpty;
+      // return;
+
+      //NOUVEAU
+      for (var i = 0; i < iteration-1 ; i++)
+      {
+         for (Position validMove in piece.identity.getValidMoves()) {
+        // We simulate the second move.
+        Extra secondMoveCommand = Extra(piece.pos, validMove);
+        executeCommand(secondMoveCommand);  
+        if (secondMoveCommand.move.isLegal) {
+          // We validate the second move. 
+          _legalSecondMoves[secondMoveCommand.move.notation] =
+              secondMoveCommand.move;
+        }
+        // We undo the simulation.  
+        secondMoveCommand.move.undoCommands();
+        _commands.remove(secondMoveCommand);
+      }
+      //  If one input doesn't leave the king in check, the first move is legal.
+      isLegal = _legalSecondMoves.isNotEmpty;
       return;
+      }
+
+
+
+
+
+
     }
 
     // We update the enemies antiking squares.
@@ -414,7 +442,7 @@ abstract class Move {
       waitingForPromotion = false;
       _nextTurn = piece.color.opposite;
       lock();
-    } else {
+    } else {x
       if (!waitingForSecondMove) {
         throw Exception(
             'Can\'t call the input method if the move is not waiting for input.');

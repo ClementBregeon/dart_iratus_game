@@ -11,7 +11,8 @@ enum Role {
   eliteSoldier,
   dynamite,
   phantom,
-  grapple;
+  grapple,
+  troll;
 
   static Role? fromChar(String ch) {
     switch (ch.toLowerCase()) {
@@ -41,6 +42,8 @@ enum Role {
         return Role.phantom;
       case 'g':
         return Role.grapple;
+      case 't':
+        return Role.troll;
       default:
         return null;
     }
@@ -73,6 +76,8 @@ enum Role {
       case Role.phantom:
         return 'f';
       case Role.grapple:
+        return 'g';
+      case Role.troll:
         return 'g';
     }
   }
