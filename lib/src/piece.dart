@@ -939,7 +939,7 @@ class _Soldier extends RollingPiece {
   }
 
   @override
-  List<Command> capture(Piece capturer) {
+  List<Command> capture(Piece capturer) {    
     List<Command> commands = super.capture(capturer);
 
     // If this is the phantom of the soldier
